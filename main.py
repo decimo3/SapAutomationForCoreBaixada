@@ -6,6 +6,7 @@ class main:
   print("Programa de automação de rotinas do Mestre Ruan")
   print("===============================================")
   print("")
+  sape = sapHandler.sap()
   print("Digite o comando abaixo que deseja executar ou AJUDA para mostrar as opções disponíveis.")
   print("")
   while True:
@@ -20,6 +21,11 @@ class main:
       print("\tAutomatiza o relatório de uma semana se nenhum argumento for informado")
     if argumentos[0] == "relatorio":
       try:
-        sapHandler.sap.relatorio(int(argumentos[1]))
+        sape.relatorio(int(argumentos[1]))
       except:
-        sapHandler.sap.relatorio()
+        sape.relatorio()
+    if argumentos[0] == "leiturista":
+      try:
+        sape.leiturista(int(argumentos[1]))
+      except:
+        print("É necessário fornecer um número de nota válido")
