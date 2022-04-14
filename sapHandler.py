@@ -1,8 +1,10 @@
 # coding: utf8
 
 import datetime
+import ctypes
 
 import win32com.client
+
 
 class sap:
   def relatorio(dia=7):
@@ -29,5 +31,10 @@ class sap:
       print("Aguarde relatório sendo processado...")
       session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       print("Relatório processado com sucesso!")
+      ctypes.windll.user32.FlashWindow(ctypes.windll.kernel32.GetConsoleWindow(), True )
     except:
       print("Verifique se o SAP está aberto ou se há uma seção ativa!")
+    def leiturista(nota):
+      pass
+    def debito(nota):
+      pass
