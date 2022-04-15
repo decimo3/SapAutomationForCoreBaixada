@@ -1,13 +1,13 @@
 # coding: utf8
 
-import sapHandler
+import sap
 
 class main:
   print("Programa de automação de rotinas do Mestre Ruan")
   print("===============================================")
   print("")
   try:
-    sape = sapHandler.sap()
+    sape = sap.sap()
   except:
     raise Exception("O módulo do SAP Frontend não pode ser iniciado!\nVerifique se o SAP está aberto ou se há uma seção ativa!")
   print("Digite o comando abaixo que deseja executar ou AJUDA para mostrar as opções disponíveis.")
