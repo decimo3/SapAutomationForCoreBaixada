@@ -8,14 +8,10 @@ import win32com.client
 
 class sap:
   def __init__(self):
-    print("Inicializando o módulo de automação do SAP Frontend...")
-    try:
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
       # print(dir(self.SapGui)) ['AddHistoryEntry', 'CreateGuiCollection', 'DropHistory', 'FindById', 'GetScriptingEngine', 'Ignore', 'OpenConnection', 'OpenConnectionByConnectionString', 'OpenWDConnection', 'Quit', 'RegisterROT', 'RevokeROT']
       self.session = self.SapGui.FindById("ses[0]")
       # print(dir(self.session)) ['AsStdNumberFormat', 'ClearErrorList', 'CreateSession', 'EnableJawsEvents', 'EndTransaction', 'FindById', 'FindByPosition', 'GetIconResourceName', 'GetVKeyDescription', 'LockSessionUI', 'RunScriptControl', 'SendCommand', 'SendCommandAsync', 'SendMenu', 'StartTransaction', 'UnlockSessionUI']
-    except:
-      raise Exception("O módulo do SAP Frontend não pode ser iniciado!\nVerifique se o SAP está aberto ou se há uma seção ativa!")
   def relatorio(self, dia=7):
     try:
       self.session.StartTransaction(Transaction="ZSVC20")
