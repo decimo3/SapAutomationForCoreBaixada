@@ -26,6 +26,8 @@ class main:
       print("\tAutomatiza o relatório de leitura do mês anterior para a nota informada.")
       print("DEBITO nota")
       print("\tAutomatiza o relatório de débitos da instalação referente a nota informada.")
+      print("HISTORICO nota")
+      print("\tAutomatiza o relatório com o histórico de notas referentes a nota informada.")
     elif (argumentos[0] == "relatorio"):
       try:
         sape.relatorio(int(argumentos[1]))

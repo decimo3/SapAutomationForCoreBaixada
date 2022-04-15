@@ -47,7 +47,6 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
       self.session.findById("wnd[0]/tbar[0]/btn[0]").Press()
       unidade = self.session.FindById("wnd[0]/usr/tblSAPLES30TC_TIMESL/ctxtEANLD-ABLEINH[9,0]").text
-      print(unidade)
       self.session.StartTransaction(Transaction="ZMED89")
       livro = f"{unidade[0]}{unidade[1]}"
       local = f"{unidade[2]}{unidade[3]}{unidade[4]}{unidade[5]}"
@@ -76,7 +75,6 @@ class sap:
       mes = datetime.date.today()
       mes = mes.replace(day=1)
       mes = mes - datetime.timedelta(days=1)
-      print(mes.strftime("%m/%Y"))
       self.session.FindById("wnd[0]/usr/txtP_ABL_Z-LOW").text = centro
       self.session.FindById("wnd[0]/usr/ctxtP_LOTE-LOW").text = livro
       self.session.FindById("wnd[0]/usr/ctxtP_MESANO").text = mes.strftime("%m/%Y")
