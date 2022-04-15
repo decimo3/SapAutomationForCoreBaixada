@@ -17,8 +17,10 @@ class main:
       break
     if argumentos[0] == "ajuda":
       print("")
-      print("RELATORIO [0-9]")
-      print("\tAutomatiza o relatório de uma semana se nenhum argumento for informado")
+      print("RELATORIO dias")
+      print("\tAutomatiza o relatório de religa retroativo a quantidade de dias informado")
+      print("LEITURISTA nota")
+      print("\tAutomatiza o relatório de leitura do mês anterior para a nota informada")
     if argumentos[0] == "relatorio":
       try:
         sape.relatorio(int(argumentos[1]))

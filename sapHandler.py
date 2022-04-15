@@ -10,13 +10,16 @@ class sap:
   def __init__(self):
     print("Inicializando o módulo de automação do SAP Frontend...")
     try:
-      self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine  
+      self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
+      # print(dir(self.SapGui)) ['AddHistoryEntry', 'CreateGuiCollection', 'DropHistory', 'FindById', 'GetScriptingEngine', 'Ignore', 'OpenConnection', 'OpenConnectionByConnectionString', 'OpenWDConnection', 'Quit', 'RegisterROT', 'RevokeROT']
       self.session = self.SapGui.FindById("ses[0]")
+      # print(dir(self.session)) ['AsStdNumberFormat', 'ClearErrorList', 'CreateSession', 'EnableJawsEvents', 'EndTransaction', 'FindById', 'FindByPosition', 'GetIconResourceName', 'GetVKeyDescription', 'LockSessionUI', 'RunScriptControl', 'SendCommand', 'SendCommandAsync', 'SendMenu', 'StartTransaction', 'UnlockSessionUI']
     except:
       raise Exception("O módulo do SAP Frontend não pode ser iniciado!\nVerifique se o SAP está aberto ou se há uma seção ativa!")
   def relatorio(self, dia=7):
     try:
       self.session.StartTransaction(Transaction="ZSVC20")
+      # print(dir(self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH"))) ['DumpState', 'Press', 'SetFocus', 'ShowContextMenu', 'Visualize']
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
       self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "B1"
       self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "BL"
@@ -43,18 +46,48 @@ class sap:
       self.session.StartTransaction(Transaction="IW53")
       self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = nota
       self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
-      self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09").Press()
+      self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09").Select()
       instalacao = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/ctxtVIQMEL-ZZINSTLN").text
       print(instalacao)
-      self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/ctxtVIQMEL-ZZINSTLN").Press()
+      self.session.StartTransaction(Transaction="ES32")
+      self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
+      self.session.findById("wnd[0]/tbar[0]/btn[0]").Press()
       unidade = self.session.FindById("wnd[0]/usr/tblSAPLES30TC_TIMESL/ctxtEANLD-ABLEINH[9,0]").text
       print(unidade)
       self.session.StartTransaction(Transaction="ZMED89")
-      self.session.FindById("wnd[0]/usr/txtP_ABL_Z-LOW").text = "015"
-      self.session.FindById("wnd[0]/usr/ctxtP_LOTE-LOW").text = "03"
-      self.session.FindById("wnd[0]/usr/ctxtP_MESANO").text = "04/2022"
-      self.session.FindById("wnd[0]/usr/ctxtP_UNID-LOW").text = "03L61414"
-      self.session.FindById("wnd[0]/tbar[1]/btn[8]").press
+      livro = f"{unidade[0]}{unidade[1]}"
+      local = f"{unidade[2]}{unidade[3]}{unidade[4]}{unidade[5]}"
+      if (local == "L645"): centro = "017"
+      elif (local == "L644"): centro = "017"
+      elif (local == "L643"): centro = "017"
+      elif (local == "L624"): centro = "017"
+      elif (local == "L622"): centro = "017"
+      elif (local == "L613"): centro = "017"
+      elif (local == "L616"): centro = "015"
+      elif (local == "L615"): centro = "015"
+      elif (local == "L614"): centro = "015"
+      elif (local == "L612"): centro = "015"
+      elif (local == "L610"): centro = "014"
+      elif (local == "L623"): centro = "014"
+      elif (local == "L611"): centro = "014"
+      elif (local == "L620"): centro = "015"
+      elif (local == "L617"): centro = "015"
+      elif (local == "L625"): centro = "013"
+      elif (local == "L635"): centro = "013"
+      elif (local == "L636"): centro = "013"
+      elif (local == "L637"): centro = "013"
+      elif (local == "L630"): centro = "012"
+      elif (local == "L632"): centro = "012"
+      else: raise ValueError("A localidade pesquisada é desconhecida")
+      mes = datetime.date.today()
+      mes = mes.replace(day=1)
+      mes = mes - datetime.timedelta(days=1)
+      print(mes.strftime("%m/%Y"))
+      self.session.FindById("wnd[0]/usr/txtP_ABL_Z-LOW").text = centro
+      self.session.FindById("wnd[0]/usr/ctxtP_LOTE-LOW").text = livro
+      self.session.FindById("wnd[0]/usr/ctxtP_MESANO").text = mes.strftime("%m/%Y")
+      self.session.FindById("wnd[0]/usr/ctxtP_UNID-LOW").text = unidade
+      self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
     except:
       print("Verifique se o SAP está aberto ou se há uma seção ativa!")
   def debito(self, nota):
