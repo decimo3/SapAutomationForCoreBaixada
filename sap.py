@@ -31,20 +31,18 @@ class sap:
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
       self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = "RB"
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
+      start_time = datetime.datetime.now()
       print("Aguarde relatório sendo processado...")
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       print("Relatório processado com sucesso!")
+      end_time = datetime.datetime.now()
+      print(f"Relatório gerado em {end_time - start_time}")
       ctypes.windll.user32.FlashWindow(ctypes.windll.kernel32.GetConsoleWindow(), True )
     except:
       print("Verifique se o SAP está aberto ou se há uma seção ativa!")
   def leiturista(self, nota):
     try:
-      self.session.StartTransaction(Transaction="IW53")
-      self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = nota
-      self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
-      self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09").Select()
-      instalacao = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/ctxtVIQMEL-ZZINSTLN").text
-      print(instalacao)
+      instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ES32")
       self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
       self.session.findById("wnd[0]/tbar[0]/btn[0]").Press()
@@ -84,7 +82,46 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtP_MESANO").text = mes.strftime("%m/%Y")
       self.session.FindById("wnd[0]/usr/ctxtP_UNID-LOW").text = unidade
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
+      self.session.FindById("wnd[0]/tbar[1]/btn[33]").Press()
+      self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").setCurrentCell(201,"DEFAULT")
+      self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").clickCurrentCell()
+      self.session.FindById("wnd[0]/tbar[0]/btn[71]").Press()
+      self.session.FindById("wnd[1]/usr/txtGS_SEARCH-VALUE").text = instalacao
+      self.session.FindById("wnd[1]/usr/cmbGS_SEARCH-SEARCH_ORDER").key = "0"
+      self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
+      self.session.FindById("wnd[1]").Close()
+      celula = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").currentCellRow
+      if (celula > 28):
+        self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = celula -14
+      self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").setColumnWidth("ZZ_NUMSEQ",5)
+      self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").setColumnWidth("ZHORALEIT",7)
+      self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").setColumnWidth("GERAET",8)
+      self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").setColumnWidth("ZENDERECO",65)
+      self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectedRows = celula
     except:
       print("Verifique se o SAP está aberto ou se há uma seção ativa!")
   def debito(self, nota):
-    pass
+      instalacao = self.instalacao(nota)
+      self.session.StartTransaction(Transaction="ZARC140")
+      self.session.FindById("wnd[0]/usr/ctxtP_ANLAGE").text = instalacao
+      self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
+  def instalacao(self, nota):
+      self.session.StartTransaction(Transaction="IW53")
+      self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = nota
+      self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
+      self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09").Select()
+      return self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/ctxtVIQMEL-ZZINSTLN").text
+  def historico(self, nota):
+    instalacao = self.instalacao(nota)
+    self.session.StartTransaction(Transaction="ZSVC20")
+    self.session.FindById("wnd[0]/usr/ctxtSO_ANLAG-LOW").text = instalacao
+    self.session.FindById("wnd[0]/usr/ctxtSO_QMDAT-LOW").text = ""
+    self.session.FindById("wnd[0]/usr/ctxtSO_QMDAT-HIGH").text = ""
+    self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/WILLIAM"
+    start_time = datetime.datetime.now()
+    print("Aguarde relatório sendo processado...")
+    self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
+    print("Relatório processado com sucesso!")
+    end_time = datetime.datetime.now()
+    print(f"Relatório gerado em {end_time - start_time}")
+
