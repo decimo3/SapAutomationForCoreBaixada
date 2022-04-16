@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # coding: utf8
 
 import datetime
@@ -8,10 +9,10 @@ import win32com.client
 
 class sap:
   def __init__(self):
-      self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
       # print(dir(self.SapGui)) ['AddHistoryEntry', 'CreateGuiCollection', 'DropHistory', 'FindById', 'GetScriptingEngine', 'Ignore', 'OpenConnection', 'OpenConnectionByConnectionString', 'OpenWDConnection', 'Quit', 'RegisterROT', 'RevokeROT']
-      self.session = self.SapGui.FindById("ses[0]")
+      self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
       # print(dir(self.session)) ['AsStdNumberFormat', 'ClearErrorList', 'CreateSession', 'EnableJawsEvents', 'EndTransaction', 'FindById', 'FindByPosition', 'GetIconResourceName', 'GetVKeyDescription', 'LockSessionUI', 'RunScriptControl', 'SendCommand', 'SendCommandAsync', 'SendMenu', 'StartTransaction', 'UnlockSessionUI']
+      self.session = self.SapGui.FindById("ses[0]")
   def relatorio(self, dia=7):
     try:
       self.session.StartTransaction(Transaction="ZSVC20")
@@ -122,4 +123,3 @@ class sap:
     print("Relatório processado com sucesso!")
     end_time = datetime.datetime.now()
     print(f"Relatório gerado em {end_time - start_time}")
-

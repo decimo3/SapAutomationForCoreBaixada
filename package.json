@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "clear && nodemon --exec python3 main.py"
+    "start": "nodemon --exec python3 main.py"
   },
   "author": "",
   "license": "ISC",
