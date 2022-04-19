@@ -8,13 +8,13 @@ from selenium import webdriver
 
 class wpp:
   def __init__(self):
-      self.directory = os.getenv('USERPROFILE')
-      self.temporary = os.getcwd() + '\\.whatsapp'
-      self.chrome = self.directory + '\\AppData\\Local\\SeleniumBasic\\chromedriver.exe'
-      self.options = webdriver.ChromeOptions()
-      self.options.add_argument(f"user-data-dir={self.temporary}")
-      self.driver = webdriver.Chrome(self.chrome, chrome_options=self.options)
-      self.inicia('Teste robo')
+    self.directory = os.getenv('USERPROFILE')
+    self.temporary = os.getcwd() + '\\.whatsapp'
+    self.chrome = self.directory + '\\AppData\\Local\\SeleniumBasic\\chromedriver.exe'
+    self.options = webdriver.ChromeOptions()
+    self.options.add_argument(f"user-data-dir={self.temporary}")
+    self.driver = webdriver.Chrome(self.chrome, chrome_options=self.options)
+    self.inicia('Teste robo')
   def inicia(self, nome_contato):
     self.driver.get(r'https://web.whatsapp.com/')
     self.driver.implicitly_wait(15)

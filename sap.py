@@ -2,7 +2,7 @@
 # coding: utf8
 
 import datetime
-import ctypes
+import re
 
 import win32com.client
 
@@ -14,7 +14,6 @@ class sap:
       # print(dir(self.session)) ['AsStdNumberFormat', 'ClearErrorList', 'CreateSession', 'EnableJawsEvents', 'EndTransaction', 'FindById', 'FindByPosition', 'GetIconResourceName', 'GetVKeyDescription', 'LockSessionUI', 'RunScriptControl', 'SendCommand', 'SendCommandAsync', 'SendMenu', 'StartTransaction', 'UnlockSessionUI']
       self.session = self.SapGui.FindById("ses[0]")
   def relatorio(self, dia=7):
-    try:
       self.session.StartTransaction(Transaction="ZSVC20")
       # print(dir(self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH"))) ['DumpState', 'Press', 'SetFocus', 'ShowContextMenu', 'Visualize']
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
@@ -38,11 +37,7 @@ class sap:
       print("Relatório processado com sucesso!")
       end_time = datetime.datetime.now()
       print(f"Relatório gerado em {end_time - start_time}")
-      ctypes.windll.user32.FlashWindow(ctypes.windll.kernel32.GetConsoleWindow(), True )
-    except:
-      print("Verifique se o SAP está aberto ou se há uma seção ativa!")
   def leiturista(self, nota):
-    try:
       instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ES32")
       self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
@@ -97,20 +92,35 @@ class sap:
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").setColumnWidth("GERAET",8)
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").setColumnWidth("ZENDERECO",65)
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectedRows = celula
-    except:
-      print("Verifique se o SAP está aberto ou se há uma seção ativa!")
   def debito(self, nota):
       instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ZARC140")
       self.session.FindById("wnd[0]/usr/ctxtP_ANLAGE").text = instalacao
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
-      self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").setCurrentCell(1,"TIP_FATURA")
-  def instalacao(self, nota):
+      # debString = ''
+      # apontador = 1
+      # while True:
+      #   self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").setCurrentCell(apontador,"BILLING_PERIOD")
+      #   self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").clickCurrentCell()
+      #   referencia = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").text
+      #   vencimento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").setCurrentCell(apontador,"FAEDN")
+      #   pendente = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").setCurrentCell(apontador,"TOTAL_AMNT")
+      #   faturamento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").setCurrentCell(apontador,"TIP_FATURA")
+      #   debString += f"{referencia}:{vencimento}:{pendente}:{faturamento};"
+      #   apontador += 1
+      #   print(debString)
+  def instalacao(self, arg):
+    arg = str(arg)
+    if re.search("[0-9]{10}", arg):
       self.session.StartTransaction(Transaction="IW53")
-      self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = nota
+      self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = arg
       self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
       self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09").Select()
       return self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/ctxtVIQMEL-ZZINSTLN").text
+    elif re.search("[0-9]{9}", arg):
+      return arg
+    else:
+      return 0
   def historico(self, nota):
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ZSVC20")
