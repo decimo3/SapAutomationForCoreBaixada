@@ -10,7 +10,7 @@ class main:
     print("===============================================")
     print("")
     self.sape = sap()
-    self.wapp = wpp()
+    # self.wapp = wpp()
     print("Digite o comando abaixo que deseja executar ou AJUDA para mostrar as opções disponíveis.")
     print("")
     while True:

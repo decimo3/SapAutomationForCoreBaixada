@@ -104,6 +104,7 @@ class sap:
       self.session.StartTransaction(Transaction="ZARC140")
       self.session.FindById("wnd[0]/usr/ctxtP_ANLAGE").text = instalacao
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
+      self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").setCurrentCell(1,"TIP_FATURA")
   def instalacao(self, nota):
       self.session.StartTransaction(Transaction="IW53")
       self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = nota
