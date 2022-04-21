@@ -2,7 +2,6 @@
 # coding: utf8
 
 from sap import sap
-from wpp import wpp
 
 class main:
   def __init__(self):

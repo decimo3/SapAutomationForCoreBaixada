@@ -38,3 +38,4 @@ class wpp:
     time.sleep(1)
     self.botao_enviar = self.driver.find_element_by_class_name('_4sWnG')
     self.botao_enviar.click()
+a = wpp()

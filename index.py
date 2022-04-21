@@ -4,11 +4,13 @@ import re
 
 from wpp import wpp
 from sap import sap
+from xls import xls
 
 class index:
   def __init__(self):
-    self.sape = sap()
     self.whats = wpp()
+    self.sape = sap()
+    self.xlsx = xls()
     self.ultimo_texto = ''
     while True:
       self.resposta = ''
@@ -20,6 +22,7 @@ class index:
           print(argumentos[0])
           if argumentos[0] == ":d":
             self.resposta = self.sape.debito(argumentos[1])
+            self.resposta = self.xlsx.debito(self.resposta)
             self.whats.responde(self.resposta)
           elif argumentos[0] == ":r":
             self.resposta = self.sape.relatorio(argumentos[1])
