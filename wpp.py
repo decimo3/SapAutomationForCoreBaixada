@@ -1,10 +1,12 @@
 #!/usr/bin/python
 # coding: utf8
 
-import os 
+import os
 import time
 
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 
 class wpp:
   def __init__(self):
@@ -13,7 +15,7 @@ class wpp:
     self.chrome = self.directory + '\\AppData\\Local\\SeleniumBasic\\chromedriver.exe'
     self.options = webdriver.ChromeOptions()
     self.options.add_argument(f"user-data-dir={self.temporary}")
-    self.driver = webdriver.Chrome(self.chrome, chrome_options=self.options)
+    self.driver = webdriver.Chrome(self.chrome, options=self.options)
     self.inicia('Teste robo')
   def inicia(self, nome_contato):
     self.driver.get(r'https://web.whatsapp.com/')
@@ -32,10 +34,18 @@ class wpp:
     texto = post[0].text
     return texto
   def responde(self, texto):
-    response = texto
     self.caixa_de_mensagem = self.driver.find_element_by_xpath('//div[@title = "{}"]'.format("Mensagem"))
-    self.caixa_de_mensagem.send_keys(response)
-    time.sleep(1)
-    self.botao_enviar = self.driver.find_element_by_class_name('_4sWnG')
+    self.caixa_de_mensagem.click()
+    if (bool(texto)):
+      self.caixa_de_mensagem.send_keys(texto)
+    else:
+      actions = ActionChains(self.driver)
+      actions.key_down(Keys.CONTROL)
+      actions.key_down("v")
+      actions.key_up("v")
+      actions.key_up(Keys.CONTROL)
+      actions.perform()
+      time.sleep(1)
+    self.botao_enviar = self.driver.find_element_by_class_name('_165_h')
+    # self.botao_enviar = self.driver.find_element_by_class_name('_4sWnG')
     self.botao_enviar.click()
-a = wpp()
