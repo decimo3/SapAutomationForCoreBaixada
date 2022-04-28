@@ -95,9 +95,14 @@ class sap:
       instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ZARC140")
       self.session.FindById("wnd[0]/usr/ctxtP_ANLAGE").text = instalacao
+      start_time = datetime.datetime.now()
+      print("Aguarde relatório sendo processado...")
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       linhas = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").RowCount
-      debString = ''
+      print("Relatório processado com sucesso!")
+      end_time = datetime.datetime.now()
+      print(f"Relatório gerado em {end_time - start_time}")
+      debString = 'Referência\tVencimento\tValor\tTipo\n'
       apontador = 1
       while (apontador < linhas):
         referencia = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"BILLING_PERIOD")
