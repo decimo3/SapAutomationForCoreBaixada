@@ -86,6 +86,8 @@ class sap:
       celula = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").currentCellRow
       if (celula > 28):
         self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = celula -14
+      else:
+        self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = 1
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").setColumnWidth("ZZ_NUMSEQ",5)
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").setColumnWidth("ZHORALEIT",7)
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").setColumnWidth("GERAET",8)
