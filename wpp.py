@@ -27,12 +27,15 @@ class wpp:
     self.contato.click()
     time.sleep(2)
     return True
-  def escuta(self):
+  def escuta(self) -> str:
     post = self.driver.find_elements_by_class_name('i0jNr')
     ultimo = len(post) - 1
     post = post[ultimo].find_elements_by_tag_name("span")
-    texto = post[0].text
-    return texto
+    try:
+      texto = post[0].text
+      return texto
+    except:
+      return None
   def responde(self, texto):
     self.caixa_de_mensagem = self.driver.find_element_by_xpath('//div[@title = "{}"]'.format("Mensagem"))
     self.caixa_de_mensagem.click()

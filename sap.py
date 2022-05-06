@@ -3,11 +3,13 @@
 
 import datetime
 import re
-
 import win32com.client
+
+from log import log
 
 class sap:
   def __init__(self):
+      self.log = log()
       # print(dir(self.SapGui)) ['AddHistoryEntry', 'CreateGuiCollection', 'DropHistory', 'FindById', 'GetScriptingEngine', 'Ignore', 'OpenConnection', 'OpenConnectionByConnectionString', 'OpenWDConnection', 'Quit', 'RegisterROT', 'RevokeROT']
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
       # print(dir(self.session)) ['AsStdNumberFormat', 'ClearErrorList', 'CreateSession', 'EnableJawsEvents', 'EndTransaction', 'FindById', 'FindByPosition', 'GetIconResourceName', 'GetVKeyDescription', 'LockSessionUI', 'RunScriptControl', 'SendCommand', 'SendCommandAsync', 'SendMenu', 'StartTransaction', 'UnlockSessionUI']
@@ -76,7 +78,7 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtP_UNID-LOW").text = unidade
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       self.session.FindById("wnd[0]/tbar[1]/btn[33]").Press()
-      self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").setCurrentCell(201,"DEFAULT")
+      self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").setCurrentCell(26,"DEFAULT")
       self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").clickCurrentCell()
       self.session.FindById("wnd[0]/tbar[0]/btn[71]").Press()
       self.session.FindById("wnd[1]/usr/txtGS_SEARCH-VALUE").text = instalacao
@@ -84,15 +86,30 @@ class sap:
       self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
       self.session.FindById("wnd[1]").Close()
       celula = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").currentCellRow
-      if (celula > 28):
-        self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = celula -14
+      linhas = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").RowCount
+      if (celula >= 14):
+        self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = celula - 14
+        apontador = celula - 14
+        limite = celula + 14
       else:
-        self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = 1
-      self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").setColumnWidth("ZZ_NUMSEQ",5)
-      self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").setColumnWidth("ZHORALEIT",7)
-      self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").setColumnWidth("GERAET",8)
-      self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").setColumnWidth("ZENDERECO",65)
+        self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = 0
+        apontador = 0
+        limite = 28
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectedRows = celula
+      leitString = "Seq\tEndereço\tBairro\tMedidor\tHora\tCod\n"
+      print(f"Celula: {celula} Apontador: {apontador} Limite: {limite}")
+      print(leitString)
+      while (apontador < limite and apontador < linhas):
+        sequencia = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZZ_NUMSEQ")
+        endereco = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZENDERECO")
+        subbairro = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"BAIRRO")
+        medidor = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"GERAET")
+        horaleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZHORALEIT")
+        codleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ABLHINW")
+        leitString = f"{leitString}{sequencia}\t{endereco}\t{subbairro}\t{medidor}\t{horaleit}\t{codleit}\n"
+        print(f"{sequencia}\t{endereco}\t{subbairro}\t{medidor}\t{horaleit}\t{codleit}")
+        apontador = apontador + 1
+      return leitString
   def debito(self, nota):
       instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ZARC140")

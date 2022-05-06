@@ -15,7 +15,8 @@ class index:
     while True:
       self.resposta = ''
       self.texto = self.whats.escuta()
-      if self.texto != self.ultimo_texto:
+      if self.texto != self.ultimo_texto and self.texto != None:
+        self.texto = self.texto.lower()
         self.ultimo_texto = self.texto
         argumentos = self.texto.split(' ')
         # if re.search("débito", self.texto):
@@ -25,13 +26,16 @@ class index:
           self.resposta = self.sape.debito(argumentos[1])
           self.resposta = self.xlsx.escrever(self.resposta)
           self.whats.responde(self.resposta)
-        if argumentos[0] == ":r":
+        if re.search("relatório", self.texto):
           self.resposta = self.sape.relatorio(argumentos[1])
+          self.resposta = self.xlsx.escrever(self.resposta)
           self.whats.responde(self.resposta)
-        if argumentos[0] == ":l":
+        if re.search("leiturista", self.texto):
           self.resposta = self.sape.leiturista(argumentos[1])
+          self.resposta = self.xlsx.escrever(self.resposta)
           self.whats.responde(self.resposta)
-        if argumentos[0] == ":h":
+        if re.search("histórico", self.texto):
           self.resposta = self.sape.historico(argumentos[1])
+          self.resposta = self.xlsx.escrever(self.resposta)
           self.whats.responde(self.resposta)
 robo = index()
