@@ -1,0 +1,2 @@
+pywin32==303
+selenium==4.1.3
