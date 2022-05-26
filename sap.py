@@ -78,7 +78,7 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtP_UNID-LOW").text = unidade
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       self.session.FindById("wnd[0]/tbar[1]/btn[33]").Press()
-      self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").setCurrentCell(26,"DEFAULT")
+      self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").setCurrentCell(27,"DEFAULT")
       self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").clickCurrentCell()
       self.session.FindById("wnd[0]/tbar[0]/btn[71]").Press()
       self.session.FindById("wnd[1]/usr/txtGS_SEARCH-VALUE").text = instalacao
@@ -157,3 +157,34 @@ class sap:
     print("Relatório processado com sucesso!")
     end_time = datetime.datetime.now()
     print(f"Relatório gerado em {end_time - start_time}")
+  def agrupamento(self, nota):
+    instalacao = self.instalacao(nota)
+    self.session.StartTransaction(Transaction="ES32")
+    self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
+    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    consumo = self.session.FindById("wnd[0]/usr/ctxtEANLD-VSTELLE").text
+    self.session.StartTransaction(Transaction="ES61")
+    self.session.findById("wnd[0]/usr/ctxtEVBSD-VSTELLE").text = consumo
+    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    ligacao = self.session.FindById("wnd[0]/usr/ctxtEVBSD-HAUS").text
+    self.session.StartTransaction(Transaction="ES57")
+    self.session.FindById("wnd[0]/usr/ctxtEHAUD-HAUS").text = ligacao
+    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    logradouro = self.session.findById("wnd[0]/usr/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:0301/txtADDR1_DATA-NAME_CO").text
+    numero = self.session.findById("wnd[0]/usr/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:0301/txtADDR1_DATA-HOUSE_NUM1").text
+    self.session.StartTransaction(Transaction="ZMED95")
+    self.session.FindById("wnd[0]/usr/ctxtADRSTREET-STRT_CODE").text = logradouro
+    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    self.session.FindById("wnd[0]/tbar[1]/btn[9]").Press()
+    if (numero == "1SN" or numero == "SN"):
+      return "O agrupamento não pode ser analizado automaticamente"
+    linhas = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").RowCount
+    apontador = 1
+    while (apontador < linhas):
+      # num = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").getCellValue(apontador,"TI_NUMSX-NUMERO")
+      num = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,{apontador}]").text
+      if num == numero:
+        break
+      apontador = apontador + 1
+    print(apontador)
+    self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").getAbsoluteRow(apontador).selected = True

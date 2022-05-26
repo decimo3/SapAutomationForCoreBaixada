@@ -35,5 +35,7 @@ class main:
         self.sape.debito(int(argumentos[1]))
       elif (argumentos[0] == "historico"):
         self.sape.historico(int(argumentos[1]))
+      elif (argumentos[0] == "agrupamento"):
+        self.sape.agrupamento(int(argumentos[1]))
       else: print("Selecione uma opção válida. Digite AJUDA para saber as consultas suportadas ou SAIR para terminar o programa!")
 robo = main()
