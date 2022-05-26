@@ -27,6 +27,10 @@ class main:
         print("\tAutomatiza o relatório de débitos da instalação referente a nota informada.")
         print("HISTORICO nota")
         print("\tAutomatiza o relatório com o histórico de notas referentes a nota informada.")
+        print("AGRUPAMENTO nota")
+        print("\tAutomatiza o relatório de consulta de débitos para o agrupamento da nota informada.")
+        print("MANOBRA dias")
+        print("\tAutomatiza o relatório de CORE MT retroativo a quantidade de dias informado.")
       elif (argumentos[0] == "relatorio"):
         self.sape.relatorio(int(argumentos[1]))
       elif (argumentos[0] == "leiturista"):
@@ -37,5 +41,7 @@ class main:
         self.sape.historico(int(argumentos[1]))
       elif (argumentos[0] == "agrupamento"):
         self.sape.agrupamento(int(argumentos[1]))
+      elif (argumentos[0] == "manobra"):
+        self.sape.manobra(int(argumentos[1]))
       else: print("Selecione uma opção válida. Digite AJUDA para saber as consultas suportadas ou SAIR para terminar o programa!")
 robo = main()
