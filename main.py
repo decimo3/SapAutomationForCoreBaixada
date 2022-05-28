@@ -17,6 +17,8 @@ class main:
       argumentos = resposta.split(' ')
       if (argumentos[0] == "sair"):
         break
+      elif (argumentos[0] == ""):
+        continue
       elif (argumentos[0] == "ajuda"):
         print("")
         print("RELATORIO dias")
