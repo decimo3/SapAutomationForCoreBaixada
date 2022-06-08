@@ -183,6 +183,7 @@ class sap:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ZSVC20")
     self.session.FindById("wnd[0]/usr/ctxtSO_ANLAG-LOW").text = instalacao
+    self.session.FindById("wnd[0]/usr/ctxtSO_QMART-LOW").text = ""
     self.session.FindById("wnd[0]/usr/ctxtSO_QMDAT-LOW").text = ""
     self.session.FindById("wnd[0]/usr/ctxtSO_QMDAT-HIGH").text = ""
     self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/WILLIAM"
