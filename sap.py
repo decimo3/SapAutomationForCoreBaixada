@@ -4,6 +4,7 @@
 import datetime
 import re
 import win32com.client
+from win10toast import ToastNotifier
 
 from log import log
 
@@ -14,6 +15,7 @@ class sap:
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
       # print(dir(self.session)) ['AsStdNumberFormat', 'ClearErrorList', 'CreateSession', 'EnableJawsEvents', 'EndTransaction', 'FindById', 'FindByPosition', 'GetIconResourceName', 'GetVKeyDescription', 'LockSessionUI', 'RunScriptControl', 'SendCommand', 'SendCommandAsync', 'SendMenu', 'StartTransaction', 'UnlockSessionUI']
       self.session = self.SapGui.FindById("ses[0]")
+      self.toaster = ToastNotifier()
   def relatorio(self, dia=7):
       self.session.StartTransaction(Transaction="ZSVC20")
       # print(dir(self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH"))) ['DumpState', 'Press', 'SetFocus', 'ShowContextMenu', 'Visualize']
@@ -38,6 +40,7 @@ class sap:
       print("Relatório processado com sucesso!")
       end_time = datetime.datetime.now()
       print(f"Relatório gerado em {end_time - start_time}")
+      self.toaster.show_toast("Relatório está pronto!")
   def manobra(self, dia=7):
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
@@ -73,6 +76,7 @@ class sap:
       print("Relatório processado com sucesso!")
       end_time = datetime.datetime.now()
       print(f"Relatório gerado em {end_time - start_time}")
+      self.toaster.show_toast("Relatório está pronto!")
   def leiturista(self, nota):
       instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ES32")
