@@ -42,7 +42,7 @@ class sap:
       print(f"Relatório gerado em {end_time - start_time}")
       if (dia > 0):
         self.toaster.show_toast("Relatório está pronto!")
-  def manobra(self, dia=7):
+  def manobra(self, dia=0):
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
       self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "BP"
@@ -223,9 +223,10 @@ class sap:
     apontador = 1
     while (apontador < linhas):
       # num = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").getCellValue(apontador,"TI_NUMSX-NUMERO")
-      num = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,{apontador}]").text
-      if num == numero:
-        break
+      num = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,1]").text
+      self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
       apontador = apontador + 1
-    print(apontador)
-    self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").getAbsoluteRow(apontador).selected = True
+      if num == numero:
+        self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").GetAbsoluteRow(apontador - 1).selected = True #.selected = True
+        self.session.FindById("wnd[0]/usr/btn%#AUTOTEXT005").Press()
+        break
