@@ -11,14 +11,11 @@ from log import log
 class sap:
   def __init__(self):
       self.log = log()
-      # print(dir(self.SapGui)) ['AddHistoryEntry', 'CreateGuiCollection', 'DropHistory', 'FindById', 'GetScriptingEngine', 'Ignore', 'OpenConnection', 'OpenConnectionByConnectionString', 'OpenWDConnection', 'Quit', 'RegisterROT', 'RevokeROT']
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
-      # print(dir(self.session)) ['AsStdNumberFormat', 'ClearErrorList', 'CreateSession', 'EnableJawsEvents', 'EndTransaction', 'FindById', 'FindByPosition', 'GetIconResourceName', 'GetVKeyDescription', 'LockSessionUI', 'RunScriptControl', 'SendCommand', 'SendCommandAsync', 'SendMenu', 'StartTransaction', 'UnlockSessionUI']
       self.session = self.SapGui.FindById("ses[0]")
       self.toaster = ToastNotifier()
   def relatorio(self, dia=7):
       self.session.StartTransaction(Transaction="ZSVC20")
-      # print(dir(self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH"))) ['DumpState', 'Press', 'SetFocus', 'ShowContextMenu', 'Visualize']
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
       self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "B1"
       self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "BL"
@@ -147,7 +144,6 @@ class sap:
         horaleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZHORALEIT")
         codleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ABLHINW")
         leitString = f"{leitString}{sequencia}\t{endereco}\t{subbairro}\t{medidor}\t{horaleit}\t{codleit}\n"
-        print(f"{sequencia}\t{endereco}\t{subbairro}\t{medidor}\t{horaleit}\t{codleit}")
         apontador = apontador + 1
       return leitString
   def debito(self, nota):
@@ -170,7 +166,6 @@ class sap:
         faturamento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TIP_FATURA")
         debString = f"{debString}{referencia}\t{vencimento}\tR$:{pendente}\t{faturamento}\n"
         apontador = apontador + 1
-        print(f"{referencia}\t{vencimento}\tR$:{pendente}\t{faturamento}")
       return debString
   def instalacao(self, arg):
     arg = str(arg)
@@ -222,11 +217,10 @@ class sap:
     linhas = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").RowCount
     apontador = 1
     while (apontador < linhas):
-      # num = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").getCellValue(apontador,"TI_NUMSX-NUMERO")
       num = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,1]").text
       self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
       apontador = apontador + 1
       if num == numero:
-        self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").GetAbsoluteRow(apontador - 1).selected = True #.selected = True
+        self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").GetAbsoluteRow(apontador - 1).selected = True
         self.session.FindById("wnd[0]/usr/btn%#AUTOTEXT005").Press()
         break
