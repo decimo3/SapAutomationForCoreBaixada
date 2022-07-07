@@ -2,9 +2,11 @@
 # coding: utf8
 
 from sap import sap
+import sys
 
 class main:
   def __init__(self):
+    #sys.argv
     print("Programa de automação de rotinas do Mestre Ruan")
     print("===============================================")
     print("")
