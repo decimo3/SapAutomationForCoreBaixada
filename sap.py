@@ -115,7 +115,7 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtP_UNID-LOW").text = unidade
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       self.session.FindById("wnd[0]/tbar[1]/btn[33]").Press()
-      self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").setCurrentCell(27,"DEFAULT")
+      self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").setCurrentCell(28,"DEFAULT")
       self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").clickCurrentCell()
       self.session.FindById("wnd[0]/tbar[0]/btn[71]").Press()
       self.session.FindById("wnd[1]/usr/txtGS_SEARCH-VALUE").text = instalacao
@@ -134,8 +134,6 @@ class sap:
         limite = 28
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectedRows = celula
       leitString = "Seq\tEndereço\tBairro\tMedidor\tHora\tCod\n"
-      print(f"Celula: {celula} Apontador: {apontador} Limite: {limite}")
-      print(leitString)
       while (apontador < limite and apontador < linhas):
         sequencia = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZZ_NUMSEQ")
         endereco = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZENDERECO")
