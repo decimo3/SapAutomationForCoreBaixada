@@ -9,10 +9,10 @@ from win10toast import ToastNotifier
 from log import log
 
 class sap:
-  def __init__(self):
+  def __init__(self, instancia=0):
       self.log = log()
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
-      self.session = self.SapGui.FindById("ses[0]")
+      self.session = self.SapGui.FindById(f"ses[{instancia}]")
       self.toaster = ToastNotifier()
   def relatorio(self, dia=7):
       self.session.StartTransaction(Transaction="ZSVC20")
@@ -105,7 +105,7 @@ class sap:
       elif (local == "L637"): centro = "013"
       elif (local == "L630"): centro = "012"
       elif (local == "L632"): centro = "012"
-      else: raise ValueError("A localidade pesquisada é desconhecida")
+      else: self.toaster.show_toast("A localidade pesquisada é desconhecida")
       mes = datetime.date.today()
       mes = mes.replace(day=1)
       mes = mes - datetime.timedelta(days=1)
@@ -222,3 +222,13 @@ class sap:
         self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").GetAbsoluteRow(apontador - 1).selected = True
         self.session.FindById("wnd[0]/usr/btn%#AUTOTEXT005").Press()
         break
+  def consulta(self, lista):
+    index = 0
+    argumentos = lista.split(',')
+    while (len(argumentos)):
+      self.session.StartTransaction(Transaction="IW53")
+      self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = argumentos[index]
+      self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
+      texto = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/subCUSTOM_SCREEN:SAPLIQS0:7244/subSUBSCREEN_2:SAPLIQS0:8125/cntlTEXT_DISPLAY/shellcont/shell").text
+      print(f"{argumentos[index]}\t{texto}")
+      index = index + 1

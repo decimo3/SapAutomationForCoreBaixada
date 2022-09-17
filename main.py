@@ -10,7 +10,7 @@ class main:
     print("Programa de automação de rotinas do Mestre Ruan")
     print("===============================================")
     print("")
-    self.sape = sap()
+    self.sape = sap(0)
     print("Digite o comando abaixo que deseja executar ou AJUDA para mostrar as opções disponíveis.")
     print("")
     while True:
@@ -47,5 +47,7 @@ class main:
         self.sape.agrupamento(int(argumentos[1]))
       elif (argumentos[0] == "manobra"):
         self.sape.manobra(int(argumentos[1]))
+      elif (argumentos[0] == "consulta"):
+        self.sape.consulta(argumentos[1])
       else: print("Selecione uma opção válida. Digite AJUDA para saber as consultas suportadas ou SAIR para terminar o programa!")
 robo = main()
