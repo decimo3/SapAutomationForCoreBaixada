@@ -232,3 +232,15 @@ class sap:
       texto = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/subCUSTOM_SCREEN:SAPLIQS0:7244/subSUBSCREEN_2:SAPLIQS0:8125/cntlTEXT_DISPLAY/shellcont/shell").text
       print(f"{argumentos[index]}\t{texto}")
       index = index + 1
+  def coordenadas(self, nota):
+    instalacao = self.instalacao(nota)
+    self.session.StartTransaction(Transaction="ES32")
+    self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
+    self.session.findById("wnd[0]/tbar[0]/btn[0]").Press()
+    consumo = self.session.FindById("wnd[0]/usr/ctxtEANLD-VSTELLE").text
+    self.session.StartTransaction(Transaction="ES61")
+    self.session.findById("wnd[0]/usr/ctxtEVBSD-VSTELLE").text = consumo
+    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    self.session.FindById("wnd[0]/usr/ssubSUB:SAPLXES60:0100/tabsTS0100/tabpTAB2").select
+    coordenada = self.session.FindById("wnd[0]/usr/ssubSUB:SAPLXES60:0100/tabsTS0100/tabpTAB2/ssubSUB1:SAPLXES60:0201/txtEVBSD-ZZ_COORDENADAS").text
+    print(coordenada)
