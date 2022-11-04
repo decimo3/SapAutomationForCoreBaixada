@@ -37,6 +37,8 @@ class main:
         print("\tAutomatiza o relatório de CORE MT retroativo a quantidade de dias informado.")
         print("COORDENADA nota")
         print("\tAutomatiza a coleta das coordenadas da instalação e monta o link do Google Maps")
+        print("TELEFONE nota")
+        print("\tAutomatiza a coleta de telefones do cliente, tanto do atendimento, quanto do cadastro")
       elif (argumentos[0] == "relatorio"):
         self.sape.relatorio(int(argumentos[1]))
       elif (argumentos[0] == "leiturista"):
@@ -53,5 +55,7 @@ class main:
         self.sape.consulta(argumentos[1])
       elif (argumentos[0] == "coordenada"):
         self.sape.coordenadas(int(argumentos[1]))
+      elif (argumentos[0] == "telefone"):
+        self.sape.telefone(int(argumentos[1]))
       else: print("Selecione uma opção válida. Digite AJUDA para saber as consultas suportadas ou SAIR para terminar o programa!")
 robo = main()
