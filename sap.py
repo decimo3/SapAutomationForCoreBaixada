@@ -241,6 +241,10 @@ class sap:
     self.session.StartTransaction(Transaction="ES61")
     self.session.findById("wnd[0]/usr/ctxtEVBSD-VSTELLE").text = consumo
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
-    self.session.FindById("wnd[0]/usr/ssubSUB:SAPLXES60:0100/tabsTS0100/tabpTAB2").select
+    self.session.FindById("wnd[0]/usr/ssubSUB:SAPLXES60:0100/tabsTS0100/tabpTAB2").Select()
     coordenada = self.session.FindById("wnd[0]/usr/ssubSUB:SAPLXES60:0100/tabsTS0100/tabpTAB2/ssubSUB1:SAPLXES60:0201/txtEVBSD-ZZ_COORDENADAS").text
     print(coordenada)
+    coordenada = re.sub(',', '.', coordenada)
+    print(coordenada)
+    coordenada = re.findall("-[0-9]{2}.[0-9]*", coordenada)
+    print(f"https://www.google.com/maps?z=12&t=m&q=loc:{coordenada[0]}+{coordenada[1]}")
