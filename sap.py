@@ -147,6 +147,7 @@ class sap:
   def debito(self, nota):
       instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ZARC140")
+      self.session.FindById("wnd[0]/usr/ctxtP_PARTNR").text = ""
       self.session.FindById("wnd[0]/usr/ctxtP_ANLAGE").text = instalacao
       start_time = datetime.datetime.now()
       print("Aguarde relatório sendo processado...")
