@@ -244,16 +244,28 @@ class sap:
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
     self.session.FindById("wnd[0]/usr/ssubSUB:SAPLXES60:0100/tabsTS0100/tabpTAB2").Select()
     coordenada = self.session.FindById("wnd[0]/usr/ssubSUB:SAPLXES60:0100/tabsTS0100/tabpTAB2/ssubSUB1:SAPLXES60:0201/txtEVBSD-ZZ_COORDENADAS").text
-    coordenada = re.sub(',', '.', coordenada)
-    coordenada = re.findall("-[0-9]{2}.[0-9]*", coordenada)
-    print(f"https://www.google.com/maps?z=12&t=m&q=loc:{coordenada[0]}+{coordenada[1]}")
-  def telefone(self, nota):
-    instalacao = self.instalacao(nota)
+    if (len(coordenada) > 0):
+      coordenada = re.sub(',', '.', coordenada)
+      coordenada = re.findall("-[0-9]{2}.[0-9]*", coordenada)
+      print(f"https://www.google.com/maps?z=12&t=m&q=loc:{coordenada[0]}+{coordenada[1]}")
+    else:
+      print("A instalação não possui coordenada cadastrada!")
+  def telefone(self, info):
+    info = str(info)
     telefone = []
-    nome_solicitante = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/txtVIQMEL-ZZ_NOME_SOLICIT").text
-    telefone[0] = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/txtVIQMEL-ZZ_TEL_SOLICIT").text
-    telefone[1] = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/txtVIQMEL-ZZ_CEL_SOLICIT").text
-    print(f"{nome_solicitante}")
+    if re.search("[0-9]{10}", info):
+      self.session.StartTransaction(Transaction="IW53")
+      self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = info
+      self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
+      self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09").Select()
+      nome_solicitante = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/txtVIQMEL-ZZ_NOME_SOLICIT").text
+      telefone.append(self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/txtVIQMEL-ZZ_TEL_SOLICIT").text)
+      telefone.append(self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/txtVIQMEL-ZZ_CEL_SOLICIT").text)
+      info = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/ctxtVIQMEL-ZZINSTLN").text
+    self.session.StartTransaction(Transaction="ES32")
+    self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = info
+    for tel in telefone:
+      print(tel)
     # self.session.StartTransaction(Transaction="ES32")
     # self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
     # self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
