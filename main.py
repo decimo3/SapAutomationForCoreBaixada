@@ -39,6 +39,8 @@ class main:
         print("\tAutomatiza a coleta das coordenadas da instalação e monta o link do Google Maps")
         print("TELEFONE nota")
         print("\tAutomatiza a coleta de telefones do cliente, tanto do atendimento, quanto do cadastro")
+        print("MEDIDOR nota")
+        print("\tAutomatiza a verificação de código de retirada de medidor na nota")
       elif (argumentos[0] == "relatorio"):
         self.sape.relatorio(int(argumentos[1]))
       elif (argumentos[0] == "leiturista"):
@@ -57,5 +59,7 @@ class main:
         self.sape.coordenadas(int(argumentos[1]))
       elif (argumentos[0] == "telefone"):
         self.sape.telefone(int(argumentos[1]))
+      elif (argumentos[0] == "medidor"):
+        self.sape.medidor(int(argumentos[1]))
       else: print("Selecione uma opção válida. Digite AJUDA para saber as consultas suportadas ou SAIR para terminar o programa!")
 robo = main()

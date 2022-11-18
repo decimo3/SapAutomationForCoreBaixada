@@ -294,3 +294,25 @@ class sap:
     telefone.append(coletor(self))
     for tel in telefone:
       print(tel)
+  def medidor(self, nota):
+    instalacao = self.instalacao(nota)
+    self.session.StartTransaction(Transaction="ZATC66")
+    self.session.FindById("wnd[0]/usr/ctxtP_ANLAGE").text = instalacao
+    self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
+    try:
+      self.session.FindById("wnd[0]/usr/subSUB1:SAPLZATC_INFO_CRM:0900/radXSCREEN-HEADER-RB_LEIT").Select()
+    except:
+      print(f"A instalação {instalacao} não possui histórico de consumo para o contrato atual.")
+      return True
+    linhas = self.session.FindById("wnd[0]/usr/cntlCONTROL/shellcont/shell").RowCount
+    apontador = 0
+    while(apontador < linhas):
+      codigo = self.session.FindById("wnd[0]/usr/cntlCONTROL/shellcont/shell").getCellValue(apontador,"OCORRENCIA")
+      if ((codigo == "3201") or (codigo == "3202") or (codigo == "3203") or (codigo == "3251")):
+        medidor = int(self.session.FindById("wnd[0]/usr/cntlCONTROL/shellcont/shell").getCellValue(apontador,"GERNR"))
+        leitura = self.session.FindById("wnd[0]/usr/cntlCONTROL/shellcont/shell").getCellValue(apontador,"ADATSOLL")
+        print(f"Medidor {medidor} com código de retirado pelo leiturista desde {leitura}")
+        return True
+      apontador = apontador + 1
+    print("Medidor *não* consta como retirado")
+    return False
