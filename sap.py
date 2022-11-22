@@ -256,6 +256,7 @@ class sap:
   def telefone(self, info):
     info = str(info)
     telefone = []
+    nome_solicitante = ""
     if re.search("[0-9]{10}", info):
       self.session.StartTransaction(Transaction="IW53")
       self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = info
@@ -298,7 +299,10 @@ class sap:
     telefone.extend(coletor(self))
     # Remove duplicadas do array
     telefone = list(dict.fromkeys(telefone))
-    telefone.remove("______________________________")
+    try:
+      telefone.remove("______________________________")
+    except:
+      pass
     print(nome_solicitante if (len(nome_solicitante) > 0) else nome_cliente)
     for tel in telefone:
       print(tel, end=" ")
