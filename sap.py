@@ -298,8 +298,11 @@ class sap:
     telefone.extend(coletor(self))
     # Remove duplicadas do array
     telefone = list(dict.fromkeys(telefone))
+    telefone.remove("______________________________")
+    print(nome_solicitante if (len(nome_solicitante) > 0) else nome_cliente)
     for tel in telefone:
-      print(tel)
+      print(tel, end=" ")
+    print()
   def medidor(self, nota):
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ZATC66")
