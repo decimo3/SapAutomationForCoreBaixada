@@ -144,7 +144,7 @@ class sap:
         leitString = f"{leitString}{sequencia}\t{endereco}\t{subbairro}\t{medidor}\t{horaleit}\t{codleit}\n"
         apontador = apontador + 1
       return leitString
-  def debito(self, nota):
+  def debito(self, nota, faturas=False):
       instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ZARC140")
       self.session.FindById("wnd[0]/usr/ctxtP_PARTNR").text = ""
@@ -152,20 +152,44 @@ class sap:
       start_time = datetime.datetime.now()
       print("Aguarde relatório sendo processado...")
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
-      linhas = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").RowCount
-      print("Relatório processado com sucesso!")
+      if (faturas == False):
+        linhas = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").RowCount
+        debString = 'Referência\tVencimento\tValor\tTipo\n'
+        apontador = 1
+        while (apontador < linhas):
+          referencia = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"BILLING_PERIOD")
+          vencimento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"FAEDN")
+          pendente = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TOTAL_AMNT")
+          faturamento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TIP_FATURA")
+          debString = f"{debString}{referencia}\t{vencimento}\tR$:{pendente}\t{faturamento}\n"
+          apontador = apontador + 1
+        return debString
+      else:
+        self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").selectedRows = "1"
+        self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").pressToolbarButton("2VIA")
+        self.session.FindById("wnd[0]/usr/rad2VIA").Select()
+        linhas = int(self.session.FindById("wnd[0]/usr/txtZATCE_MENGE_BETRW-MENGE").text)
+        linhas = linhas - 1
+        tipo = True #Seleciona "Conta não entregue no motivo da impressão"
+        if (linhas > 10):
+          raise Exception("Faturas demais para imprimir!")
+        while (linhas >= 0):
+          status_conta = self.session.FindById(f"wnd[0]/usr/tblSAPLZCRM_METODOSTC_FATURAS/txtIT_SAIDA-STATUS[7,{linhas}]").text
+          if (status_conta != "Pendente"):
+            linhas = linhas - 1
+            continue
+          self.session.FindById(f"wnd[0]/usr/tblSAPLZCRM_METODOSTC_FATURAS/chkIT_SAIDA-SELFAT[3,{linhas}]").selected = True
+          self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
+          if (tipo == True):
+            self.session.FindById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[4,0]").Select()
+            self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
+            tipo = False
+          self.session.FindById("wnd[0]/mbar/menu[0]/menu[0]").Select()
+          self.session.FindById("wnd[0]/tbar[0]/btn[3]").Press()
+          self.session.FindById(f"wnd[0]/usr/tblSAPLZCRM_METODOSTC_FATURAS/chkIT_SAIDA-SELFAT[3,{linhas}]").selected = False
+          linhas = linhas - 1
       end_time = datetime.datetime.now()
       print(f"Relatório gerado em {end_time - start_time}")
-      debString = 'Referência\tVencimento\tValor\tTipo\n'
-      apontador = 1
-      while (apontador < linhas):
-        referencia = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"BILLING_PERIOD")
-        vencimento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"FAEDN")
-        pendente = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TOTAL_AMNT")
-        faturamento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TIP_FATURA")
-        debString = f"{debString}{referencia}\t{vencimento}\tR$:{pendente}\t{faturamento}\n"
-        apontador = apontador + 1
-      return debString
   def instalacao(self, arg):
     arg = str(arg)
     if re.search("[0-9]{10}", arg):
