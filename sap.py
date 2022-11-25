@@ -224,6 +224,8 @@ class sap:
         self.session.FindById("wnd[0]/usr/btn%#AUTOTEXT005").Press()
         break
   def consulta(self, lista):
+    if (not(len(lista) > 0)):
+      raise Exception("A lista não pode estar vazia!")
     index = 0
     argumentos = lista.split(',')
     while (len(argumentos)):
