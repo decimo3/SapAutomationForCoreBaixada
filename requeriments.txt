@@ -1,7 +1,0 @@
-pywin32==303
-selenium==4.1.3
-win10toast==0.9
-flask
-flask-jsonpify
-flask-sqlalchemy
-flask-restful
