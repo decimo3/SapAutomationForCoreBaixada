@@ -54,6 +54,6 @@ class main:
       elif (argumentos[0] == "medidor"):
         self.sape.medidor(int(argumentos[1]))
       elif (argumentos[0] == "fatura"):
-        self.sape.debito(nota=int(argumentos[1]), faturas=True)
+        self.sape.imprimir(int(argumentos[1]))
       else: print("Selecione uma opção válida. Digite AJUDA para saber as consultas suportadas ou SAIR para terminar o programa!")
 robo = main()
