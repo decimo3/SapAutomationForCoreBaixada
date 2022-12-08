@@ -105,6 +105,7 @@ class sap:
       elif (local == "L637"): centro = "013"
       elif (local == "L630"): centro = "012"
       elif (local == "L632"): centro = "012"
+      elif (local == "L731"): centro = "016"
       else: self.toaster.show_toast("A localidade pesquisada é desconhecida")
       mes = datetime.date.today()
       mes = mes.replace(day=1)
@@ -154,7 +155,7 @@ class sap:
     self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
     end_time = datetime.datetime.now()
     print(f"Relatório gerado em {end_time - start_time}")
-  def faturas(self, nota) -> str:
+  def escrever(self, nota) -> str:
     self.debito(nota)
     linhas = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").RowCount
     debString = 'Referência\tVencimento\tValor\tTipo\n'
@@ -358,3 +359,11 @@ class sap:
       apontador = apontador + 1
     print("Medidor *não* consta como retirado")
     return False
+  def analisar(self, apontador=0) -> bool:
+    status = self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador, "STATUS")
+    vencimento = self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(1,"FAEDN")
+    vencimento = datetime.datetime.strptime(vencimento, "%d.%m.%Y")
+    vencida = datetime.datetime.now() - datetime.timedelta(days=15)
+    if (status != "@5C@"): return False
+    if (vencimento <= vencida): return False
+    return True
