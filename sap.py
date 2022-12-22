@@ -148,8 +148,10 @@ class sap:
       return leitString
   def debito(self, nota):
     instalacao = self.instalacao(nota)
+    contrato = self.session.FindById("wnd[0]/usr/txtEANLD-VERTRAG").text
     self.session.StartTransaction(Transaction="ZARC140")
     self.session.FindById("wnd[0]/usr/ctxtP_PARTNR").text = ""
+    self.session.findById("wnd[0]/usr/ctxtP_VERTRG").text = contrato
     self.session.FindById("wnd[0]/usr/ctxtP_ANLAGE").text = instalacao
     start_time = datetime.datetime.now()
     print("Aguarde relatório sendo processado...")
@@ -203,6 +205,9 @@ class sap:
       self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09").Select()
       return self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/ctxtVIQMEL-ZZINSTLN").text
     elif re.search("[0-9]{9}", arg):
+      self.session.StartTransaction(Transaction="ES32")
+      self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = arg
+      self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
       return arg
     else:
       return 0
