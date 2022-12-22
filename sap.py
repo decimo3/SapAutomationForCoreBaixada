@@ -107,6 +107,7 @@ class sap:
       elif (local == "L632"): centro = "012"
       elif (local == "L731"): centro = "016"
       elif (local == "L749"): centro = "016"
+      elif (local == "L762"): centro = "016"
       else: raise Exception(f"A localidade {local} pesquisada é desconhecida")
       mes = datetime.date.today()
       mes = mes.replace(day=1)
