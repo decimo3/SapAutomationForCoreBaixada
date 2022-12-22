@@ -172,7 +172,7 @@ class sap:
       debString = f"{debString}{referencia}\t{vencimento}\tR$:{pendente}\t{faturamento}\n"
       apontador = apontador + 1
     return debString
-  def imprimir(self, nota):
+  def fatura(self, nota):
     self.debito(nota)
     self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").selectedRows = "1"
     self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").pressToolbarButton("2VIA")
