@@ -196,6 +196,7 @@ class sap:
       apontador = apontador + 1
     print(debitos.__str__())
     self.imprimir(debitos)
+    self.debito(nota)
   def fatura(self, nota):
     self.debito(nota)
     self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").selectedRows = "1"
@@ -403,11 +404,12 @@ class sap:
       apontador = apontador + 1
     print("Medidor *não* consta como retirado")
     return False
-  def analisar(self, apontador=0) -> bool:
-    status = self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador, "STATUS")
-    vencimento = self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"FAEDN")
-    vencimento = datetime.datetime.strptime(vencimento, "%d.%m.%Y")
-    vencida = datetime.datetime.now() - datetime.timedelta(days=15)
-    if (status != "@5C@"): return False
-    if (vencimento <= vencida): return False
+  def analisar(self, apontador=0, verificar_15_dias=False) -> bool:
+    if(apontador == 0): return False
+    if (self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador, "STATUS") != "@5C@"): return False
+    if(verificar_15_dias):
+      vencimento = self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"FAEDN")
+      vencimento = datetime.datetime.strptime(vencimento, f"%d.%m.%Y").date()
+      prazo_mais_15_dias = vencimento + datetime.timedelta(days=15)
+      if (datetime.date.today() > prazo_mais_15_dias): return False
     return True
