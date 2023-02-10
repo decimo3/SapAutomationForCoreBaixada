@@ -3,20 +3,26 @@
 
 from sap import sap
 import sys
+import datetime
 
 class main:
   def __init__(self):
+#   if (datetime.datetime.now() > datetime.datetime.strptime("13.01.2023", "%d.%m.%Y")):
+#     raise Exception("O prazo de avaliação acabou!")
     #sys.argv
     print("Programa de automação de rotinas do Mestre Ruan")
     print("===============================================")
     print("")
     self.sape = sap(0)
+    self.ultima_nota = ""
     print("Digite o comando abaixo que deseja executar ou AJUDA para mostrar as opções disponíveis.")
     print("")
     while True:
       resposta = input("> ")
       resposta = resposta.lower()
       argumentos = resposta.split(' ')
+      if (len(argumentos) < 2):
+        argumentos.append(self.ultima_nota)
       if (argumentos[0] == "sair"):
         break
       elif (argumentos[0] == ""):
@@ -54,8 +60,11 @@ class main:
       elif (argumentos[0] == "medidor"):
         self.sape.medidor(int(argumentos[1]))
       elif (argumentos[0] == "fatura"):
-        self.sape.imprimir(int(argumentos[1]))
+        self.sape.fatura_novo(int(argumentos[1]))
       elif (argumentos[0] == "analise"):
         self.sape.analisar(int(argumentos[1]))
+      elif (argumentos[0] == "teste"):
+        self.sape.instalacao(int(argumentos[1]))
       else: print("Selecione uma opção válida. Digite AJUDA para saber as consultas suportadas ou SAIR para terminar o programa!")
+      self.ultima_nota = argumentos[1]
 robo = main()

@@ -3,14 +3,13 @@
 
 import datetime
 import re
+import shutil
+from os import makedirs
 import win32com.client
 from win10toast import ToastNotifier
 
-from log import log
-
 class sap:
   def __init__(self, instancia=0):
-      self.log = log()
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
       self.session = self.SapGui.FindById(f"ses[{instancia}]")
       self.toaster = ToastNotifier()
@@ -108,6 +107,7 @@ class sap:
       elif (local == "L731"): centro = "016"
       elif (local == "L749"): centro = "016"
       elif (local == "L762"): centro = "016"
+      elif (local == "L747"): centro = "016"
       else: raise Exception(f"A localidade {local} pesquisada é desconhecida")
       mes = datetime.date.today()
       mes = mes.replace(day=1)
@@ -118,7 +118,7 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtP_UNID-LOW").text = unidade
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       self.session.FindById("wnd[0]/tbar[1]/btn[33]").Press()
-      self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").setCurrentCell(28,"DEFAULT")
+      self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").setCurrentCell(0,"DEFAULT")
       self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").clickCurrentCell()
       self.session.FindById("wnd[0]/tbar[0]/btn[71]").Press()
       self.session.FindById("wnd[1]/usr/txtGS_SEARCH-VALUE").text = instalacao
@@ -172,6 +172,30 @@ class sap:
       debString = f"{debString}{referencia}\t{vencimento}\tR$:{pendente}\t{faturamento}\n"
       apontador = apontador + 1
     return debString
+  def imprimir(self, documento):
+    self.session.StartTransaction(Transaction="ZATC73")
+    shutil.rmtree("C:\\Users\\ruan.camello\\Documents\\Temporario")
+    makedirs("C:\\Users\\ruan.camello\\Documents\\Temporario")
+    self.session.FindById("wnd[0]/usr/chkP_LOCL").selected = True
+    self.session.FindById("wnd[0]/usr/chkP_IMPLOC").selected = True
+    apontador = 0
+    while(apontador < len(documento)):
+      self.session.FindById("wnd[0]/usr/ctxtP_OPBEL").text = documento[apontador]
+      self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
+      apontador = apontador + 1
+  def fatura_novo(self, nota):
+    debitos = []
+    apontador = 0
+    self.debito(nota)
+    linhas = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").RowCount
+    while(apontador < linhas):
+      if not (self.analisar(apontador)):
+        apontador = apontador + 1
+        continue
+      debitos.append(self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"ZIMPRES"))
+      apontador = apontador + 1
+    print(debitos.__str__())
+    self.imprimir(debitos)
   def fatura(self, nota):
     self.debito(nota)
     self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").selectedRows = "1"
@@ -197,6 +221,8 @@ class sap:
       self.session.FindById("wnd[0]/tbar[0]/btn[3]").Press()
       self.session.FindById(f"wnd[0]/usr/tblSAPLZCRM_METODOSTC_FATURAS/chkIT_SAIDA-SELFAT[3,{linhas}]").selected = False
       linhas = linhas - 1
+    shutil.rmtree("C:\\Users\\ruan.camello\\Documents\\Temporario")
+    makedirs("C:\\Users\\ruan.camello\\Documents\\Temporario")
   def instalacao(self, arg):
     arg = str(arg)
     if re.search("[0-9]{10}", arg):
@@ -248,17 +274,26 @@ class sap:
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
     self.session.FindById("wnd[0]/tbar[1]/btn[9]").Press()
     if (numero == "1SN" or numero == "SN"):
-      return "O agrupamento não pode ser analizado automaticamente"
+      raise Exception("O agrupamento não pode ser analizado automaticamente")
     linhas = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").RowCount
-    apontador = 1
+    numero_sem_letra = re.search("[0-9]{1,5}", numero)
+    print(f"{int(numero_sem_letra.group())} de {linhas}")
+    apontador = 0
     while (apontador < linhas):
-      num = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,1]").text
-      self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
-      apontador = apontador + 1
+      num10 = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,10]").text
+      num10_sem_letra = re.search("[0-9]{1,5}", num10)
+      if ((num10_sem_letra != None) and (int(num10_sem_letra.group()) < int(numero_sem_letra.group()))):
+        apontador = apontador + 10
+        self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
+        continue
+      num = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,0]").text
       if num == numero:
-        self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").GetAbsoluteRow(apontador - 1).selected = True
+        self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
+        self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").GetAbsoluteRow(apontador).selected = True
         self.session.FindById("wnd[0]/usr/btn%#AUTOTEXT005").Press()
         break
+      apontador = apontador + 1
+      self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
   def consulta(self, lista):
     if (not(len(lista) > 0)):
       raise Exception("A lista não pode estar vazia!")
@@ -290,7 +325,7 @@ class sap:
       coordenada = re.findall("-[0-9]{2}.[0-9]*", coordenada)
       print(f"https://www.google.com/maps?z=12&t=m&q=loc:{coordenada[0]}+{coordenada[1]}")
     else:
-      print("A instalação não possui coordenada cadastrada!")
+      raise Exception("A instalação não possui coordenada cadastrada!")
   def telefone(self, info):
     info = str(info)
     telefone = []
@@ -342,10 +377,10 @@ class sap:
       telefone.remove("______________________________")
     except:
       pass
-    print(nome_solicitante if (len(nome_solicitante) > 0) else nome_cliente)
+    texto = nome_solicitante + " " if (len(nome_solicitante) > 0) else nome_cliente + " "
     for tel in telefone:
-      print(tel, end=" ")
-    print()
+      texto += tel + " " if (len(tel) > 0) else ""
+    print(texto)
   def medidor(self, nota):
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ZATC66")
@@ -370,7 +405,7 @@ class sap:
     return False
   def analisar(self, apontador=0) -> bool:
     status = self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador, "STATUS")
-    vencimento = self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(1,"FAEDN")
+    vencimento = self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"FAEDN")
     vencimento = datetime.datetime.strptime(vencimento, "%d.%m.%Y")
     vencida = datetime.datetime.now() - datetime.timedelta(days=15)
     if (status != "@5C@"): return False
