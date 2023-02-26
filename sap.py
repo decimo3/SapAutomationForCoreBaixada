@@ -327,7 +327,7 @@ class sap:
       print(f"https://www.google.com/maps?z=12&t=m&q=loc:{coordenada[0]}+{coordenada[1]}")
     else:
       raise Exception("A instalação não possui coordenada cadastrada!")
-  def telefone(self, info):
+  def telefone(self, info) -> str:
     info = str(info)
     telefone = []
     nome_solicitante = ""
@@ -382,7 +382,8 @@ class sap:
     for tel in telefone:
       texto += tel + " " if (len(tel) > 0) else ""
     print(texto)
-  def medidor(self, nota):
+    return texto
+  def medidor(self, nota) -> bool:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ZATC66")
     self.session.FindById("wnd[0]/usr/ctxtP_ANLAGE").text = instalacao
