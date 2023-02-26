@@ -13,3 +13,11 @@ def get():
   data = win32clipboard.GetClipboardData()
   win32clipboard.CloseClipboard()
   print(data)
+
+
+from PIL import ImageGrab, Image
+
+def imageClipboardGet():
+  im= ImageGrab.grabclipboard()
+  if isinstance(im, Image.Image):
+    im.save('tmp.jpg')
