@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # coding: utf8
-
+import sys
 import datetime
 import re
 import shutil
@@ -307,7 +307,7 @@ class sap:
       texto = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/subCUSTOM_SCREEN:SAPLIQS0:7244/subSUBSCREEN_2:SAPLIQS0:8125/cntlTEXT_DISPLAY/shellcont/shell").text
       print(f"{argumentos[index]}\t{texto}")
       index = index + 1
-  def coordenadas(self, nota):
+  def coordenadas(self, nota) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ES32")
     self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
@@ -325,6 +325,7 @@ class sap:
       coordenada = re.sub(',', '.', coordenada)
       coordenada = re.findall("-[0-9]{2}.[0-9]*", coordenada)
       print(f"https://www.google.com/maps?z=12&t=m&q=loc:{coordenada[0]}+{coordenada[1]}")
+      return f"https://www.google.com/maps?z=12&t=m&q=loc:{coordenada[0]}+{coordenada[1]}"
     else:
       raise Exception("A instalação não possui coordenada cadastrada!")
   def telefone(self, info) -> str:
@@ -414,3 +415,25 @@ class sap:
       prazo_mais_15_dias = vencimento + datetime.timedelta(days=15)
       if (datetime.date.today() > prazo_mais_15_dias): return False
     return True
+
+if __name__ == "__main__":
+  robo = sap()
+  if (len(sys.argv) < 3):
+    print("BadRequest")
+  elif (sys.argv[1] == "coordenada"):
+    try:
+      print(robo.coordenadas(int(sys.argv[2])))
+    except:
+      print("ErrorHandler")
+  elif (sys.argv[1] == "telefone"):
+    try:
+      print(robo.telefone(int(sys.argv[2])))
+    except:
+      print("ErrorHandler")
+  elif (sys.argv[1] == "telefone"):
+    try:
+      print(robo.medidor(int(sys.argv[2])))
+    except:
+      print("ErrorHandler")
+  else:
+    print("BadRequest")
