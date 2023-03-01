@@ -2,14 +2,14 @@ from os import environ
 from dotenv import load_dotenv
 from sap import sap
 from telegram import Update, ForceReply, InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler, ContextTypes
 
 class telbot:
   def __init__(self) -> None:
     # Load enviorement variables from '.env' file
     load_dotenv()
-    # create a new instance of SAP runner 
-    self.sap = sap(1)
+    # create a new instance of SAP runner
+    self.sape = sap(1)
     self.updater = Updater(environ.get("TOKEN"))
     # Get the dispatcher to register handlers
     self.dispatcher = self.updater.dispatcher
@@ -32,13 +32,15 @@ class telbot:
     argumentos = resposta.split(' ')
     if (len(argumentos) < 2):
       self.ajuda(update, context)
+      return
     # Métodos homologados
     if (argumentos[0] == "telefone"):
-      context.bot.send_message(update.message.chat_id, self.sap.telefone(int(argumentos[1])))
+      resposta = self.sape.telefone(int(argumentos[1]))
+      context.bot.send_message(update.message.chat_id, resposta)
     elif (argumentos[0] == "localização"):
-      context.bot.send_message(update.message.chat_id, self.sap.coordenadas(int(argumentos[1])))
+      context.bot.send_message(update.message.chat_id, self.sape.coordenadas(int(argumentos[1])))
     elif (argumentos[0] == "coordenada"):
-      context.bot.send_message(update.message.chat_id, self.sap.coordenadas(int(argumentos[1])))
+      context.bot.send_message(update.message.chat_id, self.sape.coordenadas(int(argumentos[1])))
     # métodos não homologados
     # elif (argumentos[0] == "leiturista"):
     #   self.sap.leiturista(int(argumentos[1]))
@@ -60,18 +62,21 @@ class telbot:
       context.bot.send_message(update.message.chat_id, "Selecione uma opção válida.")
       context.bot.send_message(update.message.chat_id, "Digite /AJUDA para saber as consultas suportadas")
       self.ajuda(update, context)
-  # 
+  #
   def error(self, update: Update, context: CallbackContext) -> None:
     context.bot.send_message(update.message.chat_id, "Ocorreu um erro ao tentar processar a informação solicitada!")
     context.bot.send_message(update.message.chat_id, "Solicito que verifique com o monitor(a) responsável")
+    return
   def start(self, update: Update, context: CallbackContext) -> None:
     context.bot.send_message(update.message.chat_id, "Bem vindo ao bot do MestreRuan!")
     self.ajuda(update, context)
+    return
   def ajuda(self, update: Update, context: CallbackContext) -> None:
     context.bot.send_message(update.message.chat_id, "Digite o tipo de informação que deseja e depois o número da nota ou instalação. Por exemplo:\n")
     context.bot.send_message(update.message.chat_id, "leiturista 1012456598")
     context.bot.send_message(update.message.chat_id, "No momento temos as informações: TELEFONE, LOCALIZAÇÃO")
     context.bot.send_message(update.message.chat_id, "Estou trabalhando para trazer mais funções em breve")
+    return
 
 if __name__ == '__main__':
   bot = telbot()
