@@ -418,22 +418,21 @@ class sap:
 
 if __name__ == "__main__":
   robo = sap()
-  if (len(sys.argv) < 3):
-    print("BadRequest")
-  elif (sys.argv[1] == "coordenada"):
+  if (sys.argv[1] == "coordenada"):
     try:
       print(robo.coordenadas(int(sys.argv[2])))
-    except:
-      print("ErrorHandler")
+    except Exception as err:
+      print(err.args)
   elif (sys.argv[1] == "telefone"):
     try:
       print(robo.telefone(int(sys.argv[2])))
-    except:
-      print("ErrorHandler")
+    except Exception as err:
+      print(err.args)
   elif (sys.argv[1] == "telefone"):
     try:
       print(robo.medidor(int(sys.argv[2])))
-    except:
-      print("ErrorHandler")
+    except Exception as err:
+      print(err.args)
+  # Leiturista, débitos
   else:
-    print("BadRequest")
+    print("Não entendi o comando, verifique se está correto!")
