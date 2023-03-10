@@ -8,12 +8,14 @@ from os import makedirs
 import win32com.client
 from win10toast import ToastNotifier
 
+SEPARADOR_ENTRE_COLUNAS = "|"
+
 class sap:
-  def __init__(self, instancia=0):
+  def __init__(self, instancia=0) -> None:
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
       self.session = self.SapGui.FindById(f"ses[{instancia}]")
       self.toaster = ToastNotifier()
-  def relatorio(self, dia=7):
+  def relatorio(self, dia=7) -> None:
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
       self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "B1"
@@ -38,7 +40,7 @@ class sap:
       print(f"Relatório gerado em {end_time - start_time}")
       if (dia > 0):
         self.toaster.show_toast("Relatório está pronto!")
-  def manobra(self, dia=0):
+  def manobra(self, dia=0) -> None:
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
       self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "BP"
@@ -74,7 +76,7 @@ class sap:
       end_time = datetime.datetime.now()
       print(f"Relatório gerado em {end_time - start_time}")
       self.toaster.show_toast("Relatório está pronto!")
-  def leiturista(self, nota):
+  def leiturista(self, nota) -> str:
       instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ES32")
       self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
@@ -136,7 +138,7 @@ class sap:
         apontador = 0
         limite = 28
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectedRows = celula
-      leitString = "Seq\tEndereço\tBairro\tMedidor\tHora\tCod\n"
+      leitString = "Seq|Endereço|Bairro|Medidor|Hora|Cod\n"
       while (apontador < limite and apontador < linhas):
         sequencia = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZZ_NUMSEQ")
         endereco = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZENDERECO")
@@ -144,10 +146,10 @@ class sap:
         medidor = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"GERAET")
         horaleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZHORALEIT")
         codleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ABLHINW")
-        leitString = f"{leitString}{sequencia}\t{endereco}\t{subbairro}\t{medidor}\t{horaleit}\t{codleit}\n"
+        leitString = f"{leitString}{sequencia}|{endereco}|{subbairro}|{medidor}|{horaleit}|{codleit}\n"
         apontador = apontador + 1
       return leitString
-  def debito(self, nota):
+  def debito(self, nota) -> None:
     instalacao = self.instalacao(nota)
     contrato = self.session.FindById("wnd[0]/usr/txtEANLD-VERTRAG").text
     self.session.StartTransaction(Transaction="ZARC140")
@@ -162,14 +164,14 @@ class sap:
   def escrever(self, nota) -> str:
     self.debito(nota)
     linhas = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").RowCount
-    debString = 'Referência\tVencimento\tValor\tTipo\n'
+    debString = 'Referência|Vencimento|Valor|Tipo\n'
     apontador = 1
     while (apontador < linhas):
       referencia = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"BILLING_PERIOD")
       vencimento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"FAEDN")
       pendente = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TOTAL_AMNT")
       faturamento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TIP_FATURA")
-      debString = f"{debString}{referencia}\t{vencimento}\tR$:{pendente}\t{faturamento}\n"
+      debString = f"{debString}{referencia}|{vencimento}|R$:{pendente}|{faturamento}\n"
       apontador = apontador + 1
     return debString
   def imprimir(self, documento):
@@ -183,7 +185,7 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtP_OPBEL").text = documento[apontador]
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       apontador = apontador + 1
-  def fatura_novo(self, nota):
+  def fatura_novo(self, nota): #TODO: Implementar o file watcher!
     debitos = []
     apontador = 0
     self.debito(nota)
@@ -197,7 +199,7 @@ class sap:
     print(debitos.__str__())
     self.imprimir(debitos)
     self.debito(nota)
-  def fatura(self, nota):
+  def fatura(self, nota): #TODO: Descontinuado, remover
     self.debito(nota)
     self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").selectedRows = "1"
     self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").pressToolbarButton("2VIA")
@@ -224,7 +226,7 @@ class sap:
       linhas = linhas - 1
     shutil.rmtree("C:\\Users\\ruan.camello\\Documents\\Temporario")
     makedirs("C:\\Users\\ruan.camello\\Documents\\Temporario")
-  def instalacao(self, arg):
+  def instalacao(self, arg: str) -> str:
     arg = str(arg)
     if re.search("[0-9]{10}", arg):
       self.session.StartTransaction(Transaction="IW53")
@@ -240,8 +242,8 @@ class sap:
       self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
       return arg
     else:
-      return 0
-  def historico(self, nota):
+      return ""
+  def historico(self, nota) -> None:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ZSVC20")
     self.session.FindById("wnd[0]/usr/ctxtSO_ANLAG-LOW").text = instalacao
@@ -255,7 +257,7 @@ class sap:
     print("Relatório processado com sucesso!")
     end_time = datetime.datetime.now()
     print(f"Relatório gerado em {end_time - start_time}")
-  def agrupamento(self, nota):
+  def agrupamento(self, nota): #TODO: Implementar análise de débitos
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ES32")
     self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
@@ -295,7 +297,7 @@ class sap:
         break
       apontador = apontador + 1
       self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
-  def consulta(self, lista):
+  def consulta(self, lista): #TODO: Descontinuado, remover
     if (not(len(lista) > 0)):
       raise Exception("A lista não pode estar vazia!")
     index = 0
@@ -305,7 +307,7 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = argumentos[index]
       self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
       texto = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/subCUSTOM_SCREEN:SAPLIQS0:7244/subSUBSCREEN_2:SAPLIQS0:8125/cntlTEXT_DISPLAY/shellcont/shell").text
-      print(f"{argumentos[index]}\t{texto}")
+      print(f"{argumentos[index]}|{texto}")
       index = index + 1
   def coordenadas(self, nota) -> str:
     instalacao = self.instalacao(nota)
@@ -329,13 +331,15 @@ class sap:
     else:
       raise Exception("A instalação não possui coordenada cadastrada!")
   def telefone(self, info) -> str:
-    info = str(info)
     telefone = []
     nome_solicitante = ""
-    if re.search("[0-9]{10}", info):
+    if re.search("[0-9]{10}", str(info)):
       self.session.StartTransaction(Transaction="IW53")
       self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = info
-      self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
+      try:
+        self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
+      except:
+        raise Exception("Número da nota é inválido!")
       self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09").Select()
       nome_solicitante = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/txtVIQMEL-ZZ_NOME_SOLICIT").text
       telefone.append(self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/txtVIQMEL-ZZ_TEL_SOLICIT").text)
@@ -428,9 +432,24 @@ if __name__ == "__main__":
       print(robo.telefone(int(sys.argv[2])))
     except Exception as err:
       print(err.args)
-  elif (sys.argv[1] == "telefone"):
+  elif (sys.argv[1] == "medidor"):
     try:
       print(robo.medidor(int(sys.argv[2])))
+    except Exception as err:
+      print(err.args)
+  elif (sys.argv[1] == "leiturista"):
+    try:
+      print(robo.leiturista(int(sys.argv[2])))
+    except Exception as err:
+      print(err.args)
+  elif (sys.argv[1] == "debito"):
+    try:
+      print(robo.escrever(int(sys.argv[2])))
+    except Exception as err:
+      print(err.args)
+  elif (sys.argv[1] == "relatorio"):
+    try:
+      robo.relatorio(int(sys.argv[2]))
     except Exception as err:
       print(err.args)
   # Leiturista, débitos
