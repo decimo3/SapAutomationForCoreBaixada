@@ -425,12 +425,12 @@ class sap:
 
 if __name__ == "__main__":
   robo = sap()
-  if (sys.argv[1] == "coordenada"):
+  if ((sys.argv[1] == "coordenada") or (sys.argv[1] == "localização")):
     try:
       print(robo.coordenadas(int(sys.argv[2])))
     except Exception as err:
       print(err.args)
-  elif (sys.argv[1] == "telefone"):
+  elif ((sys.argv[1] == "telefone") or (sys.argv[1] == "contato")):
     try:
       print(robo.telefone(int(sys.argv[2])))
     except Exception as err:
@@ -445,9 +445,9 @@ if __name__ == "__main__":
       print(robo.leiturista(int(sys.argv[2])))
     except Exception as err:
       print(err.args)
-  elif (sys.argv[1] == "debito"):
+  elif ((sys.argv[1] == "debito") or (sys.argv[1] == "fatura")):
     try:
-      print(robo.escrever(int(sys.argv[2])))
+      print(robo.fatura_novo(int(sys.argv[2])))
     except Exception as err:
       print(err.args)
   elif (sys.argv[1] == "relatorio"):
@@ -455,6 +455,5 @@ if __name__ == "__main__":
       robo.relatorio(int(sys.argv[2]))
     except Exception as err:
       print(err.args)
-  # Leiturista, débitos
   else:
     print("Não entendi o comando, verifique se está correto!")
