@@ -1,10 +1,12 @@
 #!/usr/bin/python
 # coding: utf8
 import sys
+import time
 import datetime
 import re
 import shutil
 from os import makedirs
+from os import listdir
 import win32com.client
 from win10toast import ToastNotifier
 
@@ -156,11 +158,7 @@ class sap:
     self.session.FindById("wnd[0]/usr/ctxtP_PARTNR").text = ""
     self.session.findById("wnd[0]/usr/ctxtP_VERTRG").text = contrato
     self.session.FindById("wnd[0]/usr/ctxtP_ANLAGE").text = instalacao
-    start_time = datetime.datetime.now()
-    print("Aguarde relatório sendo processado...")
     self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
-    end_time = datetime.datetime.now()
-    print(f"Relatório gerado em {end_time - start_time}")
   def escrever(self, nota) -> str:
     self.debito(nota)
     linhas = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").RowCount
@@ -196,9 +194,8 @@ class sap:
         continue
       debitos.append(self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"ZIMPRES"))
       apontador = apontador + 1
-    print(debitos.__str__())
     self.imprimir(debitos)
-    self.debito(nota)
+    self.monitorar(len(debitos))
   def fatura(self, nota): #TODO: Descontinuado, remover
     self.debito(nota)
     self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").selectedRows = "1"
@@ -419,6 +416,12 @@ class sap:
       prazo_mais_15_dias = vencimento + datetime.timedelta(days=15)
       if (datetime.date.today() > prazo_mais_15_dias): return False
     return True
+  def monitorar(self, qnt) -> str:
+    while(len(listdir("C:\\Users\\ruan.camello\\Documents\\Temporario")) < qnt):
+      time.sleep(3)
+    for file in listdir("C:\\Users\\ruan.camello\\Documents\\Temporario"):
+      print(file)
+    return "|".join(listdir("C:\\Users\\ruan.camello\\Documents\\Temporario")) + "\n"
 
 if __name__ == "__main__":
   robo = sap()
