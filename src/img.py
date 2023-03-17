@@ -8,14 +8,16 @@ from wand.drawing import Drawing
 from wand.color import Color
 
 SEPARADOR_ENTRE_COLUNAS = "|"
-TAMANHO_COLUNAS_RELATORIO = [5,0,0,10,10,0]
+TAMANHO_COLUNAS_RELATORIO = [(5 * 13),0,0,(10 * 13),(10 * 13),0]
 
+MARGEM_ESQUERDA = 13
 nRow = 0 # contador de linha atual
 nCol = 0 # contador de coluna atual
 nEnd = 0 # tamanho da string do endereço
 nBairro = 0 # tamanho da string do bairro
-cursor = 0 # distância a esqueda da escrita do texto
+cursor = MARGEM_ESQUERDA # distância a esqueda da escrita do texto
 linhas = argv[1].split("\n")
+
 LARGURA_TOTAL = 0
 while(nRow < len(linhas)):
   colunas = linhas[nRow].split(SEPARADOR_ENTRE_COLUNAS)
@@ -30,11 +32,12 @@ while(nRow < len(linhas)):
     LARGURA_TOTAL = len(linhas[nRow])
   nRow = nRow + 1
 
-TAMANHO_COLUNAS_RELATORIO[1] = nEnd
-TAMANHO_COLUNAS_RELATORIO[2] = nBairro
+TAMANHO_COLUNAS_RELATORIO[1] = nEnd * 13
+TAMANHO_COLUNAS_RELATORIO[2] = nBairro * 13
 
 nRow = 0
 nCol = 0
+
 print(f"A maior linha tem {LARGURA_TOTAL} caracteres!")
 print(f"O maior endereço tem {nEnd} caracteres!")
 
@@ -48,9 +51,11 @@ with Drawing() as draw:
       colunas = linhas[nRow].split(SEPARADOR_ENTRE_COLUNAS)
       while(nCol < len(colunas)):
         col = "0" if (colunas[nCol] == None or colunas[nCol] == "") else colunas[nCol]
-        draw.text(x = TAMANHO_COLUNAS_RELATORIO[nCol], y = (nRow + 1) * 20, body = col)
+        draw.text(x = cursor, y = (nRow + 1) * 20, body = col)
+        cursor = cursor + TAMANHO_COLUNAS_RELATORIO[nCol]
         nCol = nCol + 1
       nCol = 0
+      cursor = MARGEM_ESQUERDA
       nRow = nRow + 1
     draw(img) 
     img.save(filename = "temporary.png")
