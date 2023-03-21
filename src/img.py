@@ -8,54 +8,46 @@ from wand.drawing import Drawing
 from wand.color import Color
 
 SEPARADOR_ENTRE_COLUNAS = "|"
-TAMANHO_COLUNAS_RELATORIO = [(5 * 13),0,0,(10 * 13),(10 * 13),0]
-
+SEPARADOR_ENTRE_LINHAS = "\n"
 MARGEM_ESQUERDA = 13
+LARGURA_CARACTERE = 13
+ALTURA_CARACTERE = 20
 nRow = 0 # contador de linha atual
 nCol = 0 # contador de coluna atual
-nEnd = 0 # tamanho da string do endereço
-nBairro = 0 # tamanho da string do bairro
 cursor = MARGEM_ESQUERDA # distância a esqueda da escrita do texto
-linhas = argv[1].split("\n")
 
-LARGURA_TOTAL = 0
-while(nRow < len(linhas)):
-  colunas = linhas[nRow].split(SEPARADOR_ENTRE_COLUNAS)
-  # Verifica o maior tamanho do endereço
-  if(len(colunas[1]) > nEnd):
-    nEnd = len(colunas[1])
-  # Verifica o maior tamanho do sub-bairro
-  if(len(colunas[2]) > nBairro):
-    nBairro = len(colunas[2])
-  # Verifica o tamanho total da linha
-  if(len(linhas[nRow]) > LARGURA_TOTAL):
-    LARGURA_TOTAL = len(linhas[nRow])
-  nRow = nRow + 1
+linhas = argv[1].split(SEPARADOR_ENTRE_LINHAS)
+metadados = linhas[0].split(SEPARADOR_ENTRE_COLUNAS)
+TAMANHO_COLUNAS_RELATORIO = linhas[1].split(SEPARADOR_ENTRE_COLUNAS)
+TAMANHO_COLUNAS_RELATORIO = [int(x) for x in TAMANHO_COLUNAS_RELATORIO]
+CARACTERES_TOTAL = sum(TAMANHO_COLUNAS_RELATORIO)
 
-TAMANHO_COLUNAS_RELATORIO[1] = nEnd * 13
-TAMANHO_COLUNAS_RELATORIO[2] = nBairro * 13
+LARGURA_TOTAL_IMAGEM = CARACTERES_TOTAL * LARGURA_CARACTERE
+ALTURA_TOTAL_IMAGEM = len(linhas) * ALTURA_CARACTERE
 
-nRow = 0
-nCol = 0
-
-print(f"A maior linha tem {LARGURA_TOTAL} caracteres!")
-print(f"O maior endereço tem {nEnd} caracteres!")
-
+nRow = 2
 
 with Drawing() as draw:
-  with Image(width = (LARGURA_TOTAL * 13), height = (len(linhas) * 20 + 5), background = Color('white')) as img:
+  with Image(width = LARGURA_TOTAL_IMAGEM, height = ALTURA_TOTAL_IMAGEM, background = Color('white')) as img:
     draw.font_family = 'Arial'
     draw.font = 'monospace'
-    draw.font_size = 20 # 15x15 cada letra
+    draw.font_size = ALTURA_CARACTERE # 15x15 cada letra
     while(nRow < len(linhas)):
+      if(nRow == int(metadados[0])- 2):
+        draw.fill_color = Color('rgb(255,255,0)')
+        draw.rectangle(left = 0, top = (nRow * ALTURA_CARACTERE), right = LARGURA_TOTAL_IMAGEM, bottom = (nRow * ALTURA_CARACTERE) + ALTURA_CARACTERE)
+        draw.fill_color = Color('rgb(0,0,0)')
+      if(linhas[nRow] == ""):
+        nRow = nRow + 1
+        continue
       colunas = linhas[nRow].split(SEPARADOR_ENTRE_COLUNAS)
       while(nCol < len(colunas)):
-        col = "0" if (colunas[nCol] == None or colunas[nCol] == "") else colunas[nCol]
-        draw.text(x = cursor, y = (nRow + 1) * 20, body = col)
-        cursor = cursor + TAMANHO_COLUNAS_RELATORIO[nCol]
+        col = " " if (colunas[nCol] == None or colunas[nCol] == "") else colunas[nCol]
+        draw.text(x = cursor, y = (nRow * ALTURA_CARACTERE), body = col)
+        cursor = cursor + (TAMANHO_COLUNAS_RELATORIO[nCol] * LARGURA_CARACTERE)
         nCol = nCol + 1
       nCol = 0
       cursor = MARGEM_ESQUERDA
       nRow = nRow + 1
-    draw(img) 
-    img.save(filename = "temporary.png")
+    draw(img)
+    img.save(filename = "C:\\Users\\ruan.camello\\Documents\\Temporario\\temporario.png")
