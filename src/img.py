@@ -10,7 +10,7 @@ from wand.color import Color
 SEPARADOR_ENTRE_COLUNAS = "|"
 SEPARADOR_ENTRE_LINHAS = "\n"
 MARGEM_ESQUERDA = 13
-LARGURA_CARACTERE = 13
+LARGURA_CARACTERE = 14
 ALTURA_CARACTERE = 20
 nRow = 0 # contador de linha atual
 nCol = 0 # contador de coluna atual
