@@ -140,16 +140,30 @@ class sap:
         apontador = 0
         limite = 28
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectedRows = celula
-      leitString = "Seq|Endereço|Bairro|Medidor|Hora|Cod\n"
+      leitString = "Seq|Instalacao|Endereco|Bairro|Medidor|Hora|Cod\n"
+      tamanhos = [0,0,0,0,0,0,0]
+      offset = 0
       while (apontador < limite and apontador < linhas):
         sequencia = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZZ_NUMSEQ")
+        tamanhos[0] = len(sequencia) if (len(sequencia) > tamanhos[0]) else tamanhos[0]
+        instalRoteiro = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ANLAGE")
+        tamanhos[1] = len(instalRoteiro) if (len(instalRoteiro) > tamanhos[1]) else tamanhos[1]
+        if(int(instalRoteiro) == int(instalacao)): offset = apontador
         endereco = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZENDERECO")
+        tamanhos[2] = len(endereco) if (len(endereco) > tamanhos[2]) else tamanhos[2]
         subbairro = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"BAIRRO")
+        tamanhos[3] = len(subbairro) if (len(subbairro) > tamanhos[3]) else tamanhos[3]
         medidor = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"GERAET")
+        tamanhos[4] = len(medidor) if (len(medidor) > tamanhos[4]) else tamanhos[4]
         horaleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZHORALEIT")
+        tamanhos[5] = len(horaleit) if (len(horaleit) > tamanhos[5]) else tamanhos[5]
         codleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ABLHINW")
-        leitString = f"{leitString}{sequencia}|{endereco}|{subbairro}|{medidor}|{horaleit}|{codleit}\n"
+        tamanhos[6] = len(codleit) if (len(codleit) > tamanhos[6]) else tamanhos[6]
+        leitString = f"{leitString}{sequencia}|{instalRoteiro}|{endereco}|{subbairro}|{medidor}|{horaleit}|{codleit}\n"
         apontador = apontador + 1
+      metadados = f"{offset - 1}\n"
+      tamanhosString = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}|{tamanhos[4]}|{tamanhos[5]}|{tamanhos[6]}\n"
+      leitString = metadados + tamanhosString + leitString
       return leitString
   def debito(self, nota) -> None:
     instalacao = self.instalacao(nota)
