@@ -10,12 +10,11 @@ from os import listdir
 import win32com.client
 from win10toast import ToastNotifier
 
-SEPARADOR_ENTRE_COLUNAS = "|"
-
 class sap:
   def __init__(self, instancia=0) -> None:
+      self.instancia = instancia
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
-      self.session = self.SapGui.FindById(f"ses[{instancia}]")
+      self.session = self.SapGui.FindById(f"ses[{self.instancia}]")
       self.toaster = ToastNotifier()
   def relatorio(self, dia=7) -> None:
       self.session.StartTransaction(Transaction="ZSVC20")
@@ -78,7 +77,7 @@ class sap:
       end_time = datetime.datetime.now()
       print(f"Relatório gerado em {end_time - start_time}")
       self.toaster.show_toast("Relatório está pronto!")
-  def leiturista(self, nota) -> str:
+  def leiturista(self, nota, retry=False) -> str:
       instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ES32")
       self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
@@ -128,6 +127,8 @@ class sap:
       self.session.FindById("wnd[1]/usr/txtGS_SEARCH-VALUE").text = instalacao
       self.session.FindById("wnd[1]/usr/cmbGS_SEARCH-SEARCH_ORDER").key = "0"
       self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
+      if(self.session.FindById(f"/app/con[0]/ses[{self.instancia}]/wnd[0]/sbar").text == "Nenhuma ocorrência encontrada"):
+        raise Exception("A instalação não foi encontrada no relatório!")
       self.session.FindById("wnd[1]").Close()
       celula = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").currentCellRow
       linhas = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").RowCount
@@ -436,6 +437,8 @@ class sap:
     for file in listdir("C:\\Users\\ruan.camello\\Documents\\Temporario"):
       print(file)
     return "|".join(listdir("C:\\Users\\ruan.camello\\Documents\\Temporario")) + "\n"
+  def pegar(self) -> str:
+    return self.session.FindById("wnd[1]/usr/lbl[1,1]").text
 
 if __name__ == "__main__":
   robo = sap()
@@ -467,6 +470,11 @@ if __name__ == "__main__":
   elif (sys.argv[1] == "relatorio"):
     try:
       robo.relatorio(int(sys.argv[2]))
+    except Exception as err:
+      print(err.args)
+  elif (sys.argv[1] == "teste"):
+    try:
+      print(robo.pegar())
     except Exception as err:
       print(err.args)
   else:
