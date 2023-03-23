@@ -132,24 +132,37 @@ class sap:
       self.session.FindById("wnd[1]").Close()
       celula = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").currentCellRow
       linhas = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").RowCount
-      if (celula >= 14):
-        self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = celula - 14
-        apontador = celula - 14
-        limite = celula + 14
-      else:
+      # se a linhaAtual é menor que 14, a primeiraVisivel é 0 e offset é igual a linha atual
+      # se a linhaAtual é maior que linhasTotais - 14, então primeiraVisivel é linhasTotais - 28 e offset é igual a 
+      apontador = 0
+      limite = 0
+      offset = 0
+      # Se a instalação foi encontrada no início do relatório
+      if (celula <= 14):
         self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = 0
         apontador = 0
         limite = 28
+        offset = celula
+      # Se a instalação foi encontrada no meio do relatório
+      if (celula > 14 and celula < (linhas - 14)):
+        self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = celula - 14
+        apontador = celula - 14
+        limite = celula + 14
+        offset = 15
+      # Se a instalação foi encontrada no final do relatório
+      if(celula > 14 and celula >= (linhas - 14)):
+        self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = linhas - 28
+        apontador = celula - 28
+        limite = linhas
+        offset = (28 - (linhas - celula))
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectedRows = celula
       leitString = "Seq|Instalacao|Endereco|Bairro|Medidor|Hora|Cod\n"
       tamanhos = [0,0,0,0,0,0,0]
-      offset = 0
       while (apontador < limite and apontador < linhas):
         sequencia = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZZ_NUMSEQ")
         tamanhos[0] = len(sequencia) if (len(sequencia) > tamanhos[0]) else tamanhos[0]
         instalRoteiro = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ANLAGE")
         tamanhos[1] = len(instalRoteiro) if (len(instalRoteiro) > tamanhos[1]) else tamanhos[1]
-        if(int(instalRoteiro) == int(instalacao)): offset = apontador
         endereco = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZENDERECO")
         tamanhos[2] = len(endereco) if (len(endereco) > tamanhos[2]) else tamanhos[2]
         subbairro = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"BAIRRO")
@@ -179,13 +192,23 @@ class sap:
     linhas = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").RowCount
     debString = 'Referência|Vencimento|Valor|Tipo\n'
     apontador = 1
+    metadados = ''
+    tamanhos = [0,0,0,0,0]
     while (apontador < linhas):
       referencia = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"BILLING_PERIOD")
+      tamanhos[0] = len(referencia) if (len(referencia) > tamanhos[0]) else tamanhos[0]
       vencimento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"FAEDN")
+      tamanhos[1] = len(vencimento) if (len(vencimento) > tamanhos[1]) else tamanhos[1]
       pendente = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TOTAL_AMNT")
+      tamanhos[2] = len(pendente) if (len(pendente) > tamanhos[2]) else tamanhos[2]
       faturamento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TIP_FATURA")
-      debString = f"{debString}{referencia}|{vencimento}|R$:{pendente}|{faturamento}\n"
+      tamanhos[3] = len(faturamento) if (len(faturamento) > tamanhos[3]) else tamanhos[3]
+      statusFat = self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador, "STATUS")
+      tamanhos[4] = len(statusFat) if (len(statusFat) > tamanhos[4]) else tamanhos[4]
+      debString = f"{debString}{referencia}|{vencimento}|R$:{pendente}|{faturamento}|{statusFat}\n"
       apontador = apontador + 1
+    tamanhosString = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}|{tamanhos[4]}\n"
+    debString = metadados + tamanhosString + debString
     return debString
   def imprimir(self, documento):
     self.session.StartTransaction(Transaction="ZATC73")
@@ -243,7 +266,10 @@ class sap:
     if re.search("[0-9]{10}", arg):
       self.session.StartTransaction(Transaction="IW53")
       self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = arg
-      self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
+      try:
+        self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
+      except:
+        raise Exception("A nota informada é inválida!")
       self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09").Select()
       instalacao = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/ctxtVIQMEL-ZZINSTLN").text
       self.instalacao(instalacao)
