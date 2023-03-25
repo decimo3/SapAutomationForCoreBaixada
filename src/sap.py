@@ -466,9 +466,7 @@ class sap:
   def monitorar(self, qnt) -> str:
     while(len(listdir("C:\\Users\\ruan.camello\\Documents\\Temporario")) < qnt):
       time.sleep(3)
-    for file in listdir("C:\\Users\\ruan.camello\\Documents\\Temporario"):
-      print(file)
-    return "|".join(listdir("C:\\Users\\ruan.camello\\Documents\\Temporario")) + "\n"
+    return "\n".join(listdir("C:\\Users\\ruan.camello\\Documents\\Temporario"))
 
 if __name__ == "__main__":
   robo = sap()
