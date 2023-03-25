@@ -16,11 +16,16 @@ ALTURA_CARACTERE = 20
 nRow = 0 # contador de linha atual
 nCol = 0 # contador de coluna atual
 cursor = MARGEM_ESQUERDA # distância a esqueda da escrita do texto
-# CORES_LINHAS_RELATORIO = []
+CORES = ['rgb(255,255,255)', 'rgb(0,0,0)', 'rgb(255,0,0)', 'rgb(255,255,0)', 'rgb(0,255,0)']
 # OFFSET_LINHAS_RELATORIO = []
 
 linhas = argv[1].split(SEPARADOR_ENTRE_LINHAS)
-metadados = linhas[0].split(SEPARADOR_ENTRE_COLUNAS)
+metadados = []
+if(linhas[0] == "0"):
+  metadados.append(0)
+else:
+  metadados = linhas[0].split(SEPARADOR_ENTRE_COLUNAS)
+  metadados = [int(x) for x in metadados]
 # for metadado in metadados:
 #   OFFSET_LINHAS_RELATORIO[0] = metadado.split(SEPARADOR_METADADOS)[0]
 #   CORES_LINHAS_RELATORIO[0] = metadado.split(SEPARADOR_METADADOS)[1]
@@ -34,15 +39,15 @@ ALTURA_TOTAL_IMAGEM = len(linhas) * ALTURA_CARACTERE
 nRow = 2
 
 with Drawing() as draw:
-  with Image(width = LARGURA_TOTAL_IMAGEM, height = ALTURA_TOTAL_IMAGEM, background = Color('white')) as img:
+  with Image(width = LARGURA_TOTAL_IMAGEM, height = ALTURA_TOTAL_IMAGEM, background = Color(CORES[0])) as img:
     draw.font_family = 'Arial'
     draw.font = 'monospace'
     draw.font_size = ALTURA_CARACTERE # 15x15 cada letra
     while(nRow < len(linhas)):
-      if(nRow == int(metadados[0]) + 2):
-        draw.fill_color = Color('rgb(255,255,0)')
-        draw.rectangle(left = 0, top = (nRow * ALTURA_CARACTERE), right = LARGURA_TOTAL_IMAGEM, bottom = (nRow * ALTURA_CARACTERE) + ALTURA_CARACTERE)
-        draw.fill_color = Color('rgb(0,0,0)')
+      if(metadados[0] != 0 and (nRow == metadados[0] + 2)):
+        draw.fill_color = Color(CORES[3])
+        draw.rectangle(left = 0, top = (nRow * ALTURA_CARACTERE) + 1, right = LARGURA_TOTAL_IMAGEM, bottom = (nRow * ALTURA_CARACTERE) + ALTURA_CARACTERE + 1)
+        draw.fill_color = Color(CORES[1])
       if(linhas[nRow] == ""):
         nRow = nRow + 1
         continue
