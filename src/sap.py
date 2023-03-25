@@ -469,8 +469,6 @@ class sap:
     for file in listdir("C:\\Users\\ruan.camello\\Documents\\Temporario"):
       print(file)
     return "|".join(listdir("C:\\Users\\ruan.camello\\Documents\\Temporario")) + "\n"
-  def pegar(self) -> str:
-    return self.session.FindById("wnd[1]/usr/lbl[1,1]").text
 
 if __name__ == "__main__":
   robo = sap()
