@@ -24,8 +24,9 @@ metadados = []
 if(linhas[0] == "0"):
   metadados.append(0)
 else:
-  metadados = linhas[0].split(SEPARADOR_ENTRE_COLUNAS)
-  metadados = [int(x) for x in metadados]
+  metadados.append(int(linhas[0]))
+  #metadados = linhas[0].split(SEPARADOR_METADADOS)
+  #metadados = [int(x) for x in metadados]
 # for metadado in metadados:
 #   OFFSET_LINHAS_RELATORIO[0] = metadado.split(SEPARADOR_METADADOS)[0]
 #   CORES_LINHAS_RELATORIO[0] = metadado.split(SEPARADOR_METADADOS)[1]
@@ -44,7 +45,7 @@ with Drawing() as draw:
     draw.font = 'monospace'
     draw.font_size = ALTURA_CARACTERE # 15x15 cada letra
     while(nRow < len(linhas)):
-      if(metadados[0] != 0 and (nRow == metadados[0] + 2)):
+      if(metadados[0] != 0 and (nRow == metadados[0] + 1)):
         draw.fill_color = Color(CORES[3])
         draw.rectangle(left = 0, top = (nRow * ALTURA_CARACTERE) + 1, right = LARGURA_TOTAL_IMAGEM, bottom = (nRow * ALTURA_CARACTERE) + ALTURA_CARACTERE + 1)
         draw.fill_color = Color(CORES[1])
