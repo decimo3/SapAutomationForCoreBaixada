@@ -216,7 +216,7 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtP_OPBEL").text = documento[apontador]
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       apontador = apontador + 1
-  def fatura_novo(self, nota): #TODO: Implementar o file watcher!
+  def fatura_novo(self, nota) -> str:
     debitos = []
     apontador = 0
     self.debito(nota)
@@ -228,7 +228,7 @@ class sap:
       debitos.append(self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"ZIMPRES"))
       apontador = apontador + 1
     self.imprimir(debitos)
-    self.monitorar(len(debitos))
+    return self.monitorar(len(debitos))
   def fatura(self, nota): #TODO: Descontinuado, remover
     self.debito(nota)
     self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").selectedRows = "1"
