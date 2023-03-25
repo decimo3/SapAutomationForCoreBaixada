@@ -276,7 +276,7 @@ class sap:
       return arg
     else:
       return ""
-  def historico(self, nota) -> None:
+  def historico(self, nota) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ZSVC20")
     self.session.FindById("wnd[0]/usr/ctxtSO_ANLAG-LOW").text = instalacao
@@ -284,12 +284,23 @@ class sap:
     self.session.FindById("wnd[0]/usr/ctxtSO_QMDAT-LOW").text = ""
     self.session.FindById("wnd[0]/usr/ctxtSO_QMDAT-HIGH").text = ""
     self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/WILLIAM"
-    start_time = datetime.datetime.now()
-    print("Aguarde relatório sendo processado...")
     self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
-    print("Relatório processado com sucesso!")
-    end_time = datetime.datetime.now()
-    print(f"Relatório gerado em {end_time - start_time}")
+    linhas = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").RowCount
+    apontador = 0
+    tamanhos = [10,0,0,10]
+    metadados = "0\n"
+    historico = "Nota|Texto breve para dano|Texto breve para code|Data\n"
+    while(apontador < linhas and apontador < 10):
+      notaServico = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"QMNUM")
+      textoDano = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador, "KURZTEXT")
+      tamanhos[1] = len(textoDano) if (len(textoDano) > tamanhos[1]) else tamanhos[1]
+      textoCode = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"MATXT")
+      tamanhos[2] = len(textoCode) if (len(textoCode) > tamanhos[2]) else tamanhos[2]
+      FimAvaria = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"AUSBS")
+      historico = f"{historico}{notaServico}|{textoDano}|{textoCode}|{FimAvaria}\n"
+      apontador = apontador + 1
+    tamanho = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}\n"
+    return metadados + tamanho + historico
   def agrupamento(self, nota): #TODO: Implementar análise de débitos
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ES32")
@@ -493,9 +504,9 @@ if __name__ == "__main__":
       robo.relatorio(int(sys.argv[2]))
     except Exception as err:
       print(err.args)
-  elif (sys.argv[1] == "teste"):
+  elif (sys.argv[1] == "historico"):
     try:
-      print(robo.pegar())
+      print(robo.historico(sys.argv[2]))
     except Exception as err:
       print(err.args)
   else:
