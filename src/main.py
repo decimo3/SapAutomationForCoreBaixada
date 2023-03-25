@@ -3,6 +3,7 @@
 
 from sap import sap
 import sys
+import os
 import datetime
 
 class main:
@@ -10,10 +11,14 @@ class main:
 #   if (datetime.datetime.now() > datetime.datetime.strptime("13.01.2023", "%d.%m.%Y")):
 #     raise Exception("O prazo de avaliação acabou!")
     #sys.argv
+    if 'sys.argv[1]' in locals():
+      self.instancia = int(sys.argv[1])
+    else:
+      self.instancia = 0
     print("Programa de automação de rotinas do Mestre Ruan")
     print("===============================================")
     print("")
-    self.sape = sap(0)
+    self.sape = sap(self.instancia)
     self.ultima_nota = ""
     print("Digite o comando abaixo que deseja executar ou AJUDA para mostrar as opções disponíveis.")
     print("")
