@@ -471,39 +471,18 @@ class sap:
 if __name__ == "__main__":
   robo = sap()
   if ((sys.argv[1] == "coordenada") or (sys.argv[1] == "localização")):
-    try:
-      print(robo.coordenadas(int(sys.argv[2])))
-    except Exception as err:
-      print(err.args)
+    print(robo.coordenadas(int(sys.argv[2])))
   elif ((sys.argv[1] == "telefone") or (sys.argv[1] == "contato")):
-    try:
-      print(robo.telefone(int(sys.argv[2])))
-    except Exception as err:
-      print(err.args)
+    print(robo.telefone(int(sys.argv[2])))
   elif (sys.argv[1] == "medidor"):
-    try:
-      print(robo.medidor(int(sys.argv[2])))
-    except Exception as err:
-      print(err.args)
+    print(robo.medidor(int(sys.argv[2])))
   elif (sys.argv[1] == "leiturista"):
-    try:
-      print(robo.leiturista(int(sys.argv[2])))
-    except Exception as err:
-      print(err.args)
+    print(robo.leiturista(int(sys.argv[2])))
   elif ((sys.argv[1] == "debito") or (sys.argv[1] == "fatura")):
-    try:
-      print(robo.fatura_novo(int(sys.argv[2])))
-    except Exception as err:
-      print(err.args)
+    print(robo.fatura_novo(int(sys.argv[2])))
   elif (sys.argv[1] == "relatorio"):
-    try:
-      robo.relatorio(int(sys.argv[2]))
-    except Exception as err:
-      print(err.args)
+    robo.relatorio(int(sys.argv[2]))
   elif (sys.argv[1] == "historico"):
-    try:
-      print(robo.historico(sys.argv[2]))
-    except Exception as err:
-      print(err.args)
+    print(robo.historico(sys.argv[2]))
   else:
-    print("Não entendi o comando, verifique se está correto!")
+    raise Exception("Não entendi o comando, verifique se está correto!")
