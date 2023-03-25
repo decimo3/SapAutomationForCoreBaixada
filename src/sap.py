@@ -142,19 +142,19 @@ class sap:
         self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = 0
         apontador = 0
         limite = 28
-        offset = celula
+        offset = celula + 1
       # Se a instalação foi encontrada no meio do relatório
       if (celula > 14 and celula < (linhas - 14)):
         self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = celula - 14
         apontador = celula - 14
         limite = celula + 14
-        offset = 15
+        offset = 14 + 1
       # Se a instalação foi encontrada no final do relatório
       if(celula > 14 and celula >= (linhas - 14)):
         self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = linhas - 28
         apontador = celula - 28
         limite = linhas
-        offset = (28 - (linhas - celula))
+        offset = (28 - (linhas - celula)) + 1
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectedRows = celula
       leitString = "Seq|Instalacao|Endereco|Bairro|Medidor|Hora|Cod\n"
       tamanhos = [4,10,0,0,8,8,4]
