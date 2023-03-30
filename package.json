@@ -1,14 +1,16 @@
 {
-  "name": "ruan.automacao.python",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "start": "nodemon --exec python3 main.py"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "nodemon": "^2.0.15"
-  }
+    "name": "ruan.automacao.python",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "nodemon --exec python3 .\\src\\main.py",
+        "start": "python3 .\\src\\main.py 1",
+        "publish": "pyinstaller --onefile .\\src\\main.py"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "nodemon": "^2.0.15"
+    }
 }
