@@ -41,8 +41,8 @@ nRow = 2
 
 with Drawing() as draw:
   with Image(width = LARGURA_TOTAL_IMAGEM, height = ALTURA_TOTAL_IMAGEM, background = Color(CORES[0])) as img:
-    draw.font_family = 'Arial'
-    draw.font = 'monospace'
+    draw.font_family = 'Consolas'
+    draw.font = 'Consolas'
     draw.font_size = ALTURA_CARACTERE # 15x15 cada letra
     while(nRow < len(linhas)):
       if(metadados[0] != 0 and (nRow == metadados[0] + 1)):
