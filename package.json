@@ -6,7 +6,7 @@
     "scripts": {
         "test": "nodemon --exec python3 .\\src\\main.py",
         "start": "python3 .\\src\\main.py 1",
-        "publish": "pyinstaller --onefile .\\src\\main.py"
+        "build": "pyinstaller --onefile .\\src\\sap.py"
     },
     "author": "",
     "license": "ISC",
