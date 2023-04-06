@@ -36,6 +36,19 @@ class sap:
       start_time = datetime.datetime.now()
       print("Aguarde relatório sendo processado...")
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
+      filepath = "S:\\ADM\\RUAN CAMELLO\\" + hoje.strftime("%d.%m.%Y")
+      filename = datetime.datetime.now().strftime("%H;%M") + ".XLSX"
+      self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
+      self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
+      
+      #TODO: make interation with fileDialog
+      # https://answers.sap.com/questions/7761287/pasting-filename-in-a-panel-using-script.html
+
+      # self.session.FindById("wnd[1]/usr/ctxtDY_PATH").text = filepath
+      # self.session.FindById("wnd[1]/usr/ctxtDY_FILENAME").Text = filename
+      # self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
+      # self.session.FindById("wnd[0]/mbar/menu[0]/menu[1]/menu[1]").Select()
+      
       print("Relatório processado com sucesso!")
       end_time = datetime.datetime.now()
       print(f"Relatório gerado em {end_time - start_time}")
