@@ -429,7 +429,7 @@ if __name__ == "__main__":
     print(robo.telefone(int(sys.argv[2])))
   elif (sys.argv[1] == "medidor"):
     print(robo.medidor(int(sys.argv[2])))
-  elif (sys.argv[1] == "leiturista"):
+  elif ((sys.argv[1] == "leiturista") or (sys.argv[1] == "roteiro")):
     print(robo.leiturista(int(sys.argv[2])))
   elif ((sys.argv[1] == "debito") or (sys.argv[1] == "fatura")):
     print(robo.fatura_novo(int(sys.argv[2])))
@@ -437,5 +437,7 @@ if __name__ == "__main__":
     robo.relatorio(int(sys.argv[2]))
   elif (sys.argv[1] == "historico"):
     print(robo.historico(sys.argv[2]))
+  elif (sys.argv[1] == "agrupamento"):
+    print(robo.agrupamento(sys.argv[2]))
   else:
     raise Exception("Não entendi o comando, verifique se está correto!")
