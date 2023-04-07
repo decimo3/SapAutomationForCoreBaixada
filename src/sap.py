@@ -227,33 +227,6 @@ class sap:
       apontador = apontador + 1
     self.imprimir(debitos)
     return self.monitorar(len(debitos))
-  def fatura(self, nota): #TODO: Descontinuado, remover
-    self.debito(nota)
-    self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").selectedRows = "1"
-    self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").pressToolbarButton("2VIA")
-    self.session.FindById("wnd[0]/usr/rad2VIA").Select()
-    linhas = int(self.session.FindById("wnd[0]/usr/txtZATCE_MENGE_BETRW-MENGE").text)
-    linhas = linhas - 1
-    tipo = True #Seleciona "Conta não entregue no motivo da impressão"
-    if (linhas > 10):
-      raise Exception("Faturas demais para imprimir!")
-    while (linhas >= 0):
-      status_conta = self.session.FindById(f"wnd[0]/usr/tblSAPLZCRM_METODOSTC_FATURAS/txtIT_SAIDA-STATUS[7,{linhas}]").text
-      if (status_conta != "Pendente"):
-        linhas = linhas - 1
-        continue
-      self.session.FindById(f"wnd[0]/usr/tblSAPLZCRM_METODOSTC_FATURAS/chkIT_SAIDA-SELFAT[3,{linhas}]").selected = True
-      self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
-      if (tipo == True):
-        self.session.FindById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[4,0]").Select()
-        self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
-        tipo = False
-      self.session.FindById("wnd[0]/mbar/menu[0]/menu[0]").Select()
-      self.session.FindById("wnd[0]/tbar[0]/btn[3]").Press()
-      self.session.FindById(f"wnd[0]/usr/tblSAPLZCRM_METODOSTC_FATURAS/chkIT_SAIDA-SELFAT[3,{linhas}]").selected = False
-      linhas = linhas - 1
-    shutil.rmtree("C:\\Users\\ruan.camello\\Documents\\Temporario")
-    makedirs("C:\\Users\\ruan.camello\\Documents\\Temporario")
   def instalacao(self, arg: str) -> str:
     arg = str(arg)
     if re.search("[0-9]{10}", arg):
@@ -338,18 +311,6 @@ class sap:
         break
       apontador = apontador + 1
       self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
-  def consulta(self, lista): #TODO: Descontinuado, remover
-    if (not(len(lista) > 0)):
-      raise Exception("A lista não pode estar vazia!")
-    index = 0
-    argumentos = lista.split(',')
-    while (len(argumentos)):
-      self.session.StartTransaction(Transaction="IW53")
-      self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = argumentos[index]
-      self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
-      texto = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/subCUSTOM_SCREEN:SAPLIQS0:7244/subSUBSCREEN_2:SAPLIQS0:8125/cntlTEXT_DISPLAY/shellcont/shell").text
-      print(f"{argumentos[index]}|{texto}")
-      index = index + 1
   def coordenadas(self, nota) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ES32")
