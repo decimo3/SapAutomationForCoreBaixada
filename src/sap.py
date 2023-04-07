@@ -54,6 +54,7 @@ class sap:
       print(f"Relatório gerado em {end_time - start_time}")
       if (dia > 0):
         self.toaster.show_toast("Relatório está pronto!")
+        self.manobra(dia)
   def manobra(self, dia=0) -> None:
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
