@@ -33,12 +33,7 @@ class sap:
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
       self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = "RB"
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
-      start_time = datetime.datetime.now()
-      print("Aguarde relatório sendo processado...")
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
-      print("Relatório processado com sucesso!")
-      end_time = datetime.datetime.now()
-      print(f"Relatório gerado em {end_time - start_time}")
       if (dia > 0):
         self.toaster.show_toast("Relatório está pronto!")
       filepath = "S:\\ADM\\RUAN CAMELLO\\" + hoje.strftime("%d.%m.%Y")
@@ -78,12 +73,7 @@ class sap:
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
       self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = "RB"
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
-      start_time = datetime.datetime.now()
-      print("Aguarde relatório sendo processado...")
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
-      print("Relatório processado com sucesso!")
-      end_time = datetime.datetime.now()
-      print(f"Relatório gerado em {end_time - start_time}")
       self.toaster.show_toast("Relatório está pronto!")
   def leiturista(self, nota, retry=False) -> str:
       instalacao = self.instalacao(nota)
@@ -332,7 +322,6 @@ class sap:
       raise Exception("O agrupamento não pode ser analizado automaticamente")
     linhas = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").RowCount
     numero_sem_letra = re.search("[0-9]{1,5}", numero)
-    print(f"{int(numero_sem_letra.group())} de {linhas}")
     apontador = 0
     while (apontador < linhas):
       num10 = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,10]").text
@@ -378,7 +367,6 @@ class sap:
     if (len(coordenada) > 0):
       coordenada = re.sub(',', '.', coordenada)
       coordenada = re.findall("-[0-9]{2}.[0-9]*", coordenada)
-      print(f"https://www.google.com/maps?z=12&t=m&q=loc:{coordenada[0]}+{coordenada[1]}")
       return f"https://www.google.com/maps?z=12&t=m&q=loc:{coordenada[0]}+{coordenada[1]}"
     else:
       raise Exception("A instalação não possui coordenada cadastrada!")
@@ -438,9 +426,8 @@ class sap:
     texto = nome_solicitante + " " if (len(nome_solicitante) > 0) else nome_cliente + " "
     for tel in telefone:
       texto += tel + " " if (len(tel) > 0) else ""
-    print(texto)
     return texto
-  def medidor(self, nota) -> bool:
+  def medidor(self, nota) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ZATC66")
     self.session.FindById("wnd[0]/usr/ctxtP_ANLAGE").text = instalacao
@@ -448,8 +435,7 @@ class sap:
     try:
       self.session.FindById("wnd[0]/usr/subSUB1:SAPLZATC_INFO_CRM:0900/radXSCREEN-HEADER-RB_LEIT").Select()
     except:
-      print(f"A instalação {instalacao} não possui histórico de consumo para o contrato atual.")
-      return True
+      raise Exception(f"A instalação {instalacao} não possui histórico de consumo para o contrato atual.")
     linhas = self.session.FindById("wnd[0]/usr/cntlCONTROL/shellcont/shell").RowCount
     apontador = 0
     while(apontador < linhas):
@@ -457,11 +443,9 @@ class sap:
       if ((codigo == "3201") or (codigo == "3202") or (codigo == "3203") or (codigo == "3251")):
         medidor = int(self.session.FindById("wnd[0]/usr/cntlCONTROL/shellcont/shell").getCellValue(apontador,"GERNR"))
         leitura = self.session.FindById("wnd[0]/usr/cntlCONTROL/shellcont/shell").getCellValue(apontador,"ADATSOLL")
-        print(f"Medidor {medidor} com código de retirado pelo leiturista desde {leitura}")
-        return True
+        return f"Medidor {medidor} com código de retirado pelo leiturista desde {leitura}"
       apontador = apontador + 1
-    print("Medidor *não* consta como retirado")
-    return False
+    return "Medidor *não* consta como retirado"
   def analisar(self, apontador=0, verificar_15_dias=False) -> bool:
     if(apontador == 0): return False
     if (self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador, "STATUS") != "@5C@"): return False
