@@ -11,7 +11,11 @@ import win32com.client
 from win10toast import ToastNotifier
 
 class sap:
-  def __init__(self, instancia=0) -> None:
+  def __init__(self, instancia=1) -> None:
+      self.DESTAQUE_AMARELO = 3
+      self.DESTAQUE_VERMELHO = 2
+      self.DESTAQUE_VERDEJANTE = 4
+      self.DESTAQUE_AUSENTE = 0
       self.instancia = instancia
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
       self.session = self.SapGui.FindById(f"ses[{self.instancia}]")
@@ -154,23 +158,23 @@ class sap:
         limite = linhas
         offset = (28 - (linhas - celula)) + 1
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectedRows = celula
-      leitString = "Seq|Instalacao|Endereco|Bairro|Medidor|Hora|Cod\n"
-      tamanhos = [4,10,0,0,8,8,4]
+      leitString = "Cor|Seq|Instalacao|Endereco|Bairro|Medidor|Hora|Cod\n"
+      tamanhos = [0,4,10,0,0,8,8,4]
       while (apontador < limite and apontador < linhas):
+        destaque = self.DESTAQUE_AMARELO if(apontador == celula) else self.DESTAQUE_AUSENTE
         sequencia = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZZ_NUMSEQ")
         instalRoteiro = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ANLAGE")
         endereco = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZENDERECO")
-        tamanhos[2] = len(endereco) if (len(endereco) > tamanhos[2]) else tamanhos[2]
+        tamanhos[3] = len(endereco) if (len(endereco) > tamanhos[3]) else tamanhos[3]
         subbairro = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"BAIRRO")
-        tamanhos[3] = len(subbairro) if (len(subbairro) > tamanhos[3]) else tamanhos[3]
+        tamanhos[4] = len(subbairro) if (len(subbairro) > tamanhos[4]) else tamanhos[4]
         medidor = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"GERAET")
         horaleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZHORALEIT")
         codleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ABLHINW")
-        leitString = f"{leitString}{sequencia}|{instalRoteiro}|{endereco}|{subbairro}|{medidor}|{horaleit}|{codleit}\n"
+        leitString = f"{leitString}{destaque}|{sequencia}|{instalRoteiro}|{endereco}|{subbairro}|{medidor}|{horaleit}|{codleit}\n"
         apontador = apontador + 1
-      metadados = f"{offset}\n"
-      tamanhosString = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}|{tamanhos[4]}|{tamanhos[5]}|{tamanhos[6]}\n"
-      leitString = metadados + tamanhosString + leitString
+      tamanhosString = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}|{tamanhos[4]}|{tamanhos[5]}|{tamanhos[6]}|{tamanhos[7]}\n"
+      leitString = tamanhosString + leitString
       return leitString
   def debito(self, nota) -> None:
     instalacao = self.instalacao(nota)
@@ -183,25 +187,30 @@ class sap:
   def escrever(self, nota) -> str:
     self.debito(nota)
     linhas = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").RowCount
-    debString = 'Referência|Vencimento|Valor|Tipo\n'
+    debString = 'Cor|Mês ref.|Vencimento|Valor|Tipo|Status\n'
     apontador = 1
-    metadados = ''
-    tamanhos = [0,0,0,0,0]
+    tamanhos = [0,7,10,12,0,0]
     while (apontador < linhas):
       referencia = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"BILLING_PERIOD")
-      tamanhos[0] = len(referencia) if (len(referencia) > tamanhos[0]) else tamanhos[0]
       vencimento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"FAEDN")
-      tamanhos[1] = len(vencimento) if (len(vencimento) > tamanhos[1]) else tamanhos[1]
-      pendente = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TOTAL_AMNT")
-      tamanhos[2] = len(pendente) if (len(pendente) > tamanhos[2]) else tamanhos[2]
-      faturamento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TIP_FATURA")
-      tamanhos[3] = len(faturamento) if (len(faturamento) > tamanhos[3]) else tamanhos[3]
+      valorPendente = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TOTAL_AMNT")
+      tipoDebito = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TIP_FATURA")
+      tamanhos[4] = len(tipoDebito) if (len(tipoDebito) > tamanhos[4]) else tamanhos[4]
       statusFat = self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador, "STATUS")
-      tamanhos[4] = len(statusFat) if (len(statusFat) > tamanhos[4]) else tamanhos[4]
-      debString = f"{debString}{referencia}|{vencimento}|R$:{pendente}|{faturamento}|{statusFat}\n"
+      if(statusFat == "@5B@"): # Status no prazo de vencimento da fatura
+        destaque = self.DESTAQUE_VERDEJANTE
+        textStatus = "No prazo"
+      elif(statusFat == "@5C@"): # Status prazo de pagamento vencido
+        destaque = self.DESTAQUE_VERMELHO
+        textStatus = "vencida"
+      else:
+        destaque = self.DESTAQUE_AUSENTE
+        textStatus = "Consultar"
+      tamanhos[5] = len(textStatus) if (len(textStatus) > tamanhos[5]) else tamanhos[5]
+      debString = f"{debString}{destaque}|{referencia}|{vencimento}|R$:{valorPendente}|{tipoDebito}|{textStatus}\n"
       apontador = apontador + 1
-    tamanhosString = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}|{tamanhos[4]}\n"
-    debString = metadados + tamanhosString + debString
+    tamanhosString = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}|{tamanhos[4]}|{tamanhos[5]}\n"
+    debString = tamanhosString + debString
     return debString
   def imprimir(self, documento):
     self.session.StartTransaction(Transaction="ZATC73")
@@ -258,20 +267,20 @@ class sap:
     self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
     linhas = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").RowCount
     apontador = 0
-    tamanhos = [10,0,0,10]
-    metadados = "0\n"
-    historico = "Nota|Texto breve para dano|Texto breve para code|Data\n"
+    tamanhos = [0,10,0,0,10]
+    historico = "Cor|Nota|Texto breve para dano|Texto breve para code|Data\n"
     while(apontador < linhas and apontador < 10):
+      destaque = 0
       notaServico = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"QMNUM")
       textoDano = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador, "KURZTEXT")
-      tamanhos[1] = len(textoDano) if (len(textoDano) > tamanhos[1]) else tamanhos[1]
+      tamanhos[2] = len(textoDano) if (len(textoDano) > tamanhos[2]) else tamanhos[2]
       textoCode = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"MATXT")
-      tamanhos[2] = len(textoCode) if (len(textoCode) > tamanhos[2]) else tamanhos[2]
+      tamanhos[3] = len(textoCode) if (len(textoCode) > tamanhos[3]) else tamanhos[3]
       FimAvaria = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"AUSBS")
-      historico = f"{historico}{notaServico}|{textoDano}|{textoCode}|{FimAvaria}\n"
+      historico = f"{historico}{destaque}|{notaServico}|{textoDano}|{textoCode}|{FimAvaria}\n"
       apontador = apontador + 1
-    tamanho = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}\n"
-    return metadados + tamanho + historico
+    tamanho = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}|{tamanhos[4]}\n"
+    return tamanho + historico
   def agrupamento(self, nota): #TODO: Implementar análise de débitos
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ES32")
@@ -450,5 +459,7 @@ if __name__ == "__main__":
     print(robo.historico(sys.argv[2]))
   elif (sys.argv[1] == "agrupamento"):
     print(robo.agrupamento(sys.argv[2]))
+  if ((sys.argv[1] == "pendentes") or (sys.argv[1] == "consulta")):
+    print(robo.escrever(int(sys.argv[2])))
   else:
     raise Exception("Não entendi o comando, verifique se está correto!")
