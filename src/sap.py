@@ -295,6 +295,8 @@ class sap:
       raise Exception("O agrupamento não pode ser analizado automaticamente")
     linhas = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").RowCount
     numero_sem_letra = re.search("[0-9]{1,5}", numero)
+    if(numero_sem_letra == None):
+      raise Exception("O agrupamento não pode ser analizado automaticamente")
     apontador = 0
     while (apontador < linhas):
       num10 = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,10]").text
