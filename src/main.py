@@ -56,8 +56,6 @@ class main:
         self.sape.agrupamento(int(argumentos[1]))
       elif (argumentos[0] == "manobra"):
         self.sape.manobra(int(argumentos[1]))
-      elif (argumentos[0] == "consulta"):
-        self.sape.consulta(argumentos[1])
       elif (argumentos[0] == "coordenada"):
         self.sape.coordenadas(int(argumentos[1]))
       elif (argumentos[0] == "telefone"):
@@ -68,8 +66,6 @@ class main:
         self.sape.fatura_novo(int(argumentos[1]))
       elif (argumentos[0] == "analise"):
         self.sape.analisar(int(argumentos[1]))
-      elif (argumentos[0] == "teste"):
-        self.sape.instalacao(int(argumentos[1]))
       else: print("Selecione uma opção válida. Digite AJUDA para saber as consultas suportadas ou SAIR para terminar o programa!")
       self.ultima_nota = argumentos[1]
 robo = main()
