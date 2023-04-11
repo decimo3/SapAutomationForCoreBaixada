@@ -313,6 +313,15 @@ class sap:
         break
       apontador = apontador + 1
       self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
+    apontador = 0
+    linhas = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX").RowCount
+    return linhas
+    enderecos = []
+    instalacoes = []
+    nomeCliente = []
+    tipoinstal = []
+    while (apontador < linhas):
+      pass
   def coordenadas(self, nota) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ES32")
