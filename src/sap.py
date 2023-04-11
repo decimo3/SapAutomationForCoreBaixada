@@ -11,7 +11,7 @@ import win32com.client
 from win10toast import ToastNotifier
 
 class sap:
-  def __init__(self, instancia=1) -> None:
+  def __init__(self, instancia=0) -> None:
       self.DESTAQUE_AMARELO = 3
       self.DESTAQUE_VERMELHO = 2
       self.DESTAQUE_VERDEJANTE = 4
