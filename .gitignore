@@ -8,3 +8,4 @@ dist
 .env
 .vs
 *.png
+*.spec
