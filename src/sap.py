@@ -459,7 +459,7 @@ if __name__ == "__main__":
     print(robo.historico(sys.argv[2]))
   elif (sys.argv[1] == "agrupamento"):
     print(robo.agrupamento(sys.argv[2]))
-  elif ((sys.argv[1] == "pendentes") or (sys.argv[1] == "consulta")):
+  elif (sys.argv[1] == "pendente"): #or (sys.argv[1] == "consulta")):
     print(robo.escrever(int(sys.argv[2])))
   else:
     raise Exception("Não entendi o comando, verifique se está correto!")
