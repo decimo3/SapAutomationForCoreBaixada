@@ -42,8 +42,11 @@ class sap:
         self.toaster.show_toast("Relatório está pronto!")
       filepath = "S:\\ADM\\RUAN CAMELLO\\" + hoje.strftime("%d.%m.%Y")
       filename = datetime.datetime.now().strftime("%H;%M") + ".XLSX"
-      self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
-      self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
+      try:
+        self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
+        self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
+      except:
+        raise Exception("O relatório de notas em aberto está vazio!")
       #TODO: make interation with fileDialog
       # https://answers.sap.com/questions/7761287/pasting-filename-in-a-panel-using-script.html
       if (dia > 0):
@@ -79,6 +82,11 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       self.toaster.show_toast("Relatório está pronto!")
+      try:
+        self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
+        self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
+      except:
+        raise Exception("O relatório de notas em aberto está vazio!")
   def leiturista(self, nota, retry=False) -> str:
       instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ES32")
@@ -122,7 +130,10 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtP_MESANO").text = mes.strftime("%m/%Y")
       self.session.FindById("wnd[0]/usr/ctxtP_UNID-LOW").text = unidade
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
-      self.session.FindById("wnd[0]/tbar[1]/btn[33]").Press()
+      try:
+        self.session.FindById("wnd[0]/tbar[1]/btn[33]").Press()
+      except:
+        raise Exception("Não há relatório de leitura para o período especificado!")
       self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").setCurrentCell(0,"DEFAULT")
       self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").clickCurrentCell()
       self.session.FindById("wnd[0]/tbar[0]/btn[71]").Press()
@@ -199,10 +210,13 @@ class sap:
       statusFat = self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador, "STATUS")
       if(statusFat == "@5B@"): # Status no prazo de vencimento da fatura
         destaque = self.DESTAQUE_VERDEJANTE
-        textStatus = "No prazo"
+        textStatus = "Fat. no prazo"
       elif(statusFat == "@5C@"): # Status prazo de pagamento vencido
         destaque = self.DESTAQUE_VERMELHO
-        textStatus = "vencida"
+        textStatus = "Fat. vencida"
+      elif(statusFat == "@06@"): # Status prazo de pagamento vencido
+        destaque = self.DESTAQUE_AMARELO
+        textStatus = "Fat. Retida"
       else:
         destaque = self.DESTAQUE_AUSENTE
         textStatus = "Consultar"
@@ -444,6 +458,7 @@ class sap:
     return "\n".join(listdir("C:\\Users\\ruan.camello\\Documents\\Temporario"))
 
 if __name__ == "__main__":
+  try:
     if (len(sys.argv) < 3):
       raise Exception("Falta argumentos para relizar alguma ação!")
     elif (len(sys.argv) == 3):
@@ -474,3 +489,5 @@ if __name__ == "__main__":
       print(robo.manobra(int(sys.argv[2])))
     else:
       raise Exception("Não entendi o comando, verifique se está correto!")
+  except Exception as erro:
+    print(f"ERRO: {erro.args[0]}")
