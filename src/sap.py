@@ -234,6 +234,8 @@ class sap:
         continue
       debitos.append(self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"ZIMPRES"))
       apontador = apontador + 1
+    if(len(debitos)> 5):
+      raise Exception("Cliente possui muitas faturas pendentes")
     self.imprimir(debitos)
     return self.monitorar(len(debitos))
   def instalacao(self, arg: str) -> str:
@@ -442,24 +444,33 @@ class sap:
     return "\n".join(listdir("C:\\Users\\ruan.camello\\Documents\\Temporario"))
 
 if __name__ == "__main__":
-  robo = sap()
-  if ((sys.argv[1] == "coordenada") or (sys.argv[1] == "localização")):
-    print(robo.coordenadas(int(sys.argv[2])))
-  elif ((sys.argv[1] == "telefone") or (sys.argv[1] == "contato")):
-    print(robo.telefone(int(sys.argv[2])))
-  elif (sys.argv[1] == "medidor"):
-    print(robo.medidor(int(sys.argv[2])))
-  elif ((sys.argv[1] == "leiturista") or (sys.argv[1] == "roteiro")):
-    print(robo.leiturista(int(sys.argv[2])))
-  elif ((sys.argv[1] == "debito") or (sys.argv[1] == "fatura")):
-    print(robo.fatura_novo(int(sys.argv[2])))
-  elif (sys.argv[1] == "relatorio"):
-    robo.relatorio(int(sys.argv[2]))
-  elif (sys.argv[1] == "historico"):
-    print(robo.historico(sys.argv[2]))
-  elif (sys.argv[1] == "agrupamento"):
-    print(robo.agrupamento(sys.argv[2]))
-  elif (sys.argv[1] == "pendente"): #or (sys.argv[1] == "consulta")):
-    print(robo.escrever(int(sys.argv[2])))
-  else:
-    raise Exception("Não entendi o comando, verifique se está correto!")
+    if (len(sys.argv) < 3):
+      raise Exception("Falta argumentos para relizar alguma ação!")
+    elif (len(sys.argv) == 3):
+      robo = sap()
+    elif (len(sys.argv) == 4):
+      robo = sap(int(sys.argv[3]))
+    else:
+      raise Exception("Script não foi programado para essa quantidade de argumentos!")
+    if ((sys.argv[1] == "coordenada") or (sys.argv[1] == "localização")):
+      print(robo.coordenadas(int(sys.argv[2])))
+    elif ((sys.argv[1] == "telefone") or (sys.argv[1] == "contato")):
+      print(robo.telefone(int(sys.argv[2])))
+    elif (sys.argv[1] == "medidor"):
+      print(robo.medidor(int(sys.argv[2])))
+    elif ((sys.argv[1] == "leiturista") or (sys.argv[1] == "roteiro")):
+      print(robo.leiturista(int(sys.argv[2])))
+    elif ((sys.argv[1] == "debito") or (sys.argv[1] == "fatura")):
+      print(robo.fatura_novo(int(sys.argv[2])))
+    elif (sys.argv[1] == "relatorio"):
+      robo.relatorio(int(sys.argv[2]))
+    elif (sys.argv[1] == "historico"):
+      print(robo.historico(sys.argv[2]))
+    elif (sys.argv[1] == "agrupamento"):
+      print(robo.agrupamento(sys.argv[2]))
+    elif (sys.argv[1] == "pendente"): #or (sys.argv[1] == "consulta")):
+      print(robo.escrever(int(sys.argv[2])))
+    elif (sys.argv[1] == "manobra"):
+      print(robo.manobra(int(sys.argv[2])))
+    else:
+      raise Exception("Não entendi o comando, verifique se está correto!")
