@@ -4,8 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "nodemon --exec python3 .\\src\\main.py",
-        "start": "python3 .\\src\\main.py 1",
+        "test": "nodemon --exec python3 .\\src\\sap.py",
+        "start": "python3 .\\src\\sap.py",
         "build": "pyinstaller --onefile .\\src\\sap.py"
     },
     "author": "",
