@@ -475,11 +475,11 @@ if __name__ == "__main__":
       print(robo.medidor(int(sys.argv[2])))
     elif ((sys.argv[1] == "leiturista") or (sys.argv[1] == "roteiro")):
       print(robo.leiturista(int(sys.argv[2])))
-    elif ((sys.argv[1] == "debito") or (sys.argv[1] == "fatura")):
+    elif ((sys.argv[1] == "debito") or (sys.argv[1] == "fatura") or (sys.argv[1] == "débito")):
       print(robo.fatura_novo(int(sys.argv[2])))
     elif (sys.argv[1] == "relatorio"):
       robo.relatorio(int(sys.argv[2]))
-    elif (sys.argv[1] == "historico"):
+    elif ((sys.argv[1] == "historico") or (sys.argv[1] == "histórico")):
       print(robo.historico(sys.argv[2]))
     elif (sys.argv[1] == "agrupamento"):
       print(robo.agrupamento(sys.argv[2]))
