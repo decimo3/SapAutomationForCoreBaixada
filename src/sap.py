@@ -461,15 +461,15 @@ class sap:
     return "\n".join(listdir("C:\\Users\\ruan.camello\\Documents\\Temporario"))
 
 if __name__ == "__main__":
+  if (len(sys.argv) < 3):
+    raise Exception("Falta argumentos para relizar alguma ação!")
+  if (len(sys.argv) > 4):
+    raise Exception("Script não foi programado para essa quantidade de argumentos!")
   try:
-    if (len(sys.argv) < 3):
-      raise Exception("Falta argumentos para relizar alguma ação!")
-    elif (len(sys.argv) == 3):
-      robo = sap()
-    elif (len(sys.argv) == 4):
-      robo = sap(int(sys.argv[3]))
-    else:
-      raise Exception("Script não foi programado para essa quantidade de argumentos!")
+    robo = sap() if (len(sys.argv) == 3) else sap(int(sys.argv[3]))
+  except:
+    raise Exception("ERRO: Não pode se conectar ao sistema SAP!")
+  try:
     if ((sys.argv[1] == "coordenada") or (sys.argv[1] == "localização")):
       print(robo.coordenadas(int(sys.argv[2])))
     elif ((sys.argv[1] == "telefone") or (sys.argv[1] == "contato")):
@@ -490,6 +490,8 @@ if __name__ == "__main__":
       print(robo.escrever(int(sys.argv[2])))
     elif (sys.argv[1] == "manobra"):
       print(robo.manobra(int(sys.argv[2])))
+    elif (sys.argv[1] == "conecao"):
+      print("Status: online")
     else:
       raise Exception("Não entendi o comando, verifique se está correto!")
   except Exception as erro:
