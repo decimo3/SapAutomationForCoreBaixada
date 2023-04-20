@@ -140,13 +140,16 @@ class sap:
       self.session.FindById("wnd[1]/usr/txtGS_SEARCH-VALUE").text = instalacao
       self.session.FindById("wnd[1]/usr/cmbGS_SEARCH-SEARCH_ORDER").key = "0"
       self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
-      if(self.session.FindById(f"/app/con[0]/ses[{self.instancia}]/wnd[0]/sbar").text == "Nenhuma ocorrência encontrada"):
-        raise Exception("A instalação não foi encontrada no relatório!")
+      # statusBar = self.session.FindById("/app/con[0]/ses[{self.instancia}]/wnd[0]/sbar").text
+      # if(statusBar == "Nenhuma ocorrência encontrada"):
+        # raise Exception("A instalação não foi encontrada no relatório!")
       self.session.FindById("wnd[1]").Close()
       celula = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").currentCellRow
+      if(celula == 0):
+        raise Exception("A instalação não foi encontrada no relatório!")
       linhas = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").RowCount
       # se a linhaAtual é menor que 14, a primeiraVisivel é 0 e offset é igual a linha atual
-      # se a linhaAtual é maior que linhasTotais - 14, então primeiraVisivel é linhasTotais - 28 e offset é igual a 
+      # se a linhaAtual é maior que linhasTotais - 14, então primeiraVisivel é linhasTotais - 28 e offset é igual a
       apontador = 0
       limite = 0
       offset = 0
