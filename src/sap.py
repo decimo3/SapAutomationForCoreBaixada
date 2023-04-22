@@ -553,7 +553,7 @@ if __name__ == "__main__":
     elif (sys.argv[1] == "manobra"):
       print(robo.manobra(int(sys.argv[2])))
     elif (sys.argv[1] == "conecao"):
-      print("Status: online")
+      print("online")
     else:
       raise Exception("Não entendi o comando, verifique se está correto!")
   except Exception as erro:
