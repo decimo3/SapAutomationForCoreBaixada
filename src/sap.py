@@ -256,9 +256,12 @@ class sap:
       raise Exception("Cliente possui muitas faturas pendentes")
     self.imprimir(debitos)
     return self.monitorar(len(debitos))
-  def instalacao(self, arg: str) -> str:
-    arg = str(arg)
-    if re.search("[0-9]{10}", arg):
+  def instalacao(self, arg) -> int:
+    try:
+      arg = int(arg)
+    except:
+      raise Exception("Informação não é um número válido!")
+    if (arg > 999999999):
       self.session.StartTransaction(Transaction="IW53")
       self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = arg
       try:
@@ -269,13 +272,13 @@ class sap:
       instalacao = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/ctxtVIQMEL-ZZINSTLN").text
       self.instalacao(instalacao)
       return instalacao
-    elif re.search("[0-9]{9}", arg):
+    elif (arg < 999999999):
       self.session.StartTransaction(Transaction="ES32")
       self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = arg
       self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
       return arg
     else:
-      return ""
+      return 0
   def historico(self, nota) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ZSVC20")
@@ -374,7 +377,11 @@ class sap:
   def telefone(self, info) -> str:
     telefone = []
     nome_solicitante = ""
-    if re.search("[0-9]{10}", str(info)):
+    try:
+      info = int(info)
+    except:
+      raise Exception("Informação não é um número válido!")
+    if (info > 999999999):
       self.session.StartTransaction(Transaction="IW53")
       self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = info
       try:
