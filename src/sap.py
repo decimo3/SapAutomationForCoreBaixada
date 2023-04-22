@@ -306,6 +306,7 @@ class sap:
     return tamanho + historico
   def agrupamento(self, nota): #TODO: Implementar análise de débitos
     instalacao = self.instalacao(nota)
+    #region
     self.session.StartTransaction(Transaction="ES32")
     self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
@@ -346,14 +347,67 @@ class sap:
       apontador = apontador + 1
       self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
     apontador = 0
-    linhas = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX").RowCount
-    return linhas
+    linhas = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX").RowCount - 10
     enderecos = []
     instalacoes = []
     nomeCliente = []
     tipoinstal = []
+    statusInstalacao = []
+    textoDescricao = []
+    destaques = []
+    tamanhos = [0,0,10,0,10,20]
+    agrupamentoString = "Cor|End.|Instalacao|Nome cliente|Tipo cliente|Observacao\n"
+    # Coleta das informações do agrupamento
     while (apontador < linhas):
-      pass
+      enderecos.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-COMPLS[0,0]").text)
+      tamanhos[1] = len(enderecos[apontador]) if (len(enderecos[apontador]) > tamanhos[1]) else tamanhos[1]
+      instalacoes.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-ANLAGE[1,0]").text)
+      nomeCliente.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-NOME[2,0]").text)
+      tamanhos[3] = len(nomeCliente[apontador]) if (len(nomeCliente[apontador]) > tamanhos[3]) else tamanhos[3]
+      tipoinstal.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-CLASSE[3,0]").text)
+      tamanhos[4] = len(tipoinstal[apontador]) if (len(tipoinstal[apontador]) > tamanhos[4]) else tamanhos[4]
+      apontador = apontador + 1
+      self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX").verticalScrollbar.position = apontador
+    apontador = 0
+    #endregion
+    # Coleta da situação das instalações
+    while (apontador < len(instalacoes)):
+      if(instalacoes[apontador] == instalacao):
+        textoDescricao.append("tem ordem de corte")
+        destaques.append(self.DESTAQUE_VERMELHO)
+        apontador = apontador + 1
+        continue
+      self.instalacao(instalacoes[apontador])
+      statusInstalacao.append(self.session.findById("wnd[0]/usr/txtEANLD-DISCSTAT").text)
+      if(self.session.findById("wnd[0]/usr/txtEANLD-VERTRAG").text == ""):
+        textoDescricao.append("sem contrato ativo")
+        destaques.append(self.DESTAQUE_VERMELHO)
+        apontador = apontador + 1
+        continue
+      if(statusInstalacao[apontador] == " Instalação complet.suspensa"):
+        textoDescricao.append("suspensa no sistema")
+        destaques.append(self.DESTAQUE_VERMELHO)
+        apontador = apontador + 1
+        continue
+      if(statusInstalacao[apontador] == "Supensão iniciada"):
+        textoDescricao.append("tem ordem de corte")
+        destaques.append(self.DESTAQUE_VERMELHO)
+        apontador = apontador + 1
+        continue
+      self.debito(instalacoes[apontador])
+      # Análise dos débitos da instalação
+      while(True):
+        break
+      textoDescricao.append("")
+      destaques.append(self.DESTAQUE_AUSENTE)
+      apontador = apontador + 1
+    apontador = 0
+    # Preparação da string final
+    tamanhosString = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}|{tamanhos[4]}|{tamanhos[5]}\n"
+    while (apontador < len(instalacoes)):
+      agrupamentoString = f"{agrupamentoString}{destaques[apontador]}|{enderecos[apontador]}|{instalacoes[apontador]}|{nomeCliente[apontador]}|{tipoinstal[apontador]}|{textoDescricao[apontador]}\n"
+      apontador = apontador + 1
+    return f"{tamanhosString}{agrupamentoString}\n"
   def coordenadas(self, nota) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ES32")
