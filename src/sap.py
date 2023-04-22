@@ -20,7 +20,7 @@ class sap:
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
       self.session = self.SapGui.FindById(f"ses[{self.instancia}]")
       self.toaster = ToastNotifier()
-  def relatorio(self, dia=7) -> None:
+  def relatorio(self, dia=7) -> str:
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
       self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "B1"
@@ -45,13 +45,14 @@ class sap:
       try:
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
+        return "O relatorio esta pronto"
       except:
         raise Exception("O relatório de notas em aberto está vazio!")
       #TODO: make interation with fileDialog
       # https://answers.sap.com/questions/7761287/pasting-filename-in-a-panel-using-script.html
       if (dia > 0):
         self.manobra(dia)
-  def manobra(self, dia=0) -> None:
+  def manobra(self, dia=0) -> str:
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
       self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "BP"
@@ -81,10 +82,10 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = "RB"
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
-      self.toaster.show_toast("Relatório está pronto!")
       try:
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
+        return "O relatorio de manobra esta pronto!"
       except:
         raise Exception("O relatório de notas em aberto está vazio!")
   def leiturista(self, nota, retry=False) -> str:
