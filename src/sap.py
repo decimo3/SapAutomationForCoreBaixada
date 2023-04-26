@@ -39,7 +39,7 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       if (dia > 0):
-        self.toaster.show_toast("Relatório está pronto!")
+        self.toaster.show_toast("Relatorio esta pronto!")
       filepath = "S:\\ADM\\RUAN CAMELLO\\" + hoje.strftime("%d.%m.%Y")
       filename = datetime.datetime.now().strftime("%H;%M") + ".XLSX"
       try:
@@ -47,7 +47,7 @@ class sap:
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
         return "O relatorio esta pronto"
       except:
-        raise Exception("O relatório de notas em aberto está vazio!")
+        raise Exception("O relatorio de notas em aberto esto vazio!")
       #TODO: make interation with fileDialog
       # https://answers.sap.com/questions/7761287/pasting-filename-in-a-panel-using-script.html
       if (dia > 0):
@@ -87,7 +87,7 @@ class sap:
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
         return "O relatorio de manobra esta pronto!"
       except:
-        raise Exception("O relatório de notas em aberto está vazio!")
+        raise Exception("O relatorio de notas em aberto esto vazio!")
   def leiturista(self, nota, retry=False) -> str:
       instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ES32")
@@ -122,7 +122,7 @@ class sap:
       elif (local == "L749"): centro = "016"
       elif (local == "L762"): centro = "016"
       elif (local == "L747"): centro = "016"
-      else: raise Exception(f"A localidade {local} pesquisada é desconhecida")
+      else: raise Exception(f"A localidade {local} pesquisada e desconhecida")
       mes = datetime.date.today()
       mes = mes.replace(day=1)
       mes = mes - datetime.timedelta(days=1)
@@ -134,7 +134,7 @@ class sap:
       try:
         self.session.FindById("wnd[0]/tbar[1]/btn[33]").Press()
       except:
-        raise Exception("Não há relatório de leitura para o período especificado!")
+        raise Exception("Nao ho relatorio de leitura para o período especificado!")
       self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").setCurrentCell(0,"DEFAULT")
       self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").clickCurrentCell()
       self.session.FindById("wnd[0]/tbar[0]/btn[71]").Press()
@@ -143,30 +143,30 @@ class sap:
       self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
       # statusBar = self.session.FindById("/app/con[0]/ses[{self.instancia}]/wnd[0]/sbar").text
       # if(statusBar == "Nenhuma ocorrência encontrada"):
-        # raise Exception("A instalação não foi encontrada no relatório!")
+        # raise Exception("A instalacao nao foi encontrada no relatorio!")
       self.session.FindById("wnd[1]").Close()
       celula = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").currentCellRow
       if(celula == 0):
-        raise Exception("A instalação não foi encontrada no relatório!")
+        raise Exception("A instalacao nao foi encontrada no relatorio!")
       linhas = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").RowCount
-      # se a linhaAtual é menor que 14, a primeiraVisivel é 0 e offset é igual a linha atual
-      # se a linhaAtual é maior que linhasTotais - 14, então primeiraVisivel é linhasTotais - 28 e offset é igual a
+      # se a linhaAtual e menor que 14, a primeiraVisivel e 0 e offset e igual a linha atual
+      # se a linhaAtual e maior que linhasTotais - 14, entao primeiraVisivel e linhasTotais - 28 e offset e igual a
       apontador = 0
       limite = 0
       offset = 0
-      # Se a instalação foi encontrada no início do relatório
+      # Se a instalacao foi encontrada no início do relatorio
       if (celula <= 14):
         self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = 0
         apontador = 0
         limite = 28
         offset = celula + 1
-      # Se a instalação foi encontrada no meio do relatório
+      # Se a instalacao foi encontrada no meio do relatorio
       if (celula > 14 and celula < (linhas - 14)):
         self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = celula - 14
         apontador = celula - 14
         limite = celula + 14
         offset = 14 + 1
-      # Se a instalação foi encontrada no final do relatório
+      # Se a instalacao foi encontrada no final do relatorio
       if(celula > 14 and celula >= (linhas - 14)):
         self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = linhas - 28
         apontador = celula - 28
@@ -260,14 +260,14 @@ class sap:
     try:
       arg = int(arg)
     except:
-      raise Exception("Informação não é um número válido!")
+      raise Exception("Informacao nao e um numero valido!")
     if (arg > 999999999):
       self.session.StartTransaction(Transaction="IW53")
       self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = arg
       try:
         self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
       except:
-        raise Exception("A nota informada é inválida!")
+        raise Exception("A nota informada e invalida!")
       self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09").Select()
       instalacao = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/ctxtVIQMEL-ZZINSTLN").text
       self.instalacao(instalacao)
@@ -304,7 +304,7 @@ class sap:
       apontador = apontador + 1
     tamanho = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}|{tamanhos[4]}\n"
     return tamanho + historico
-  def agrupamento(self, nota): #TODO: Implementar análise de débitos
+  def agrupamento(self, nota): #TODO: Implementar anolise de debitos
     instalacao = self.instalacao(nota)
     #region
     self.session.StartTransaction(Transaction="ES32")
@@ -325,11 +325,11 @@ class sap:
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
     self.session.FindById("wnd[0]/tbar[1]/btn[9]").Press()
     if (numero == "1SN" or numero == "SN"):
-      raise Exception("O agrupamento não pode ser analizado automaticamente")
+      raise Exception("O agrupamento nao pode ser analizado automaticamente")
     linhas = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").RowCount
     numero_sem_letra = re.search("[0-9]{1,5}", numero)
     if(numero_sem_letra == None):
-      raise Exception("O agrupamento não pode ser analizado automaticamente")
+      raise Exception("O agrupamento nao pode ser analizado automaticamente")
     apontador = 0
     while (apontador < linhas):
       num10 = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,10]").text
@@ -357,7 +357,7 @@ class sap:
     destaques = []
     tamanhos = [0,0,10,0,10,20]
     agrupamentoString = "Cor|End.|Instalacao|Nome cliente|Tipo cliente|Observacao\n"
-    # Coleta das informações do agrupamento
+    # Coleta das informacões do agrupamento
     while (apontador < linhas):
       enderecos.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-COMPLS[0,0]").text)
       tamanhos[1] = len(enderecos[apontador]) if (len(enderecos[apontador]) > tamanhos[1]) else tamanhos[1]
@@ -370,7 +370,7 @@ class sap:
       self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX").verticalScrollbar.position = apontador
     apontador = 0
     #endregion
-    # Coleta da situação das instalações
+    # Coleta da situacao das instalacões
     while (apontador < len(instalacoes)):
       if(instalacoes[apontador] == instalacao):
         textoDescricao.append("tem ordem de corte")
@@ -384,25 +384,25 @@ class sap:
         destaques.append(self.DESTAQUE_VERMELHO)
         apontador = apontador + 1
         continue
-      if(statusInstalacao[apontador] == " Instalação complet.suspensa"):
+      if(statusInstalacao[apontador] == " Instalacao complet.suspensa"):
         textoDescricao.append("suspensa no sistema")
         destaques.append(self.DESTAQUE_VERMELHO)
         apontador = apontador + 1
         continue
-      if(statusInstalacao[apontador] == "Supensão iniciada"):
+      if(statusInstalacao[apontador] == "Supensao iniciada"):
         textoDescricao.append("tem ordem de corte")
         destaques.append(self.DESTAQUE_VERMELHO)
         apontador = apontador + 1
         continue
       self.debito(instalacoes[apontador])
-      # Análise dos débitos da instalação
+      # Anolise dos debitos da instalacao
       while(True):
         break
       textoDescricao.append("")
       destaques.append(self.DESTAQUE_AUSENTE)
       apontador = apontador + 1
     apontador = 0
-    # Preparação da string final
+    # Preparacao da string final
     tamanhosString = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}|{tamanhos[4]}|{tamanhos[5]}\n"
     while (apontador < len(instalacoes)):
       agrupamentoString = f"{agrupamentoString}{destaques[apontador]}|{enderecos[apontador]}|{instalacoes[apontador]}|{nomeCliente[apontador]}|{tipoinstal[apontador]}|{textoDescricao[apontador]}\n"
@@ -427,21 +427,21 @@ class sap:
       coordenada = re.findall("-[0-9]{2}.[0-9]*", coordenada)
       return f"https://www.google.com/maps?z=12&t=m&q=loc:{coordenada[0]}+{coordenada[1]}"
     else:
-      raise Exception("A instalação não possui coordenada cadastrada!")
+      raise Exception("A instalacao nao possui coordenada cadastrada!")
   def telefone(self, info) -> str:
     telefone = []
     nome_solicitante = ""
     try:
       info = int(info)
     except:
-      raise Exception("Informação não é um número válido!")
+      raise Exception("Informacao nao e um numero volido!")
     if (info > 999999999):
       self.session.StartTransaction(Transaction="IW53")
       self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = info
       try:
         self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
       except:
-        raise Exception("Número da nota é inválido!")
+        raise Exception("Numero da nota e involido!")
       self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09").Select()
       nome_solicitante = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/txtVIQMEL-ZZ_NOME_SOLICIT").text
       telefone.append(self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/txtVIQMEL-ZZ_TEL_SOLICIT").text)
@@ -451,6 +451,7 @@ class sap:
     self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = info
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
     cliente = self.session.FindById("wnd[0]/usr/txtEANLD-PARTNER").text
+    cliente = str.split(cliente, "/")[0]
     self.session.StartTransaction(Transaction="BP")
     try:
       self.session.FindById("wnd[0]/usr/subSCREEN_3000_RESIZING_AREA:SAPLBUS_LOCATOR:2000/subSCREEN_1010_RIGHT_AREA:SAPLBUPA_DIALOG_JOEL:1000/subSCREEN_1000_HEADER_AREA:SAPLBUPA_DIALOG_JOEL:1510/ctxtBUS_JOEL_MAIN-CHANGE_NUMBER").text = cliente
@@ -497,7 +498,7 @@ class sap:
     try:
       self.session.FindById("wnd[0]/usr/subSUB1:SAPLZATC_INFO_CRM:0900/radXSCREEN-HEADER-RB_LEIT").Select()
     except:
-      raise Exception(f"A instalação {instalacao} não possui histórico de consumo para o contrato atual.")
+      raise Exception(f"A instalacao {instalacao} nao possui historico de consumo para o contrato atual.")
     linhas = self.session.FindById("wnd[0]/usr/cntlCONTROL/shellcont/shell").RowCount
     apontador = 0
     while(apontador < linhas):
@@ -505,9 +506,9 @@ class sap:
       if ((codigo == "3201") or (codigo == "3202") or (codigo == "3203") or (codigo == "3251")):
         medidor = int(self.session.FindById("wnd[0]/usr/cntlCONTROL/shellcont/shell").getCellValue(apontador,"GERNR"))
         leitura = self.session.FindById("wnd[0]/usr/cntlCONTROL/shellcont/shell").getCellValue(apontador,"ADATSOLL")
-        return f"Medidor {medidor} com código de retirado pelo leiturista desde {leitura}"
+        return f"Medidor {medidor} com codigo de retirado pelo leiturista desde {leitura}"
       apontador = apontador + 1
-    return "Medidor *não* consta como retirado"
+    return "Medidor *nao* consta como retirado"
   def analisar(self, apontador=0, verificar_15_dias=False) -> bool:
     if(apontador == 0): return False
     if (self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador, "STATUS") != "@5C@"): return False
@@ -524,27 +525,27 @@ class sap:
 
 if __name__ == "__main__":
   if (len(sys.argv) < 3):
-    raise Exception("Falta argumentos para relizar alguma ação!")
+    raise Exception("Falta argumentos para relizar alguma acao!")
   if (len(sys.argv) > 4):
-    raise Exception("Script não foi programado para essa quantidade de argumentos!")
+    raise Exception("Script nao foi programado para essa quantidade de argumentos!")
   try:
     robo = sap() if (len(sys.argv) == 3) else sap(int(sys.argv[3]))
   except:
-    raise Exception("ERRO: Não pode se conectar ao sistema SAP!")
+    raise Exception("ERRO: Nao pode se conectar ao sistema SAP!")
   try:
-    if ((sys.argv[1] == "coordenada") or (sys.argv[1] == "localização")):
+    if ((sys.argv[1] == "coordenada") or (sys.argv[1] == "localizacao")):
       print(robo.coordenadas(int(sys.argv[2])))
     elif ((sys.argv[1] == "telefone") or (sys.argv[1] == "contato")):
       print(robo.telefone(int(sys.argv[2])))
     elif (sys.argv[1] == "medidor"):
-      print(robo.medidor(int(sys.argv[2])))
+      print(robo.novo_medidor(int(sys.argv[2])))
     elif ((sys.argv[1] == "leiturista") or (sys.argv[1] == "roteiro")):
       print(robo.leiturista(int(sys.argv[2])))
-    elif ((sys.argv[1] == "debito") or (sys.argv[1] == "fatura") or (sys.argv[1] == "débito")):
+    elif ((sys.argv[1] == "debito") or (sys.argv[1] == "fatura") or (sys.argv[1] == "debito")):
       print(robo.fatura_novo(int(sys.argv[2])))
     elif (sys.argv[1] == "relatorio"):
       robo.relatorio(int(sys.argv[2]))
-    elif ((sys.argv[1] == "historico") or (sys.argv[1] == "histórico")):
+    elif ((sys.argv[1] == "historico") or (sys.argv[1] == "historico")):
       print(robo.historico(sys.argv[2]))
     elif (sys.argv[1] == "agrupamento"):
       print(robo.agrupamento(sys.argv[2]))
@@ -555,6 +556,6 @@ if __name__ == "__main__":
     elif (sys.argv[1] == "conecao"):
       print("online")
     else:
-      raise Exception("Não entendi o comando, verifique se está correto!")
+      raise Exception("Nao entendi o comando, verifique se esto correto!")
   except Exception as erro:
     print(f"ERRO: {erro.args[0]}")
