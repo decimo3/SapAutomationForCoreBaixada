@@ -522,6 +522,42 @@ class sap:
     while(len(listdir("C:\\Users\\ruan.camello\\Documents\\Temporario")) < qnt):
       time.sleep(3)
     return "\n".join(listdir("C:\\Users\\ruan.camello\\Documents\\Temporario"))
+  def novo_medidor(self, arg) -> str:
+    instalacao = self.instalacao(arg)
+    self.session.StartTransaction(Transaction="ES32")
+    self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
+    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    endereco = self.session.FindById("wnd[0]/usr/txtEANLD-LINE1").text
+    cliente = self.session.FindById("wnd[0]/usr/txtEANLD-PARTTEXT").text
+    cliente = str.split(cliente, "/")[0]
+    self.session.FindById("wnd[0]/usr/btnEANLD-DEVSBUT").Press()
+    try:
+      medidor = self.session.FindById("wnd[0]/usr/tblSAPLEG70TC_DEVRATE_C/ctxtREG70_D-GERAET[0,0]").text
+    except:
+      raise Exception("Instalacao nao tem medidor")
+    self.session.StartTransaction(Transaction="IQ03")
+    self.session.FindById("wnd[0]/usr/ctxtRISA0-SERNR").text = medidor
+    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    self.session.FindById(r'wnd[0]/usr/tabsTABSTRIP/tabpT\03/ssubSUB_DATA:SAPMIEQ0:0500/subISUSUB:SAPLE10R:1000/btnBUTTON_ISABL').Press()
+    apontador = 0
+    textoStatus = ""
+    linhas = self.session.FindById("wnd[0]/usr/cntlBCALVC_EVENT2_D100_C1/shellcont/shell").RowCount
+    while(apontador < linhas or apontador > 12):
+      status = self.session.findById("wnd[0]/usr/cntlBCALVC_EVENT2_D100_C1/shellcont/shell").getCellValue(apontador,"ABLHINW")
+      if(status == "3201"):
+        textoStatus = "3201 - medidor retirado"
+        break
+      if(status == "3202"):
+        textoStatus = "3202 - medidor retirado"
+        break
+      if(status == "3203"):
+        textoStatus = "3203 - retirado telemedido"
+        break
+      if(status == "5800"):
+        textoStatus = "5800 - incendiado/demolido"
+        break
+      apontador = apontador + 1
+    return f"*Medidor:* {medidor}\n*Status:* {textoStatus}\n*Instalacao:* {instalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
 
 if __name__ == "__main__":
   if (len(sys.argv) < 3):
