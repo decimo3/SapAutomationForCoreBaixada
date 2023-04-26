@@ -272,13 +272,24 @@ class sap:
       instalacao = self.session.FindById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/ctxtVIQMEL-ZZINSTLN").text
       self.instalacao(instalacao)
       return instalacao
-    elif (arg < 999999999):
+    if (arg < 999999999 and arg > 99999999):
       self.session.StartTransaction(Transaction="ES32")
       self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = arg
       self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
       return arg
-    else:
-      return 0
+    if(arg < 99999999):
+      self.session.StartTransaction(Transaction="IQ03")
+      self.session.FindById("wnd[0]/usr/ctxtRISA0-SERNR").text = arg
+      try:
+        self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+        self.session.FindById(r'wnd[0]/usr/tabsTABSTRIP/tabpT\03/ssubSUB_DATA:SAPMIEQ0:0500/subISUSUB:SAPLE10R:1000/btnBUTTON_ISABL').Press()
+        instalacao = self.session.findById("wnd[0]/usr/txtIEANL-ANLAGE").text
+        self.instalacao(instalacao)
+        return instalacao
+      except:
+        raise Exception("O numero informado nao eh nota, instalacao ou medidor")
+      pass
+    raise Exception("O numero informado nao eh nota, instalacao ou medidor")
   def historico(self, nota) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ZSVC20")
@@ -558,6 +569,8 @@ class sap:
         textoStatus = "5800 - incendiado/demolido"
         break
       apontador = apontador + 1
+    if(textoStatus == ""):
+      textoStatus = "nao esta retirado"
     return f"*Medidor:* {medidor}\n*Status:* {textoStatus}\n*Instalacao:* {instalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
 
 if __name__ == "__main__":
