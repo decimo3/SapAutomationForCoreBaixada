@@ -253,7 +253,7 @@ class sap:
       debitos.append(self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"ZIMPRES"))
       apontador = apontador + 1
     if(len(debitos)> 5):
-      raise Exception("Cliente possui muitas faturas pendentes")
+      raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
     self.imprimir(debitos)
     return self.monitorar(len(debitos))
   def instalacao(self, arg) -> int:
