@@ -528,6 +528,7 @@ class sap:
     self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
     endereco = self.session.FindById("wnd[0]/usr/txtEANLD-LINE1").text
+    endereco = str.split(endereco, ",")[1]
     cliente = self.session.FindById("wnd[0]/usr/txtEANLD-PARTTEXT").text
     cliente = str.split(cliente, "/")[0]
     self.session.FindById("wnd[0]/usr/btnEANLD-DEVSBUT").Press()
