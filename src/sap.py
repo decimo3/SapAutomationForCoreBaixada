@@ -554,7 +554,7 @@ class sap:
     apontador = 0
     textoStatus = ""
     linhas = self.session.FindById("wnd[0]/usr/cntlBCALVC_EVENT2_D100_C1/shellcont/shell").RowCount
-    while(apontador < linhas or apontador > 12):
+    while(apontador < linhas or apontador < 12):
       status = self.session.findById("wnd[0]/usr/cntlBCALVC_EVENT2_D100_C1/shellcont/shell").getCellValue(apontador,"ABLHINW")
       if(status == "3201"):
         textoStatus = "3201 - medidor retirado"
