@@ -2,7 +2,7 @@
 # coding: utf8
 
 from os import path
-from sys import argv
+import sys
 from wand.image import Image 
 from wand.drawing import Drawing 
 from wand.color import Color
@@ -19,7 +19,8 @@ cursor = MARGEM_ESQUERDA # distância a esqueda da escrita do texto
 CORES = ['rgb(255,255,255)', 'rgb(0,0,0)', 'rgb(255,0,0)', 'rgb(255,255,0)', 'rgb(0,255,0)']
 # OFFSET_LINHAS_RELATORIO = []
 
-linhas = argv[1].split(SEPARADOR_ENTRE_LINHAS)
+valores = sys.stdin.read() if (len(sys.argv) < 2) else sys.argv[1]
+linhas = valores.split(SEPARADOR_ENTRE_LINHAS)
 TAMANHO_COLUNAS_RELATORIO = linhas[0].split(SEPARADOR_ENTRE_COLUNAS)
 TAMANHO_COLUNAS_RELATORIO = [int(x) for x in TAMANHO_COLUNAS_RELATORIO]
 CARACTERES_TOTAL = sum(TAMANHO_COLUNAS_RELATORIO)
