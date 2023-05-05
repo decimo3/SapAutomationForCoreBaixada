@@ -191,17 +191,16 @@ class sap:
       tamanhosString = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}|{tamanhos[4]}|{tamanhos[5]}|{tamanhos[6]}|{tamanhos[7]}\n"
       leitString = tamanhosString + leitString
       return leitString
-  def debito(self, nota) -> None:
+  def debito(self, nota, reavisos: bool=False) -> None:
     instalacao = self.instalacao(nota)
     contrato = self.session.FindById("wnd[0]/usr/txtEANLD-VERTRAG").text
     self.session.StartTransaction(Transaction="ZARC140")
     self.session.FindById("wnd[0]/usr/ctxtP_PARTNR").text = ""
     self.session.findById("wnd[0]/usr/ctxtP_VERTRG").text = contrato
     self.session.FindById("wnd[0]/usr/ctxtP_ANLAGE").text = instalacao
-    try:
-      self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
-    except:
-      raise Exception("Cliente não possui débitos!")
+    if(reavisos):
+      self.session.FindById("wnd[0]/usr/chkC_REAV").Selected = True
+    self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
   def escrever(self, nota) -> str:
     self.debito(nota)
     linhas = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").RowCount
@@ -386,37 +385,40 @@ class sap:
       self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX").verticalScrollbar.position = apontador
     apontador = 0
     #endregion
+    #region
     # Coleta da situacao das instalacões
-    # return "OK"
     while (apontador < len(instalacoes)):
-      if(instalacoes[apontador] == instalacao):
-        textoDescricao.append("tem ordem de corte")
+      if(int(instalacoes[apontador]) == instalacao):
+        textoDescricao.append("Instalacao da nota")
         destaques.append(self.DESTAQUE_VERMELHO)
         apontador = apontador + 1
         continue
       self.instalacao(instalacoes[apontador])
       statusInstalacao.append(self.session.findById("wnd[0]/usr/txtEANLD-DISCSTAT").text)
       if(self.session.findById("wnd[0]/usr/txtEANLD-VERTRAG").text == ""):
-        textoDescricao.append("sem contrato ativo")
+        textoDescricao.append("Sem contrato ativo")
         destaques.append(self.DESTAQUE_VERMELHO)
         apontador = apontador + 1
         continue
-      if(statusInstalacao[apontador] == " Instalacao complet.suspensa"):
-        textoDescricao.append("suspensa no sistema")
+      if(statusInstalacao[apontador] == " Instalação complet.suspensa"):
+        textoDescricao.append("Suspensa no sistema")
         destaques.append(self.DESTAQUE_VERMELHO)
         apontador = apontador + 1
         continue
       if(statusInstalacao[apontador] == "Supensao iniciada"):
-        textoDescricao.append("tem ordem de corte")
+        textoDescricao.append("Tem ordem de corte")
         destaques.append(self.DESTAQUE_VERMELHO)
         apontador = apontador + 1
         continue
-      self.debito(instalacoes[apontador])
-      # Anolise dos debitos da instalacao
-      while(True):
-        break
-      textoDescricao.append("")
-      destaques.append(self.DESTAQUE_AUSENTE)
+      #endregion
+      if(self.novo_analisar(instalacoes[apontador])):
+        textoDescricao.append("Tem contas passivas")
+        destaques.append(self.DESTAQUE_VERMELHO)
+        apontador = apontador + 1
+        continue
+      # caso nao encontre nenhum impedimento
+      textoDescricao.append("Cliente nao passivel")
+      destaques.append(self.DESTAQUE_VERDEJANTE)
       apontador = apontador + 1
     apontador = 0
     # Preparacao da string final
@@ -579,6 +581,26 @@ class sap:
     if(textoStatus == ""):
       textoStatus = "nao esta retirado"
     return f"*Medidor:* {medidor}\n*Status:* {textoStatus}\n*Instalacao:* {instalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
+  def novo_analisar(self, arg) -> bool:
+    self.debito(arg, True)
+    apontador = 0
+    try:
+      self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF190").Select()
+    except:
+      return False
+    linhas = self.session.FindById(r"wnd[0]/usr/tabsTAB_STRIP_100/tabpF190/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0190/cntlCONTAINER_190/shellcont/shell").RowCount
+    if(linhas == 0): return False
+    while(apontador < linhas):
+      status = self.session.findById(r"wnd[0]/usr/tabsTAB_STRIP_100/tabpF190/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0190/cntlCONTAINER_190/shellcont/shell").getCellValue(apontador, "STATUS")
+      dtMax = self.session.findById(r"wnd[0]/usr/tabsTAB_STRIP_100/tabpF190/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0190/cntlCONTAINER_190/shellcont/shell").getCellValue(apontador, "DT_MAX_CRT")
+      dtMin = self.session.findById(r"wnd[0]/usr/tabsTAB_STRIP_100/tabpF190/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0190/cntlCONTAINER_190/shellcont/shell").getCellValue(apontador, "DT_MIN_CRT")
+      if(dtMin == ""): return False
+      dtMax = datetime.datetime.strptime(dtMax, f"%d.%m.%Y").date()
+      dtMin = datetime.datetime.strptime(dtMin, f"%d.%m.%Y").date()
+      if(status == "@45@"): return True
+      if(datetime.date.today() > dtMin and datetime.date.today() < dtMax): return True
+      apontador = apontador + 1
+    return False
 
 if __name__ == "__main__":
   if (len(sys.argv) < 3):
