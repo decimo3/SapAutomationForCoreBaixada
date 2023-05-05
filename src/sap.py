@@ -133,9 +133,9 @@ class sap:
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       try:
         self.session.FindById("wnd[0]/tbar[1]/btn[33]").Press()
+        self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").setCurrentCell(0,"DEFAULT")
       except:
-        raise Exception("Nao ho relatorio de leitura para o período especificado!")
-      self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").setCurrentCell(0,"DEFAULT")
+        raise Exception("Nao ho relatorio de leitura para o periodo especificado!")
       self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").clickCurrentCell()
       self.session.FindById("wnd[0]/tbar[0]/btn[71]").Press()
       self.session.FindById("wnd[1]/usr/txtGS_SEARCH-VALUE").text = instalacao
@@ -198,7 +198,10 @@ class sap:
     self.session.FindById("wnd[0]/usr/ctxtP_PARTNR").text = ""
     self.session.findById("wnd[0]/usr/ctxtP_VERTRG").text = contrato
     self.session.FindById("wnd[0]/usr/ctxtP_ANLAGE").text = instalacao
-    self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
+    try:
+      self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
+    except:
+      raise Exception("Cliente não possui débitos!")
   def escrever(self, nota) -> str:
     self.debito(nota)
     linhas = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").RowCount
@@ -254,6 +257,8 @@ class sap:
       apontador = apontador + 1
     if(len(debitos)> 5):
       raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
+    if(len(debitos) == 0):
+      raise Exception("Cliente nao possui faturas vencidas!")
     self.imprimir(debitos)
     return self.monitorar(len(debitos))
   def instalacao(self, arg) -> int:
@@ -264,11 +269,11 @@ class sap:
     if (arg > 999999999):
       self.session.StartTransaction(Transaction="IW53")
       self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = arg
+      self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
       try:
-        self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
+        self.session.FindById(r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09").Select()
       except:
         raise Exception("A nota informada e invalida!")
-      self.session.FindById(r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09").Select()
       instalacao = self.session.FindById(r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/ctxtVIQMEL-ZZINSTLN").text
       self.instalacao(instalacao)
       return instalacao
@@ -453,7 +458,7 @@ class sap:
       try:
         self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
       except:
-        raise Exception("Numero da nota e involido!")
+        raise Exception("Numero da nota e invalido!")
       self.session.FindById(r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09").Select()
       nome_solicitante = self.session.FindById(r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/txtVIQMEL-ZZ_NOME_SOLICIT").text
       telefone.append(self.session.FindById(r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/txtVIQMEL-ZZ_TEL_SOLICIT").text)
