@@ -392,13 +392,13 @@ class sap:
     #region
     # Coleta da situacao das instalacões
     while (apontador < len(instalacoes)):
+      self.instalacao(instalacoes[apontador])
+      statusInstalacao.append(self.session.findById("wnd[0]/usr/txtEANLD-DISCSTAT").text)
       if(int(instalacoes[apontador]) == instalacao):
         textoDescricao.append("Instalacao da nota")
         destaques.append(self.DESTAQUE_VERMELHO)
         apontador = apontador + 1
         continue
-      self.instalacao(instalacoes[apontador])
-      statusInstalacao.append(self.session.findById("wnd[0]/usr/txtEANLD-DISCSTAT").text)
       if(self.session.findById("wnd[0]/usr/txtEANLD-VERTRAG").text == ""):
         textoDescricao.append("Sem contrato ativo")
         destaques.append(self.DESTAQUE_VERMELHO)
