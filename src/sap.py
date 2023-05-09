@@ -363,6 +363,8 @@ class sap:
       self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
     apontador = 0
     linhas = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX").RowCount - 10
+    if(linhas == 1):
+      raise Exception("Instalacao unica para o numero no sistema")
     enderecos = []
     instalacoes = []
     nomeCliente = []
