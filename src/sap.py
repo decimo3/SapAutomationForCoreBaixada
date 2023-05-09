@@ -365,6 +365,8 @@ class sap:
     linhas = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX").RowCount - 10
     if(linhas == 1):
       raise Exception("Instalacao unica para o numero no sistema")
+    if(linhas > 12):
+      raise Exception(f"Agrupamento possui instalacoes demais ({linhas})")
     enderecos = []
     instalacoes = []
     nomeCliente = []
