@@ -146,7 +146,7 @@ class sap:
         # raise Exception("A instalacao nao foi encontrada no relatorio!")
       self.session.FindById("wnd[1]").Close()
       celula = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").currentCellRow
-      if(celula == 0):
+      if(celula == 0 and instalacao != int(self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(0,"ANLAGE"))):
         raise Exception("A instalacao nao foi encontrada no relatorio!")
       linhas = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").RowCount
       # se a linhaAtual e menor que 14, a primeiraVisivel e 0 e offset e igual a linha atual
