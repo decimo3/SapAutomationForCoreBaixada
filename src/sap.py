@@ -598,10 +598,12 @@ class sap:
       status = self.session.findById(r"wnd[0]/usr/tabsTAB_STRIP_100/tabpF190/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0190/cntlCONTAINER_190/shellcont/shell").getCellValue(apontador, "STATUS")
       dtMax = self.session.findById(r"wnd[0]/usr/tabsTAB_STRIP_100/tabpF190/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0190/cntlCONTAINER_190/shellcont/shell").getCellValue(apontador, "DT_MAX_CRT")
       dtMin = self.session.findById(r"wnd[0]/usr/tabsTAB_STRIP_100/tabpF190/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0190/cntlCONTAINER_190/shellcont/shell").getCellValue(apontador, "DT_MIN_CRT")
-      if(dtMin == ""): return False
+      if(status == "@45@"): return True
+      if(dtMin == "" or dtMax == ""):
+        apontador = apontador + 1
+        continue
       dtMax = datetime.datetime.strptime(dtMax, f"%d.%m.%Y").date()
       dtMin = datetime.datetime.strptime(dtMin, f"%d.%m.%Y").date()
-      if(status == "@45@"): return True
       if(datetime.date.today() > dtMin and datetime.date.today() < dtMax): return True
       apontador = apontador + 1
     return False
