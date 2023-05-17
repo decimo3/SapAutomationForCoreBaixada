@@ -16,7 +16,7 @@ nRow = 0 # contador de linha atual
 nCol = 0 # contador de coluna atual
 cursor = MARGEM_ESQUERDA # distância a esqueda da escrita do texto
 # CORES: branco, preto, vermelho, amarelo, verde
-CORES = ['rgb(255,255,255)', 'rgb(0,0,0)', 'rgb(255,0,0)', 'rgb(255,255,0)', 'rgb(0,255,0)']
+CORES = ['rgb(255,255,255)', 'rgb(0,0,0)', 'rgb(255,128,128)', 'rgb(255,255,128)', 'rgb(128,255,128)']
 # OFFSET_LINHAS_RELATORIO = []
 
 valores = sys.stdin.read() if (len(sys.argv) < 2) else sys.argv[1]
