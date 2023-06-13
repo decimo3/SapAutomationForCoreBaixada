@@ -8,10 +8,12 @@ import shutil
 from os import makedirs
 from os import listdir
 import win32com.client
-from win10toast import ToastNotifier
 
 class sap:
   def __init__(self, instancia=0) -> None:
+      self.CURRENT_FOLDER = os.getcwd() + "\\tmp\\"
+      if (not(os.path.exists(self.CURRENT_FOLDER))):
+        makedirs(self.CURRENT_FOLDER)
       self.DESTAQUE_AMARELO = 3
       self.DESTAQUE_VERMELHO = 2
       self.DESTAQUE_VERDEJANTE = 4
@@ -234,8 +236,8 @@ class sap:
     return debString
   def imprimir(self, documento):
     self.session.StartTransaction(Transaction="ZATC73")
-    shutil.rmtree("C:\\Users\\ruan.camello\\Documents\\Temporario")
-    makedirs("C:\\Users\\ruan.camello\\Documents\\Temporario")
+    shutil.rmtree(self.CURRENT_FOLDER)
+    makedirs(self.CURRENT_FOLDER)
     self.session.FindById("wnd[0]/usr/chkP_LOCL").selected = True
     self.session.FindById("wnd[0]/usr/chkP_IMPLOC").selected = True
     apontador = 0
@@ -543,9 +545,9 @@ class sap:
       if (datetime.date.today() > prazo_mais_15_dias): return False
     return True
   def monitorar(self, qnt) -> str:
-    while(len(listdir("C:\\Users\\ruan.camello\\Documents\\Temporario")) < qnt):
+    while(len(listdir(self.CURRENT_FOLDER)) < qnt):
       time.sleep(3)
-    return "\n".join(listdir("C:\\Users\\ruan.camello\\Documents\\Temporario"))
+    return "\n".join(listdir(self.CURRENT_FOLDER))
   def novo_medidor(self, arg) -> str:
     instalacao = self.instalacao(arg)
     self.session.StartTransaction(Transaction="ES32")
