@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # coding: utf8
-
-from os import path
+import os
 import sys
+from os import path
 from wand.image import Image 
 from wand.drawing import Drawing 
 from wand.color import Color
@@ -61,4 +61,5 @@ with Drawing() as draw:
       cursor = MARGEM_ESQUERDA
       nRow = nRow + 1
     draw(img)
-    img.save(filename = "C:\\Users\\ruan.camello\\Documents\\Temporario\\temporario.png")
+    savefilename = os.getcwd() + "\\tmp\\temporario.png"
+    img.save(filename = savefilename)
