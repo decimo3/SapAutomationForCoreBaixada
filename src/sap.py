@@ -21,7 +21,6 @@ class sap:
       self.instancia = instancia
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
       self.session = self.SapGui.FindById(f"ses[{self.instancia}]")
-      self.toaster = ToastNotifier()
   def relatorio(self, dia=7) -> str:
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
@@ -40,14 +39,12 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = "RB"
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
-      if (dia > 0):
-        self.toaster.show_toast("Relatorio esta pronto!")
       filepath = "S:\\ADM\\RUAN CAMELLO\\" + hoje.strftime("%d.%m.%Y")
       filename = datetime.datetime.now().strftime("%H;%M") + ".XLSX"
       try:
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
-        return "O relatorio esta pronto"
+        return "O relatorio de religa esta pronto"
       except:
         raise Exception("O relatorio de notas em aberto esto vazio!")
       #TODO: make interation with fileDialog
