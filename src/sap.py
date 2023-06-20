@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # coding: utf8
+import os
 import sys
 import time
 import datetime
@@ -35,6 +36,7 @@ class sap:
       self.session.FindById("wnd[0]/usr/btn%_SO_USUAR_%_APP_%-VALU_PUSH").Press()
       self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "ENVI"
       self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "LIBE"
+      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,2]").text = "TABL"
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
       self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = "RB"
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
@@ -241,6 +243,8 @@ class sap:
     while(apontador < len(documento)):
       self.session.FindById("wnd[0]/usr/ctxtP_OPBEL").text = documento[apontador]
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
+      if not (self.session.FindById("wnd[1]/usr/btnSPOP-OPTION1") == None):
+        self.session.FindById("wnd[1]/usr/btnSPOP-OPTION1").Press()
       apontador = apontador + 1
   def fatura_novo(self, nota) -> str:
     debitos = []
@@ -253,7 +257,7 @@ class sap:
         continue
       debitos.append(self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"ZIMPRES"))
       apontador = apontador + 1
-    if(len(debitos)> 5):
+    if(len(debitos) > 5 and self.instancia == 0):
       raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
     if(len(debitos) == 0):
       raise Exception("Cliente nao possui faturas vencidas!")
@@ -334,16 +338,16 @@ class sap:
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
     logradouro = self.session.findById("wnd[0]/usr/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:0301/txtADDR1_DATA-NAME_CO").text
     numero = self.session.findById("wnd[0]/usr/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:0301/txtADDR1_DATA-HOUSE_NUM1").text
+    if (numero == "1SN" or numero == "SN"):
+      raise Exception("O agrupamento nao pode ser analisado automaticamente")
+    numero_sem_letra = re.search("[0-9]{1,5}", numero)
+    if(numero_sem_letra == None):
+      raise Exception("O agrupamento nao pode ser analisado automaticamente")
     self.session.StartTransaction(Transaction="ZMED95")
     self.session.FindById("wnd[0]/usr/ctxtADRSTREET-STRT_CODE").text = logradouro
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
     self.session.FindById("wnd[0]/tbar[1]/btn[9]").Press()
-    if (numero == "1SN" or numero == "SN"):
-      raise Exception("O agrupamento nao pode ser analizado automaticamente")
     linhas = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").RowCount
-    numero_sem_letra = re.search("[0-9]{1,5}", numero)
-    if(numero_sem_letra == None):
-      raise Exception("O agrupamento nao pode ser analizado automaticamente")
     apontador = 0
     while (apontador < linhas):
       num10 = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,10]").text
@@ -495,7 +499,14 @@ class sap:
         return coleta
       except:
         return ""
-    self.session.FindById("wnd[0]/usr/subSCREEN_3000_RESIZING_AREA:SAPLBUS_LOCATOR:2000/subSCREEN_1010_RIGHT_AREA:SAPLBUPA_DIALOG_JOEL:1000/ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_01/ssubSCREEN_1100_TABSTRIP_AREA:SAPLBUSS:0028/ssubGENSUB:SAPLBUSS:7016/subA05P01:SAPLBUA0:0400/subADDRESS:SAPLSZA7:0600/subCOUNTRY_SCREEN:SAPLSZA7:0601/btnG_ICON_TEL").Press()
+    # eh_organizacao = False if self.session.FindById("wnd[0]/usr/subSCREEN_3000_RESIZING_AREA:SAPLBUS_LOCATOR:2000/subSCREEN_1010_RIGHT_AREA:SAPLBUPA_DIALOG_JOEL:1000/ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_01/ssubSCREEN_1100_TABSTRIP_AREA:SAPLBUSS:0028/ssubGENSUB:SAPLBUSS:7016/subA05P01:SAPLBUA0:0400/subADDRESS:SAPLSZA7:0600/subCOUNTRY_SCREEN:SAPLSZA7:0601/btnG_ICON_TEL").
+    try:
+      self.session.FindById("wnd[0]/usr/subSCREEN_3000_RESIZING_AREA:SAPLBUS_LOCATOR:2000/subSCREEN_1010_RIGHT_AREA:SAPLBUPA_DIALOG_JOEL:1000/ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_01/ssubSCREEN_1100_TABSTRIP_AREA:SAPLBUSS:0028/ssubGENSUB:SAPLBUSS:7016/subA05P01:SAPLBUA0:0400/subADDRESS:SAPLSZA7:0600/subCOUNTRY_SCREEN:SAPLSZA7:0601/btnG_ICON_TEL").Press()
+    except:
+      try:
+        self.session.findById("wnd[0]/usr/subSCREEN_3000_RESIZING_AREA:SAPLBUS_LOCATOR:2000/subSCREEN_1010_RIGHT_AREA:SAPLBUPA_DIALOG_JOEL:1000/ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_01/ssubSCREEN_1100_TABSTRIP_AREA:SAPLBUSS:0028/ssubGENSUB:SAPLBUSS:7016/subA05P01:SAPLBUA0:0400/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:0301/btnG_ICON_TEL").Press()
+      except:
+        raise Exception("Cliente solicitado e empresa o BOT nao consegue coletar os telefones")
     telefone.extend(coletor(self))
     self.session.FindById("wnd[0]/usr/subSCREEN_3000_RESIZING_AREA:SAPLBUS_LOCATOR:2000/subSCREEN_1010_RIGHT_AREA:SAPLBUPA_DIALOG_JOEL:1000/ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_01/ssubSCREEN_1100_TABSTRIP_AREA:SAPLBUSS:0028/ssubGENSUB:SAPLBUSS:7016/subA05P01:SAPLBUA0:0400/subADDRESS:SAPLSZA7:0600/subCOUNTRY_SCREEN:SAPLSZA7:0601/btnG_ICON_MOB").Press()
     telefone.extend(coletor(self))
