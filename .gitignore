@@ -9,3 +9,4 @@ dist
 .vs
 *.png
 *.spec
+*.csv
