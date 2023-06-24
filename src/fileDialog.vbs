@@ -1,0 +1,48 @@
+' argumento 0 == nome do arquivo;
+' argumento 1 == caminho para salvar;
+
+Set args = Wscript.Arguments
+
+FileName =  args.Item(0)&".xlsx"
+
+Set Wshell = CreateObject("WScript.Shell")
+
+Do 
+  bWindowFound = Wshell.AppActivate("Salvar como") 
+  wscript.sleep 1000
+  cWindowFound = Wshell.AppActivate("Importar arquivo") 
+  wscript.sleep 1000
+Loop Until bWindowFound or cWindowFound
+
+' and probably the least elegant solution around - using tab sendkeys to access the necessary input fields. 
+' the number of tabs depends on what you want to access - might be different for you. Trial and error are recommended ;)
+
+if (bWindowFound) Then
+  Wshell.appActivate "Salvar como"
+  Wshell.SendKeys "{TAB}"
+  WScript.Sleep 1000
+  Wshell.SendKeys "{TAB}"
+  WScript.Sleep 1000
+  Wshell.SendKeys "{TAB}"
+  WScript.Sleep 1000
+  Wshell.SendKeys "{TAB}"
+  WScript.Sleep 1000
+  Wshell.SendKeys "{TAB}"
+  WScript.Sleep 1000
+  Wshell.SendKeys FileName
+  WScript.Sleep 1000
+  Wshell.SendKeys "{ENTER}"
+end if
+
+if (cWindowFound) Then
+  Wshell.appActivate "Import file"
+  Wshell.SendKeys "{TAB}"
+  WScript.Sleep 100
+  Wshell.SendKeys "{TAB}"
+  WScript.Sleep 100
+  Wshell.SendKeys "{TAB}"
+  WScript.Sleep 100
+  Wshell.SendKeys FileName
+  WScript.Sleep 1000
+  Wshell.SendKeys "{ENTER}"
+end if
