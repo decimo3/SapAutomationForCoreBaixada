@@ -6,6 +6,7 @@ import time
 import datetime
 import re
 import shutil
+import subprocess
 from os import makedirs
 from os import listdir
 import win32com.client
@@ -42,8 +43,9 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       filepath = "S:\\ADM\\RUAN CAMELLO\\" + hoje.strftime("%d.%m.%Y")
-      filename = datetime.datetime.now().strftime("%H;%M") + ".XLSX"
+      filename = datetime.datetime.now().strftime("%H;%M")
       try:
+        subprocess.Popen(f"cscript fileDialog.vbs {filename} {filepath}")
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
         return "O relatorio de religa esta pronto"
