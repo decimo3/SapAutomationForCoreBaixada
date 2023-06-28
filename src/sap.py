@@ -43,7 +43,7 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       filepath = "S:\\ADM\\RUAN CAMELLO\\" + hoje.strftime("%d.%m.%Y")
-      filename = datetime.datetime.now().strftime("%H;%M")
+      filename = datetime.datetime.now().strftime("%H;%M") + ".XLSX"
       try:
         subprocess.Popen(f"cscript fileDialog.vbs {filename} {filepath}")
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
