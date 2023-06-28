@@ -245,8 +245,8 @@ class sap:
     while(apontador < len(documento)):
       self.session.FindById("wnd[0]/usr/ctxtP_OPBEL").text = documento[apontador]
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
-      if not (self.session.FindById("wnd[1]/usr/btnSPOP-OPTION1") == None):
-        self.session.FindById("wnd[1]/usr/btnSPOP-OPTION1").Press()
+      # if not (self.session.FindById("wnd[1]/usr/btnSPOP-OPTION1") == None):
+      #   self.session.FindById("wnd[1]/usr/btnSPOP-OPTION1").Press()
       apontador = apontador + 1
   def fatura_novo(self, nota) -> str:
     debitos = []
