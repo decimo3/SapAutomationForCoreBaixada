@@ -619,6 +619,37 @@ class sap:
       if(datetime.date.today() > dtMin and datetime.date.today() < dtMax): return True
       apontador = apontador + 1
     return False
+  def passivas(self, arg) -> str:
+    self.debito(arg, True)
+    apontador = 0
+    passiveis = []
+    try:
+      self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF190").Select()
+    except:
+      raise Exception("Nao ha faturas passiveis!")
+    linhas = self.session.FindById(r"wnd[0]/usr/tabsTAB_STRIP_100/tabpF190/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0190/cntlCONTAINER_190/shellcont/shell").RowCount
+    if(linhas == 0): raise Exception("Nao ha faturas passiveis!")
+    while(apontador < linhas):
+      fatura = self.session.findById(r"wnd[0]/usr/tabsTAB_STRIP_100/tabpF190/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0190/cntlCONTAINER_190/shellcont/shell").getCellValue(apontador, "ZIMPRES")
+      status = self.session.findById(r"wnd[0]/usr/tabsTAB_STRIP_100/tabpF190/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0190/cntlCONTAINER_190/shellcont/shell").getCellValue(apontador, "STATUS")
+      dtMax = self.session.findById(r"wnd[0]/usr/tabsTAB_STRIP_100/tabpF190/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0190/cntlCONTAINER_190/shellcont/shell").getCellValue(apontador, "DT_MAX_CRT")
+      dtMin = self.session.findById(r"wnd[0]/usr/tabsTAB_STRIP_100/tabpF190/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0190/cntlCONTAINER_190/shellcont/shell").getCellValue(apontador, "DT_MIN_CRT")
+      if(status == "@45@"):
+        passiveis.append(fatura)
+        apontador = apontador + 1
+        continue
+      if(dtMin == "" or dtMax == ""):
+        apontador = apontador + 1
+        continue
+      dtMax = datetime.datetime.strptime(dtMax, f"%d.%m.%Y").date()
+      dtMin = datetime.datetime.strptime(dtMin, f"%d.%m.%Y").date()
+      if(datetime.date.today() > dtMin and datetime.date.today() < dtMax):
+        passiveis.append(fatura)
+      apontador = apontador + 1
+    if(len(passiveis) > 5 and self.instancia == 0):
+      raise Exception(f"Cliente possui muitas faturas ({len(passiveis)}) passivas")
+    self.imprimir(passiveis)
+    return self.monitorar(len(passiveis))
 
 if __name__ == "__main__":
   if (len(sys.argv) < 3):
@@ -652,6 +683,8 @@ if __name__ == "__main__":
       print(robo.manobra(int(sys.argv[2])))
     elif (sys.argv[1] == "conecao"):
       print("online")
+    elif (sys.argv[1] == "passiva"):
+      print(robo.passivas(int(sys.argv[2])))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
   except Exception as erro:
