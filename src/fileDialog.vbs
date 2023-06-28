@@ -3,15 +3,15 @@
 
 Set args = Wscript.Arguments
 
-FileName =  args.Item(0)&".xlsx"
+FileName =  args.Item(0)
 
 Set Wshell = CreateObject("WScript.Shell")
 
 Do 
   bWindowFound = Wshell.AppActivate("Salvar como") 
-  wscript.sleep 1000
+  wscript.sleep 100
   cWindowFound = Wshell.AppActivate("Importar arquivo") 
-  wscript.sleep 1000
+  wscript.sleep 100
 Loop Until bWindowFound or cWindowFound
 
 ' and probably the least elegant solution around - using tab sendkeys to access the necessary input fields. 
@@ -20,22 +20,22 @@ Loop Until bWindowFound or cWindowFound
 if (bWindowFound) Then
   Wshell.appActivate "Salvar como"
   Wshell.SendKeys "{TAB}"
-  WScript.Sleep 1000
+  WScript.Sleep 100
   Wshell.SendKeys "{TAB}"
-  WScript.Sleep 1000
+  WScript.Sleep 100
   Wshell.SendKeys "{TAB}"
-  WScript.Sleep 1000
+  WScript.Sleep 100
   Wshell.SendKeys "{TAB}"
-  WScript.Sleep 1000
+  WScript.Sleep 100
   Wshell.SendKeys "{TAB}"
-  WScript.Sleep 1000
+  WScript.Sleep 100
   Wshell.SendKeys FileName
-  WScript.Sleep 1000
+  WScript.Sleep 100
   Wshell.SendKeys "{ENTER}"
 end if
 
 if (cWindowFound) Then
-  Wshell.appActivate "Import file"
+  Wshell.appActivate "Importar arquivo"
   Wshell.SendKeys "{TAB}"
   WScript.Sleep 100
   Wshell.SendKeys "{TAB}"
