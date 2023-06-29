@@ -683,7 +683,7 @@ if __name__ == "__main__":
       print(robo.manobra(int(sys.argv[2])))
     elif (sys.argv[1] == "conecao"):
       print("online")
-    elif (sys.argv[1] == "passiva"):
+    elif (sys.argv[1] == "passivo"):
       print(robo.passivas(int(sys.argv[2])))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
