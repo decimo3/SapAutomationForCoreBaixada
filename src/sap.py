@@ -41,9 +41,9 @@ class sap:
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
       self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = "RB"
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
-      self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       filepath = "S:\\ADM\\RUAN CAMELLO\\" + hoje.strftime("%d.%m.%Y")
-      filename = datetime.datetime.now().strftime("%H;%M") + ".XLSX"
+      filename = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".XLSX"
+      self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       try:
         subprocess.Popen(f"cscript fileDialog.vbs {filename} {filepath}")
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
@@ -51,10 +51,6 @@ class sap:
         return "O relatorio de religa esta pronto"
       except:
         raise Exception("O relatorio de notas em aberto esto vazio!")
-      #TODO: make interation with fileDialog
-      # https://answers.sap.com/questions/7761287/pasting-filename-in-a-panel-using-script.html
-      if (dia > 0):
-        self.manobra(dia)
   def manobra(self, dia=0) -> str:
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
@@ -84,8 +80,11 @@ class sap:
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
       self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = "RB"
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
+      filepath = "S:\\ADM\\RUAN CAMELLO\\" + hoje.strftime("%d.%m.%Y")
+      filename = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".XLSX"
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       try:
+        subprocess.Popen(f"cscript fileDialog.vbs {filename} {filepath}")
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
         return "O relatorio de manobra esta pronto!"
