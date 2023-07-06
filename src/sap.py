@@ -41,14 +41,15 @@ class sap:
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
       self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = "RB"
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
-      filepath = "S:\\ADM\\RUAN CAMELLO\\" + hoje.strftime("%d.%m.%Y")
+      filepath = os.environ['USERPROFILE'] + "\\SapWorkDir\\"
       filename = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".XLSX"
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       try:
-        subprocess.Popen(f"cscript fileDialog.vbs {filename} {filepath}")
+        proc = subprocess.Popen(f"cscript fileDialog.vbs {filename} {filepath}")
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
-        return "O relatorio de religa esta pronto"
+        proc.wait()
+        return f"{filepath}{filename}"
       except:
         raise Exception("O relatorio de notas em aberto esto vazio!")
   def manobra(self, dia=0) -> str:
@@ -80,14 +81,14 @@ class sap:
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
       self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = "RB"
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
-      filepath = "S:\\ADM\\RUAN CAMELLO\\" + hoje.strftime("%d.%m.%Y")
+      filepath = os.environ['USERPROFILE'] + "\\SapWorkDir\\"
       filename = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".XLSX"
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       try:
         subprocess.Popen(f"cscript fileDialog.vbs {filename} {filepath}")
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
         self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
-        return "O relatorio de manobra esta pronto!"
+        return f"{filepath}{filename}"
       except:
         raise Exception("O relatorio de notas em aberto esto vazio!")
   def leiturista(self, nota, retry=False) -> str:
