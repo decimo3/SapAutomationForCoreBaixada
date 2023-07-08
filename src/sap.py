@@ -579,7 +579,7 @@ class sap:
       dataRetirado = self.session.FindById("wnd[1]/usr/tblSAPLET03UTS_TC/txtPERIODS-BIS[1,0]").text
       self.session.FindById("wnd[1]").SendVKey(2)
     except:
-      raise Exception("Instalacao nao tem medidor")
+      pass
     medidor = self.session.FindById("wnd[0]/usr/tblSAPLEG70TC_DEVRATE_C/ctxtREG70_D-GERAET[0,0]").text
     self.session.StartTransaction(Transaction="IQ03")
     self.session.FindById("wnd[0]/usr/ctxtRISA0-SERNR").text = medidor
@@ -611,7 +611,7 @@ class sap:
     else: txtCodMedidor = "tipo medidor desconhecido"
     if not(dataRetirado == None):
       textoStatus = f"retirado no sistema desde {dataRetirado}"
-      return f"*Medidor:* {medidor}\nTipo: {txtCodMedidor}\n*Status:* {textoStatus}\n*Instalacao:* {instalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
+      return f"*Medidor:* {medidor}\n*Tipo:* {txtCodMedidor}\n*Status:* {textoStatus}\n*Instalacao:* {instalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
     self.session.FindById(r'wnd[0]/usr/tabsTABSTRIP/tabpT\03/ssubSUB_DATA:SAPMIEQ0:0500/subISUSUB:SAPLE10R:1000/btnBUTTON_ISABL').Press()
     apontador = 0
     linhas = self.session.FindById("wnd[0]/usr/cntlBCALVC_EVENT2_D100_C1/shellcont/shell").RowCount
@@ -632,7 +632,7 @@ class sap:
       apontador = apontador + 1
     if(textoStatus == None):
       textoStatus = "nao esta retirado"
-    return f"*Medidor:* {medidor}\nTipo: {txtCodMedidor}\n*Status:* {textoStatus}\n*Instalacao:* {instalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
+    return f"*Medidor:* {medidor}\n*Tipo:* {txtCodMedidor}\n*Status:* {textoStatus}\n*Instalacao:* {instalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
   def novo_analisar(self, arg) -> bool:
     self.debito(arg, True)
     apontador = 0
