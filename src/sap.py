@@ -574,11 +574,12 @@ class sap:
     try:
       self.session.FindById("wnd[0]/usr/btnEANLD-DEVSBUT").Press()
     except:
-      try:
-        dataRetirado = self.session.FindById("wnd[1]/usr/tblSAPLET03UTS_TC/txtPERIODS-BIS[1,0]").text
-        self.session.FindById("wnd[1]").SendVKey(2)
-      except:
-        raise Exception("Instalacao nao tem medidor")
+      raise Exception("Instalacao nao tem medidor")
+    try:
+      dataRetirado = self.session.FindById("wnd[1]/usr/tblSAPLET03UTS_TC/txtPERIODS-BIS[1,0]").text
+      self.session.FindById("wnd[1]").SendVKey(2)
+    except:
+      raise Exception("Instalacao nao tem medidor")
     medidor = self.session.FindById("wnd[0]/usr/tblSAPLEG70TC_DEVRATE_C/ctxtREG70_D-GERAET[0,0]").text
     self.session.StartTransaction(Transaction="IQ03")
     self.session.FindById("wnd[0]/usr/ctxtRISA0-SERNR").text = medidor
