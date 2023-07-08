@@ -567,17 +567,52 @@ class sap:
     endereco = str.split(endereco, ",")[1]
     cliente = self.session.FindById("wnd[0]/usr/txtEANLD-PARTTEXT").text
     cliente = str.split(cliente, "/")[0]
-    self.session.FindById("wnd[0]/usr/btnEANLD-DEVSBUT").Press()
+    dataRetirado = None
+    textoStatus = None
+    codMedidor = None
+    txtCodMedidor = None
     try:
-      medidor = self.session.FindById("wnd[0]/usr/tblSAPLEG70TC_DEVRATE_C/ctxtREG70_D-GERAET[0,0]").text
+      self.session.FindById("wnd[0]/usr/btnEANLD-DEVSBUT").Press()
     except:
-      raise Exception("Instalacao nao tem medidor")
+      try:
+        dataRetirado = self.session.FindById("wnd[1]/usr/tblSAPLET03UTS_TC/txtPERIODS-BIS[1,0]").text
+        self.session.FindById("wnd[1]").SendVKey(2)
+      except:
+        raise Exception("Instalacao nao tem medidor")
+    medidor = self.session.FindById("wnd[0]/usr/tblSAPLEG70TC_DEVRATE_C/ctxtREG70_D-GERAET[0,0]").text
     self.session.StartTransaction(Transaction="IQ03")
     self.session.FindById("wnd[0]/usr/ctxtRISA0-SERNR").text = medidor
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    codMedidor = self.session.findById("wnd[0]/usr/subSUB_EQKO:SAPLITO0:0152/subSUB_0152A:SAPLITO0:1521/ctxtITOB-MATNR").text
+    if (codMedidor == "392030"): txtCodMedidor = "CONVENCIONAL MONO"
+    elif (codMedidor == "392016"): txtCodMedidor = "CONVENCIONAL MONO"
+    elif (codMedidor == "392107"): txtCodMedidor = "CONVENCIONAL BIFASICO"
+    elif (codMedidor == "392031"): txtCodMedidor = "CONVENCIAL TRIFASICO"
+    elif (codMedidor == "392106"): txtCodMedidor = "CONVENCIAL RURAL"
+    elif (codMedidor == "392158"): txtCodMedidor = "CONVENCIONAL MONO"
+    elif (codMedidor == "392200"): txtCodMedidor = "TARIFA BRANCA MONO"
+    elif (codMedidor == "392201"): txtCodMedidor = "TARIFA BRANCA BIFASICO"
+    elif (codMedidor == "392202"): txtCodMedidor = "TARIFA BRANCA TRIFASICA"
+    elif (codMedidor == "392143"): txtCodMedidor = "MICRO GERACAO MONO"
+    elif (codMedidor == "392144"): txtCodMedidor = "MICRO GERACAO RURAL"
+    elif (codMedidor == "392145"): txtCodMedidor = "MICRO GERACAO TRI"
+    elif (codMedidor == "392146"): txtCodMedidor = "MICRO GERACAO 30A"
+    elif (codMedidor == "392147"): txtCodMedidor = "MICRO GERACAO INDIRETO"
+    elif (codMedidor == "391105"): txtCodMedidor = "MODULO MONO"
+    elif (codMedidor == "392150"): txtCodMedidor = "MODULO BI"
+    elif (codMedidor == "392151"): txtCodMedidor = "MODULO TRI"
+    elif (codMedidor == "391108"): txtCodMedidor = "200 AMP"
+    elif (codMedidor == "392032"): txtCodMedidor = "BT INDIRETO"
+    elif (codMedidor == "392181"): txtCodMedidor = "E-450"
+    elif (codMedidor == "601178"): txtCodMedidor = "TELEMEDIDO-SHUNT"
+    elif (codMedidor == "313043"): txtCodMedidor = "TRANSF 400-5A"
+    elif (codMedidor == "313044"): txtCodMedidor = "TRANSF 1000-5A"
+    else: txtCodMedidor = "tipo medidor desconhecido"
+    if not(dataRetirado == None):
+      textoStatus = f"retirado no sistema desde {dataRetirado}"
+      return f"*Medidor:* {medidor}\nTipo: {txtCodMedidor}\n*Status:* {textoStatus}\n*Instalacao:* {instalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
     self.session.FindById(r'wnd[0]/usr/tabsTABSTRIP/tabpT\03/ssubSUB_DATA:SAPMIEQ0:0500/subISUSUB:SAPLE10R:1000/btnBUTTON_ISABL').Press()
     apontador = 0
-    textoStatus = ""
     linhas = self.session.FindById("wnd[0]/usr/cntlBCALVC_EVENT2_D100_C1/shellcont/shell").RowCount
     while(apontador < linhas and apontador < 12):
       status = self.session.findById("wnd[0]/usr/cntlBCALVC_EVENT2_D100_C1/shellcont/shell").getCellValue(apontador,"ABLHINW")
@@ -594,9 +629,9 @@ class sap:
         textoStatus = "5800 - incendiado/demolido"
         break
       apontador = apontador + 1
-    if(textoStatus == ""):
+    if(textoStatus == None):
       textoStatus = "nao esta retirado"
-    return f"*Medidor:* {medidor}\n*Status:* {textoStatus}\n*Instalacao:* {instalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
+    return f"*Medidor:* {medidor}\nTipo: {txtCodMedidor}\n*Status:* {textoStatus}\n*Instalacao:* {instalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
   def novo_analisar(self, arg) -> bool:
     self.debito(arg, True)
     apontador = 0
