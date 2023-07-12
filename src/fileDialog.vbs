@@ -1,17 +1,10 @@
-' argumento 0 == nome do arquivo;
-' argumento 1 == caminho para salvar;
-
-Set args = Wscript.Arguments
-
-FileName =  args.Item(0)
-
 Set Wshell = CreateObject("WScript.Shell")
 
 Do 
   bWindowFound = Wshell.AppActivate("Salvar como") 
-  wscript.sleep 100
+  wscript.sleep 10
   cWindowFound = Wshell.AppActivate("Importar arquivo") 
-  wscript.sleep 100
+  wscript.sleep 10
 Loop Until bWindowFound or cWindowFound
 
 ' and probably the least elegant solution around - using tab sendkeys to access the necessary input fields. 
@@ -20,29 +13,33 @@ Loop Until bWindowFound or cWindowFound
 if (bWindowFound) Then
   Wshell.appActivate "Salvar como"
   Wshell.SendKeys "{TAB}"
-  WScript.Sleep 100
+  WScript.Sleep 10
   Wshell.SendKeys "{TAB}"
-  WScript.Sleep 100
+  WScript.Sleep 10
   Wshell.SendKeys "{TAB}"
-  WScript.Sleep 100
+  WScript.Sleep 10
   Wshell.SendKeys "{TAB}"
-  WScript.Sleep 100
+  WScript.Sleep 10
   Wshell.SendKeys "{TAB}"
-  WScript.Sleep 100
-  Wshell.SendKeys FileName
-  WScript.Sleep 100
+  WScript.Sleep 10
   Wshell.SendKeys "{ENTER}"
+  WScript.Sleep 10
+  bWindowFound = Wshell.AppActivate("Salvar como")
+  if (bWindowFound) Then
+    WScript.Sleep 10
+    Wshell.SendKeys "+{TAB}"
+    WScript.Sleep 10
+    Wshell.SendKeys " "
+  end if
 end if
 
 if (cWindowFound) Then
   Wshell.appActivate "Importar arquivo"
   Wshell.SendKeys "{TAB}"
-  WScript.Sleep 100
+  WScript.Sleep 10
   Wshell.SendKeys "{TAB}"
-  WScript.Sleep 100
+  WScript.Sleep 10
   Wshell.SendKeys "{TAB}"
-  WScript.Sleep 100
-  Wshell.SendKeys FileName
-  WScript.Sleep 1000
+  WScript.Sleep 10
   Wshell.SendKeys "{ENTER}"
 end if
