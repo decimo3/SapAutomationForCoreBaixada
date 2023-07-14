@@ -43,10 +43,14 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       try:
-        subprocess.Popen(f"cscript fileDialog.vbs")
-        self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
-        self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
-        return "FEITO: relatorio salvo no local padrao!"
+        exist = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell", False)
+        if(exist):
+          subprocess.Popen(f"cscript fileDialog.vbs")
+          self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
+          self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
+          return "FEITO: relatorio salvo no local padrao!"
+        else:
+          raise Exception("O relatorio de notas em aberto esto vazio!")
       except:
         raise Exception("O relatorio de notas em aberto esto vazio!")
   def manobra(self, dia=0) -> str:
@@ -80,10 +84,14 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       try:
-        subprocess.Popen(f"cscript fileDialog.vbs")
-        self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
-        self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
-        return "FEITO: relatorio salvo no local padrao!"
+        exist = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell", False)
+        if(exist):
+          subprocess.Popen(f"cscript fileDialog.vbs")
+          self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
+          self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
+          return "FEITO: relatorio salvo no local padrao!"
+        else:
+          raise Exception("O relatorio de notas em aberto esto vazio!")
       except:
         raise Exception("O relatorio de notas em aberto esto vazio!")
   def leiturista(self, nota, retry=False) -> str:
