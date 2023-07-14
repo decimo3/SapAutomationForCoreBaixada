@@ -103,7 +103,8 @@ class sap:
       self.session.StartTransaction(Transaction="ZMED89")
       livro = f"{unidade[0]}{unidade[1]}"
       local = f"{unidade[2]}{unidade[3]}{unidade[4]}{unidade[5]}"
-      if (local == "L645"): centro = "017"
+      if (retry): centro = "001"
+      elif (local == "L645"): centro = "017"
       elif (local == "L644"): centro = "017"
       elif (local == "L643"): centro = "017"
       elif (local == "L624"): centro = "017"
@@ -128,11 +129,13 @@ class sap:
       elif (local == "L749"): centro = "016"
       elif (local == "L762"): centro = "016"
       elif (local == "L747"): centro = "016"
+      elif (local == "L646"): centro = "017"
       else: raise Exception(f"A localidade {local} pesquisada e desconhecida")
       mes = datetime.date.today()
       mes = mes.replace(day=1)
       mes = mes - datetime.timedelta(days=1)
       self.session.FindById("wnd[0]/usr/txtP_ABL_Z-LOW").text = centro
+      if(retry): self.session.FindById("wnd[0]/usr/txtP_ABL_Z-HIGH").text = "100"
       self.session.FindById("wnd[0]/usr/ctxtP_LOTE-LOW").text = livro
       self.session.FindById("wnd[0]/usr/ctxtP_MESANO").text = mes.strftime("%m/%Y")
       self.session.FindById("wnd[0]/usr/ctxtP_UNID-LOW").text = unidade
@@ -140,9 +143,12 @@ class sap:
       try:
         self.session.FindById("wnd[0]/tbar[1]/btn[33]").Press()
         self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").setCurrentCell(0,"DEFAULT")
+        self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").clickCurrentCell()
       except:
         raise Exception("Nao ho relatorio de leitura para o periodo especificado!")
-      self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").clickCurrentCell()
+      if(retry):
+        self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectColumn("ZZ_NUMSEQ")
+        self.session.FindById("wnd[0]/tbar[1]/btn[28]").Press()
       self.session.FindById("wnd[0]/tbar[0]/btn[71]").Press()
       self.session.FindById("wnd[1]/usr/txtGS_SEARCH-VALUE").text = instalacao
       self.session.FindById("wnd[1]/usr/cmbGS_SEARCH-SEARCH_ORDER").key = "0"
@@ -707,7 +713,10 @@ if __name__ == "__main__":
     elif (sys.argv[1] == "medidor"):
       print(robo.novo_medidor(int(sys.argv[2])))
     elif ((sys.argv[1] == "leiturista") or (sys.argv[1] == "roteiro")):
-      print(robo.leiturista(int(sys.argv[2])))
+      try:
+        print(robo.leiturista(int(sys.argv[2])))
+      except:
+        print(robo.leiturista(int(sys.argv[2]), True))
     elif ((sys.argv[1] == "debito") or (sys.argv[1] == "fatura") or (sys.argv[1] == "debito")):
       print(robo.fatura_novo(int(sys.argv[2])))
     elif (sys.argv[1] == "relatorio"):
