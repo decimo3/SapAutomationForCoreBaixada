@@ -4,12 +4,13 @@ venv\Scripts\Activate
 pyinstaller --onefile .\\src\\sap.py
 pyinstaller --onefile .\\src\\img.py
 cd ..
-copy .\Automacao\src\fileDialog.vbs .\telbot
-copy .\Automacao\dist\* .\telbot
-cd .\telbot
-dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained true
+mkdir tmp
+copy .\SapAutomationForCoreBaixada\src\fileDialog.vbs tmp
+copy .\SapAutomationForCoreBaixada\dist\* tmp
+cd .\TelegramBotForFieldTeamHelper
+dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained true --output ..\tmp\
 cd ..
-copy .\telbot\bin\Debug\net6.0\win-x64\publish\* %USERPROFILE%\MestreRuan\
-cd .\Automacao
+copy .\tmp\* %USERPROFILE%\MestreRuan\
+cd .\SapAutomationForCoreBaixada
 venv\Scripts\deactivate.bat
 pause
