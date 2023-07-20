@@ -7,7 +7,7 @@ from wand.image import Image
 from wand.drawing import Drawing 
 from wand.color import Color
 
-SEPARADOR_ENTRE_COLUNAS = "|"
+SEPARADOR_ENTRE_COLUNAS = ","
 SEPARADOR_ENTRE_LINHAS = "\n"
 MARGEM_ESQUERDA = 13
 LARGURA_CARACTERE = 14

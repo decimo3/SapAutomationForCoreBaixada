@@ -185,7 +185,7 @@ class sap:
         limite = linhas
         offset = (28 - (linhas - celula)) + 1
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectedRows = celula
-      leitString = "Cor|Seq|Instalacao|Endereco|Bairro|Medidor|Hora|Cod\n"
+      leitString = "Cor,Seq,Instalacao,Endereco,Bairro,Medidor,Hora,Cod\n"
       tamanhos = [0,4,10,0,0,8,8,4]
       while (apontador < limite and apontador < linhas):
         destaque = self.DESTAQUE_AMARELO if(apontador == celula) else self.DESTAQUE_AUSENTE
@@ -198,9 +198,9 @@ class sap:
         medidor = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"GERAET")
         horaleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZHORALEIT")
         codleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ABLHINW")
-        leitString = f"{leitString}{destaque}|{sequencia}|{instalRoteiro}|{endereco}|{subbairro}|{medidor}|{horaleit}|{codleit}\n"
+        leitString = f"{leitString}{destaque},{sequencia},{instalRoteiro},{endereco},{subbairro},{medidor},{horaleit},{codleit}\n"
         apontador = apontador + 1
-      tamanhosString = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}|{tamanhos[4]}|{tamanhos[5]}|{tamanhos[6]}|{tamanhos[7]}\n"
+      tamanhosString = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]},{tamanhos[5]},{tamanhos[6]},{tamanhos[7]}\n"
       leitString = tamanhosString + leitString
       return leitString
   def debito(self, nota, reavisos: bool=False) -> None:
@@ -216,7 +216,7 @@ class sap:
   def escrever(self, nota) -> str:
     self.debito(nota)
     linhas = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").RowCount
-    debString = 'Cor|Mes ref.|Vencimento|Valor|Tipo|Status\n'
+    debString = 'Cor,Mes ref.,Vencimento,Valor,Tipo,Status\n'
     apontador = 1
     tamanhos = [0,7,10,12,0,0]
     while (apontador < linhas):
@@ -239,9 +239,9 @@ class sap:
         destaque = self.DESTAQUE_AUSENTE
         textStatus = "Consultar"
       tamanhos[5] = len(textStatus) if (len(textStatus) > tamanhos[5]) else tamanhos[5]
-      debString = f"{debString}{destaque}|{referencia}|{vencimento}|R$:{valorPendente}|{tipoDebito}|{textStatus}\n"
+      debString = f"{debString}{destaque},{referencia},{vencimento},R$:{valorPendente},{tipoDebito},{textStatus}\n"
       apontador = apontador + 1
-    tamanhosString = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}|{tamanhos[4]}|{tamanhos[5]}\n"
+    tamanhosString = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]},{tamanhos[5]}\n"
     debString = tamanhosString + debString
     return debString
   def imprimir(self, documento):
@@ -320,7 +320,7 @@ class sap:
     linhas = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").RowCount
     apontador = 0
     tamanhos = [0,10,0,0,10]
-    historico = "Cor|Nota|Texto breve para dano|Texto breve para code|Data\n"
+    historico = "Cor,Nota,Texto breve para dano,Texto breve para code,Data\n"
     while(apontador < linhas and apontador < 10):
       destaque = 0
       notaServico = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"QMNUM")
@@ -329,9 +329,9 @@ class sap:
       textoCode = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"MATXT")
       tamanhos[3] = len(textoCode) if (len(textoCode) > tamanhos[3]) else tamanhos[3]
       FimAvaria = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"AUSBS")
-      historico = f"{historico}{destaque}|{notaServico}|{textoDano}|{textoCode}|{FimAvaria}\n"
+      historico = f"{historico}{destaque},{notaServico},{textoDano},{textoCode},{FimAvaria}\n"
       apontador = apontador + 1
-    tamanho = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}|{tamanhos[4]}\n"
+    tamanho = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]}\n"
     return tamanho + historico
   def agrupamento(self, nota): #TODO: Implementar anolise de debitos
     instalacao = self.instalacao(nota)
@@ -389,7 +389,7 @@ class sap:
     textoDescricao = []
     destaques = []
     tamanhos = [0,0,10,0,10,20]
-    agrupamentoString = "Cor|End.|Instalacao|Nome cliente|Tipo cliente|Observacao\n"
+    agrupamentoString = "Cor,End.,Instalacao,Nome cliente,Tipo cliente,Observacao\n"
     # Coleta das informacões do agrupamento
     while (apontador < linhas):
       enderecos.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-COMPLS[0,0]").text)
@@ -440,9 +440,9 @@ class sap:
       apontador = apontador + 1
     apontador = 0
     # Preparacao da string final
-    tamanhosString = f"{tamanhos[0]}|{tamanhos[1]}|{tamanhos[2]}|{tamanhos[3]}|{tamanhos[4]}|{tamanhos[5]}\n"
+    tamanhosString = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]},{tamanhos[5]}\n"
     while (apontador < len(instalacoes)):
-      agrupamentoString = f"{agrupamentoString}{destaques[apontador]}|{enderecos[apontador]}|{instalacoes[apontador]}|{nomeCliente[apontador]}|{tipoinstal[apontador]}|{textoDescricao[apontador]}\n"
+      agrupamentoString = f"{agrupamentoString}{destaques[apontador]},{enderecos[apontador]},{instalacoes[apontador]},{nomeCliente[apontador]},{tipoinstal[apontador]},{textoDescricao[apontador]}\n"
       apontador = apontador + 1
     return f"{tamanhosString}{agrupamentoString}\n"
   def coordenadas(self, nota) -> str:
