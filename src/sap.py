@@ -359,12 +359,23 @@ class sap:
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
     self.session.FindById("wnd[0]/tbar[1]/btn[9]").Press()
     linhas = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").RowCount
+    # Determinar tamanho máximo do grid
+    apontador = 0
+    tamanho_maximo = 0
+    while(True):
+      try:
+        self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,{apontador}]")
+        apontador = apontador + 1
+        continue
+      except:
+        tamanho_maximo = apontador - 1
+        break
     apontador = 0
     while (apontador < linhas):
-      num10 = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,10]").text
+      num10 = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,{tamanho_maximo}]").text
       num10_sem_letra = re.search("[0-9]{1,5}", num10)
       if ((num10_sem_letra != None) and (int(num10_sem_letra.group()) < int(numero_sem_letra.group()))):
-        apontador = apontador + 10
+        apontador = apontador + tamanho_maximo
         self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
         continue
       num = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,0]").text
@@ -375,12 +386,6 @@ class sap:
         break
       apontador = apontador + 1
       self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
-    apontador = 0
-    linhas = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX").RowCount - 10
-    if(linhas == 1):
-      raise Exception("Instalacao unica para o numero no sistema")
-    if(linhas > 12 and self.instancia == 0):
-      raise Exception(f"Agrupamento possui instalacoes demais ({linhas})")
     enderecos = []
     instalacoes = []
     nomeCliente = []
@@ -391,7 +396,11 @@ class sap:
     tamanhos = [0,0,10,0,10,20]
     agrupamentoString = "Cor,End.,Instalacao,Nome cliente,Tipo cliente,Observacao\n"
     # Coleta das informacões do agrupamento
-    while (apontador < linhas):
+    apontador = 0
+    ultima_instalacao = 0
+    while (True):
+      if(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-ANLAGE[1,0]").text == ultima_instalacao):
+        break
       enderecos.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-COMPLS[0,0]").text)
       tamanhos[1] = len(enderecos[apontador]) if (len(enderecos[apontador]) > tamanhos[1]) else tamanhos[1]
       instalacoes.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-ANLAGE[1,0]").text)
@@ -399,8 +408,13 @@ class sap:
       tamanhos[3] = len(nomeCliente[apontador]) if (len(nomeCliente[apontador]) > tamanhos[3]) else tamanhos[3]
       tipoinstal.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-CLASSE[3,0]").text)
       tamanhos[4] = len(tipoinstal[apontador]) if (len(tipoinstal[apontador]) > tamanhos[4]) else tamanhos[4]
+      ultima_instalacao = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-ANLAGE[1,0]").text
       apontador = apontador + 1
       self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX").verticalScrollbar.position = apontador
+    if(apontador == 1):
+      raise Exception("Instalacao unica para o numero no sistema")
+    if(apontador > 12 and self.instancia == 0):
+      raise Exception(f"Agrupamento possui instalacoes demais ({apontador})")
     apontador = 0
     #endregion
     #region
