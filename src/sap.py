@@ -561,6 +561,7 @@ class sap:
     self.session.StartTransaction(Transaction="ES32")
     self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    statusInstalacao = self.session.findById('wnd[0]/usr/txtEANLD-DISCSTAT').text
     endereco = self.session.FindById("wnd[0]/usr/txtEANLD-LINE1").text
     endereco = str.split(endereco, ",")[1]
     cliente = self.session.FindById("wnd[0]/usr/txtEANLD-PARTTEXT").text
@@ -630,7 +631,7 @@ class sap:
       apontador = apontador + 1
     if(textoStatus == None):
       textoStatus = "nao esta retirado"
-    return f"*Medidor:* {medidor}\n*Tipo:* {txtCodMedidor}\n*Status:* {textoStatus}\n*Instalacao:* {instalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
+    return f"*Medidor:* {medidor}\n*Tipo:* {txtCodMedidor}\n*Status medidor:* {textoStatus}\n*Instalacao:* {instalacao}\n*Status Instalação: {statusInstalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
   def novo_analisar(self, arg) -> bool:
     self.debito(arg, True)
     apontador = 0
