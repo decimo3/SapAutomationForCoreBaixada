@@ -685,14 +685,6 @@ class sap:
       raise Exception(f"Cliente possui muitas faturas ({len(passiveis)}) passivas")
     self.imprimir(passiveis)
     return self.monitorar(len(passiveis))
-  def suspenso(self, arg) -> str:
-    instalacao = self.instalacao(arg)
-    status = self.session.findById('wnd[0]/usr/txtEANLD-DISCSTAT').text
-    endereco = self.session.FindById("wnd[0]/usr/txtEANLD-LINE1").text
-    endereco = str.split(endereco, ",")[1]
-    cliente = self.session.FindById("wnd[0]/usr/txtEANLD-PARTTEXT").text
-    cliente = str.split(cliente, "/")[0]
-    return f"*Instalacao:* {instalacao}\n*Status:* {status}\n*Endereco:* {endereco}\n*Nome cliente:* {cliente}"
   def sanitizar(self, arg) -> str:
     arg = str.replace(arg,',','.')
     return arg
@@ -734,8 +726,6 @@ if __name__ == "__main__":
       print("online")
     elif (sys.argv[1] == "passivo"):
       print(robo.passivas(int(sys.argv[2])))
-    elif (sys.argv[1] == "suspenso"):
-      print(robo.suspenso(int(sys.argv[2])))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
   except Exception as erro:
