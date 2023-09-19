@@ -98,39 +98,14 @@ class sap:
       instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ES32")
       self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
-      self.session.findById("wnd[0]/tbar[0]/btn[0]").Press()
+      self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
       unidade = self.session.FindById("wnd[0]/usr/tblSAPLES30TC_TIMESL/ctxtEANLD-ABLEINH[9,0]").text
+      self.session.FindById("wnd[0]/usr/tblSAPLES30TC_TIMESL/ctxtEANLD-ABLEINH[9,0]").setFocus()
+      self.session.FindById("wnd[0]").SendVKey(2)
+      centro = self.session.findById("wnd[0]/usr/ctxtTE422-ABL_Z").text
       self.session.StartTransaction(Transaction="ZMED89")
       livro = f"{unidade[0]}{unidade[1]}"
-      local = f"{unidade[2]}{unidade[3]}{unidade[4]}{unidade[5]}"
       if (retry): centro = "001"
-      elif (local == "L645"): centro = "017"
-      elif (local == "L644"): centro = "017"
-      elif (local == "L643"): centro = "017"
-      elif (local == "L624"): centro = "017"
-      elif (local == "L622"): centro = "017"
-      elif (local == "L613"): centro = "017"
-      elif (local == "L616"): centro = "015"
-      elif (local == "L615"): centro = "015"
-      elif (local == "L614"): centro = "015"
-      elif (local == "L612"): centro = "015"
-      elif (local == "L610"): centro = "014"
-      elif (local == "L623"): centro = "014"
-      elif (local == "L611"): centro = "014"
-      elif (local == "L620"): centro = "015"
-      elif (local == "L617"): centro = "015"
-      elif (local == "L625"): centro = "013"
-      elif (local == "L635"): centro = "013"
-      elif (local == "L636"): centro = "013"
-      elif (local == "L637"): centro = "013"
-      elif (local == "L630"): centro = "012"
-      elif (local == "L632"): centro = "012"
-      elif (local == "L731"): centro = "016"
-      elif (local == "L749"): centro = "016"
-      elif (local == "L762"): centro = "016"
-      elif (local == "L747"): centro = "016"
-      elif (local == "L646"): centro = "017"
-      else: raise Exception(f"A localidade {local} pesquisada e desconhecida")
       mes = datetime.date.today()
       mes = mes.replace(day=1)
       mes = mes - datetime.timedelta(days=1)
