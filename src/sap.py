@@ -308,9 +308,8 @@ class sap:
       apontador = apontador + 1
     tamanho = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]}\n"
     return tamanho + historico
-  def agrupamento(self, nota): #TODO: Implementar anolise de debitos
+  def agrupamento(self, nota):
     instalacao = self.instalacao(nota)
-    #region
     self.session.StartTransaction(Transaction="ES32")
     self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
@@ -391,8 +390,6 @@ class sap:
     if(apontador > 12 and self.instancia == 0):
       raise Exception(f"Agrupamento possui instalacoes demais ({apontador})")
     apontador = 0
-    #endregion
-    #region
     # Coleta da situacao das instalacões
     while (apontador < len(instalacoes)):
       self.instalacao(instalacoes[apontador])
@@ -417,7 +414,6 @@ class sap:
         destaques.append(self.DESTAQUE_VERMELHO)
         apontador = apontador + 1
         continue
-      #endregion
       if(self.novo_analisar(instalacoes[apontador])):
         textoDescricao.append("Tem contas passivas")
         destaques.append(self.DESTAQUE_VERMELHO)
