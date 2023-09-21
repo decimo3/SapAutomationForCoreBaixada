@@ -631,7 +631,7 @@ class sap:
       apontador = apontador + 1
     if(textoStatus == None):
       textoStatus = "nao esta retirado"
-    return f"*Medidor:* {medidor}\n*Tipo:* {txtCodMedidor}\n*Status medidor:* {textoStatus}\n*Instalacao:* {instalacao}\n*Status Instalação: {statusInstalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
+    return f"*Medidor:* {medidor}\n*Tipo:* {txtCodMedidor}\n*Status medidor:* {textoStatus}\n*Instalacao:* {instalacao}\n*Status Instalacao:* {statusInstalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
   def novo_analisar(self, arg) -> bool:
     self.debito(arg, True)
     apontador = 0
