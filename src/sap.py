@@ -450,7 +450,7 @@ class sap:
       return f"https://www.google.com/maps?z=12&t=m&q=loc:{coordenada[0]}+{coordenada[1]}"
     else:
       raise Exception("A instalacao nao possui coordenada cadastrada!")
-  def telefone(self, info, have_authorization: bool=False) -> str:
+  def telefone(self, info, have_authorization: bool) -> str:
     SAPLBUS_LOCATOR = "2000" if(have_authorization) else "2036"
     phone_field_partial_string = f"wnd[0]/usr/subSCREEN_3000_RESIZING_AREA:SAPLBUS_LOCATOR:{SAPLBUS_LOCATOR}/subSCREEN_1010_RIGHT_AREA:SAPLBUPA_DIALOG_JOEL:1000/"
     telefone = []
@@ -694,11 +694,15 @@ if __name__ == "__main__":
     robo = sap() if (len(sys.argv) == 3) else sap(int(sys.argv[3]))
   except:
     raise Exception("ERRO: Nao pode se conectar ao sistema SAP!")
+  if(os.getenv("SAP_PERMISSIONS") == None):
+    have_authorization = True
+  else:
+    have_authorization = bool(int(os.getenv("SAP_PERMISSIONS", "0")))
   try:
     if ((sys.argv[1] == "coordenada") or (sys.argv[1] == "localizacao")):
       print(robo.coordenadas(int(sys.argv[2])))
     elif ((sys.argv[1] == "telefone") or (sys.argv[1] == "contato")):
-      print(robo.telefone(int(sys.argv[2])))
+      print(robo.telefone(int(sys.argv[2]), have_authorization))
     elif (sys.argv[1] == "medidor"):
       print(robo.novo_medidor(int(sys.argv[2])))
     elif ((sys.argv[1] == "leiturista") or (sys.argv[1] == "roteiro")):
@@ -707,21 +711,26 @@ if __name__ == "__main__":
       except:
         print(robo.leiturista(int(sys.argv[2]), True))
     elif ((sys.argv[1] == "debito") or (sys.argv[1] == "fatura") or (sys.argv[1] == "debito")):
-      print(robo.fatura_novo(int(sys.argv[2])))
+      if(have_authorization):
+        print(robo.fatura(int(sys.argv[2])))
+      else:
+        print(robo.fatura_novo(int(sys.argv[2])))
     elif (sys.argv[1] == "relatorio"):
       robo.relatorio(int(sys.argv[2]))
     elif ((sys.argv[1] == "historico") or (sys.argv[1] == "historico")):
       print(robo.historico(sys.argv[2]))
     elif (sys.argv[1] == "agrupamento"):
-      print(robo.agrupamento(sys.argv[2]))
-    elif (sys.argv[1] == "pendente"): #or (sys.argv[1] == "consulta")):
-      print(robo.escrever(int(sys.argv[2])))
+      if(have_authorization):
+        print(robo.agrupamento(sys.argv[2]))
+      else:
+        raise Exception("Aplicacao não pode ser ultilizada!")
+    elif (sys.argv[1] == "pendente"):
+      if(have_authorization):
+        print(robo.escrever(int(sys.argv[2])))
+      else:
+        print(robo.escrever_novo(int(sys.argv[2])))
     elif (sys.argv[1] == "manobra"):
       print(robo.manobra(int(sys.argv[2])))
-    elif (sys.argv[1] == "conecao"):
-      print("online")
-    elif (sys.argv[1] == "passivo"):
-      print(robo.passivas(int(sys.argv[2])))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
   except Exception as erro:
