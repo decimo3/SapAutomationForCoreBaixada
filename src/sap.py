@@ -308,7 +308,7 @@ class sap:
       apontador = apontador + 1
     tamanho = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]}\n"
     return tamanho + historico
-  def agrupamento(self, nota):
+  def agrupamento(self, nota, have_authorization: bool):
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ES32")
     self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
@@ -414,7 +414,9 @@ class sap:
         destaques.append(self.DESTAQUE_VERMELHO)
         apontador = apontador + 1
         continue
-      if(self.novo_analisar(instalacoes[apontador])):
+      if(have_authorization): temp = self.novo_analisar(instalacoes[apontador])
+      else: temp = self.passivas_novo(instalacoes[apontador])
+      if(temp):
         textoDescricao.append("Tem contas passivas")
         destaques.append(self.DESTAQUE_VERMELHO)
         apontador = apontador + 1
@@ -736,7 +738,9 @@ class sap:
     # if(len(debitos) > 6): raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
     self.imprimir(debitos)
     return self.monitorar(len(debitos))
-    raise Exception("Not implemented yet!")
+  def passivas_novo(self, arg) -> str:
+    
+    return ""
 
 if __name__ == "__main__":
   if (len(sys.argv) < 3):
@@ -773,10 +777,7 @@ if __name__ == "__main__":
     elif ((sys.argv[1] == "historico") or (sys.argv[1] == "historico")):
       print(robo.historico(sys.argv[2]))
     elif (sys.argv[1] == "agrupamento"):
-      if(have_authorization):
-        print(robo.agrupamento(sys.argv[2]))
-      else:
-        raise Exception("Aplicacao não pode ser ultilizada!")
+        print(robo.agrupamento(sys.argv[2], have_authorization))
     elif (sys.argv[1] == "pendente"):
       if(have_authorization):
         print(robo.escrever(int(sys.argv[2])))
