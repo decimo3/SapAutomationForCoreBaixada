@@ -735,7 +735,7 @@ class sap:
       return respostaString
   def fatura_novo(self, arg) -> str:
     debitos = self.escrever_novo(arg, True)
-    # if(len(debitos) > 6): raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
+    if(len(debitos) > 6): raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
     self.imprimir(debitos)
     return self.monitorar(len(debitos))
   def passivas_novo(self, arg) -> str:
