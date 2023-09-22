@@ -232,7 +232,7 @@ class sap:
       # if not (self.session.FindById("wnd[1]/usr/btnSPOP-OPTION1") == None):
       #   self.session.FindById("wnd[1]/usr/btnSPOP-OPTION1").Press()
       apontador = apontador + 1
-  def fatura_novo(self, nota) -> str:
+  def fatura(self, nota) -> str:
     debitos = []
     apontador = 0
     self.debito(nota)
