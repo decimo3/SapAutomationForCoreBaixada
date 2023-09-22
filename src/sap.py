@@ -683,7 +683,60 @@ class sap:
     return self.monitorar(len(passiveis))
   def sanitizar(self, arg) -> str:
     arg = str.replace(arg,',','.')
+    arg = arg.strip()
     return arg
+  def escrever_novo(self, arg, doc_impressao: bool=False) -> str | list[str]:
+    self.instalacao(arg)
+    contrato = self.session.FindById("wnd[0]/usr/txtEANLD-VERTRAG").text
+    self.session.StartTransaction(Transaction="FPL9")
+    self.session.findById("wnd[0]/usr/ctxtFKKL1-VTREF").text = contrato
+    self.session.findById("wnd[0]/tbar[0]/btn[0]").Press()
+    self.session.findById("wnd[0]/tbar[1]/btn[39]").Press()
+    #[collum, line]
+    col = 1
+    row = 0
+    tamanhos = [0,7,12,10,9]
+    colunas = [0,0,0,0,0]
+    response = ""
+    debitos = []
+    while(row < 99):
+      while(col < 99):
+        label = self.session.FindById(f"wnd[0]/usr/lbl[{col},{row}]", False)
+        if(label == None):
+          col = col + 1
+          continue
+        # Verifica se a coluna DOC_IMPRESSAO não está preenchida com VOID
+        # if(colunas[2] > 0):
+        #   temp = self.session.FindById(f"wnd[0]/usr/lbl[{colunas[2]},{row}]", False)
+        #   if(temp == None): break
+        if(col == colunas[0]): response = response + f"0," # Preenchimento da COR_DESTAQUE
+        if(col == colunas[1]): response = response + f"{label.text}," # Preenchimento do REFERENCIA
+        # Preenchimento do DOC_IMPRESSAO
+        if(col == colunas[2]):
+          response = response + f"{label.text},"
+          debitos.append(label.text)
+        if(col == colunas[3]): response = response + f"{label.text}," # Preenchimento da VENCIMENTO
+        if(col == colunas[4]): response = response + f"R$: {self.sanitizar(label.text)}\n" # Preenchimento do VALOR
+        if(label.text == "Sts"): colunas[0] = col
+        if(label.text == "Mês Refer"): colunas[1] = col
+        if(label.text == "Doc. Faturam"): colunas[2] = col
+        if(label.text == "Vencimento"): colunas[3] = col
+        if(label.text == "Valor"): colunas[4] = col
+        col = col + 1
+      row = row + 1
+      col = 1
+    tamanhoString = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]}\n"
+    respostaString = f"{tamanhoString}Cor,Mes ref.,Doc. Faturam,Vencimento,Valor\n{response}"
+    if(doc_impressao):
+      return debitos
+    else:
+      return respostaString
+  def fatura_novo(self, arg) -> str:
+    debitos = self.escrever_novo(arg, True)
+    # if(len(debitos) > 6): raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
+    self.imprimir(debitos)
+    return self.monitorar(len(debitos))
+    raise Exception("Not implemented yet!")
 
 if __name__ == "__main__":
   if (len(sys.argv) < 3):
