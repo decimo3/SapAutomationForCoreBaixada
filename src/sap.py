@@ -697,38 +697,56 @@ class sap:
     #[collum, line]
     col = 1
     row = 0
-    tamanhos = [0,7,12,10,9]
-    colunas = [0,0,0,0,0]
+    tamanhos = [0,0,7,12,10,9]
+    colunas = [0,0,0,0,0,0]
     response = ""
     debitos = []
-    while(row < 99):
+    hasLines = True
+    while(hasLines):
+      if(colunas[2] > 0 and row > 20):
+        # Verifica se a coluna VENCIMENTO não está vazia, se estiver, encerra a leitura dos labels
+        temp1 = self.session.FindById(f"wnd[0]/usr/lbl[{colunas[4]},{row}]", False)
+        if(temp1 == None):
+          hasLines = False
+          continue
+        if(temp1.text.strip() == ""):
+          hasLines = False
+          continue
+      if(colunas[2] > 0):
+        # Verifica se a coluna REFERENCIA não está vazia, se estiver, pula para a proxima linha
+        temp2 = self.session.FindById(f"wnd[0]/usr/lbl[{colunas[2]},{row}]", False)
+        if(temp2 == None):
+          row = row + 1
+          continue
+        if(temp2.text.strip() == ""):
+          row = row + 1
+          continue
       while(col < 99):
         label = self.session.FindById(f"wnd[0]/usr/lbl[{col},{row}]", False)
         if(label == None):
           col = col + 1
           continue
-        # Verifica se a coluna DOC_IMPRESSAO não está preenchida com VOID
-        # if(colunas[2] > 0):
-        #   temp = self.session.FindById(f"wnd[0]/usr/lbl[{colunas[2]},{row}]", False)
-        #   if(temp == None): break
-        if(col == colunas[0]): response = response + f"0," # Preenchimento da COR_DESTAQUE
-        if(col == colunas[1]): response = response + f"{label.text}," # Preenchimento do REFERENCIA
-        # Preenchimento do DOC_IMPRESSAO
-        if(col == colunas[2]):
+        # Preenche as informações caso as colunas já tenham sido identificadas
+        # Preenchimento do COR_DESTAQUE e STATUS
+        if(col == colunas[1]):
+          response = response + f"0,{label.iconName},"
+        if(col == colunas[2]): response = response + f"{label.text}," # Preenchimento do REFERENCIA
+        # Preenchimento do DOC_IMPRESSAO e colhimento do débitos pendentes
+        if(col == colunas[3]):
           response = response + f"{label.text},"
           debitos.append(label.text)
-        if(col == colunas[3]): response = response + f"{label.text}," # Preenchimento da VENCIMENTO
-        if(col == colunas[4]): response = response + f"R$: {self.sanitizar(label.text)}\n" # Preenchimento do VALOR
-        if(label.text == "Sts"): colunas[0] = col
-        if(label.text == "Mês Refer"): colunas[1] = col
-        if(label.text == "Doc. Faturam"): colunas[2] = col
-        if(label.text == "Vencimento"): colunas[3] = col
-        if(label.text == "Valor"): colunas[4] = col
+        if(col == colunas[4]): response = response + f"{label.text}," # Preenchimento da VENCIMENTO
+        if(col == colunas[5]): response = response + f"R$: {self.sanitizar(label.text)}\n" # Preenchimento do VALOR
+        if(label.text == "Sts"): colunas[1] = col
+        if(label.text == "Mês Refer"): colunas[2] = col
+        if(label.text == "Doc. Faturam"): colunas[3] = col
+        if(label.text == "Vencimento"): colunas[4] = col
+        if(label.text == "Valor"): colunas[5] = col
         col = col + 1
       row = row + 1
       col = 1
-    tamanhoString = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]}\n"
-    respostaString = f"{tamanhoString}Cor,Mes ref.,Doc. Faturam,Vencimento,Valor\n{response}"
+    tamanhoString = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]},{tamanhos[5]}\n"
+    respostaString = f"{tamanhoString}Cor,Status,Mes ref.,Doc. Faturam,Vencimento,Valor\n{response}"
     if(doc_impressao):
       return debitos
     else:
@@ -738,6 +756,7 @@ class sap:
     if(len(debitos) > 6): raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
     self.imprimir(debitos)
     return self.monitorar(len(debitos))
+  # Método para analizar débitos passíveis pelo FPL9
   def passivas_novo(self, arg) -> str:
     
     return ""
