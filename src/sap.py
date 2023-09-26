@@ -746,7 +746,11 @@ class sap:
         # Preenchimento do COR_DESTAQUE e STATUS
         # TODO: Configurar a cor de acordo com o status correto e um texto descritivo (verificar os vencimentos)
         if(col == colunas[1]):
-          response = response + f"0,{label.iconName},"
+          if(label.iconName == "S_TL_R"): response = response + f"{self.DESTAQUE_VERMELHO},"
+          elif(label.iconName == "S_TL_Y"): response = response + f"{self.DESTAQUE_VERDEJANTE},"
+          elif(label.iconName == "S_TL_G"): response = response + f"{self.DESTAQUE_VERMELHO},"
+          else: response = response + f"{self.DESTAQUE_AUSENTE},"
+          response = response + f"{label.iconName},"
         if(col == colunas[2]):
           response = response + f"{label.text}," # Preenchimento do REFERENCIA
         # Preenchimento do DOC_IMPRESSAO e colhimento do débitos pendentes
