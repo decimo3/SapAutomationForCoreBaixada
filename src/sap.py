@@ -694,7 +694,7 @@ class sap:
     self.session.findById("wnd[0]/usr/ctxtFKKL1-VTREF").text = contrato
     self.session.findById("wnd[0]/tbar[0]/btn[0]").Press()
     self.session.findById("wnd[0]/tbar[1]/btn[39]").Press()
-    #[collum, line]
+    #[char, line]
     col = 1
     row = 0
     tamanhos = [0,0,7,12,10,9]
@@ -702,41 +702,61 @@ class sap:
     response = ""
     debitos = []
     hasLines = True
+    MAX_LINES = 32
     while(hasLines):
-      if(colunas[2] > 0 and row > 20):
-        # Verifica se a coluna VENCIMENTO não está vazia, se estiver, encerra a leitura dos labels
-        temp1 = self.session.FindById(f"wnd[0]/usr/lbl[{colunas[4]},{row}]", False)
+      # Aponta para a linha atual ou para a última caso o índice da linha tenha ultrapassado o máximo
+      linha = MAX_LINES if(row >= MAX_LINES) else row
+      # Verifica se a coluna VENCIMENTO não está vazia, se estiver, encerra a leitura dos labels
+      if(colunas[2] > 0 and row >= MAX_LINES):
+        temp1 = self.session.FindById(f"wnd[0]/usr/lbl[{colunas[4]},{linha}]", False)
         if(temp1 == None):
           hasLines = False
           continue
         if(temp1.text.strip() == ""):
           hasLines = False
           continue
-      if(colunas[2] > 0):
-        # Verifica se a coluna REFERENCIA não está vazia, se estiver, pula para a proxima linha
-        temp2 = self.session.FindById(f"wnd[0]/usr/lbl[{colunas[2]},{row}]", False)
-        if(temp2 == None):
-          row = row + 1
-          continue
-        if(temp2.text.strip() == ""):
-          row = row + 1
-          continue
+      # Verifica se a coluna REFERENCIA não está vazia, se estiver, pula para a proxima linha
+      # if(colunas[2] > 0):
+      #   temp2 = self.session.FindById(f"wnd[0]/usr/lbl[{colunas[2]},{linha}]", False)
+      #   if(temp2 == None):
+      #     row = row + 1
+      #     if(row >= MAX_LINES):
+      #       self.session.FindById("wnd[0]/usr").verticalScrollbar.position = row - MAX_LINES
+      #     continue
+      #   if(temp2.text.strip() == ""):
+      #     row = row + 1
+      #     if(row >= MAX_LINES):
+      #       self.session.FindById("wnd[0]/usr").verticalScrollbar.position = row - MAX_LINES
+      #     continue
+      # Verifica se tem label na linha na coluna 1, caso não tenha a linha é vazia, então pula ela
+      if(self.session.FindById(f"wnd[0]/usr/lbl[1,{linha}]", False) == None):
+        row = row + 1
+        if(row >= MAX_LINES):
+          self.session.FindById("wnd[0]/usr").verticalScrollbar.position = row - MAX_LINES
+        continue
       while(col < 99):
-        label = self.session.FindById(f"wnd[0]/usr/lbl[{col},{row}]", False)
+        label = self.session.FindById(f"wnd[0]/usr/lbl[{col},{linha}]", False)
+        # Verifica se a coordenada do objeto retorna um objeto, se não pula para a próxima coluna
         if(label == None):
           col = col + 1
           continue
+        # Caso encontrado o objeto label, destaca o mesmo 
+        label.setFocus()
         # Preenche as informações caso as colunas já tenham sido identificadas
         # Preenchimento do COR_DESTAQUE e STATUS
+        # TODO: Configurar a cor de acordo com o status correto e um texto descritivo (verificar os vencimentos)
         if(col == colunas[1]):
           response = response + f"0,{label.iconName},"
-        if(col == colunas[2]): response = response + f"{label.text}," # Preenchimento do REFERENCIA
+        if(col == colunas[2]):
+          response = response + f"{label.text}," # Preenchimento do REFERENCIA
         # Preenchimento do DOC_IMPRESSAO e colhimento do débitos pendentes
         if(col == colunas[3]):
           response = response + f"{label.text},"
           debitos.append(label.text)
-        if(col == colunas[4]): response = response + f"{label.text}," # Preenchimento da VENCIMENTO
-        if(col == colunas[5]): response = response + f"R$: {self.sanitizar(label.text)}\n" # Preenchimento do VALOR
+        if(col == colunas[4]):
+          response = response + f"{label.text}," # Preenchimento da VENCIMENTO
+        if(col == colunas[5]):
+          response = response + f"R$: {self.sanitizar(label.text)}\n" # Preenchimento do VALOR
         if(label.text == "Sts"): colunas[1] = col
         if(label.text == "Mês Refer"): colunas[2] = col
         if(label.text == "Doc. Faturam"): colunas[3] = col
@@ -744,6 +764,8 @@ class sap:
         if(label.text == "Valor"): colunas[5] = col
         col = col + 1
       row = row + 1
+      if(row >= MAX_LINES):
+        self.session.FindById("wnd[0]/usr").verticalScrollbar.position = row - MAX_LINES
       col = 1
     tamanhoString = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]},{tamanhos[5]}\n"
     respostaString = f"{tamanhoString}Cor,Status,Mes ref.,Doc. Faturam,Vencimento,Valor\n{response}"
