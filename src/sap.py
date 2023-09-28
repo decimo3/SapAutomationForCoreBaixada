@@ -354,6 +354,9 @@ class sap:
         continue
       num = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,0]").text
       if num == numero:
+        quantidade = int(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[1,0]").text)
+        if(quantidade > 12):
+          raise Exception(f"Agrupamento possui instalacoes demais ({quantidade})")
         self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
         self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").GetAbsoluteRow(apontador).selected = True
         self.session.FindById("wnd[0]/usr/btn%#AUTOTEXT005").Press()
