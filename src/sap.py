@@ -698,7 +698,11 @@ class sap:
     self.session.findById("wnd[0]/usr/ctxtFKKL1-GPART").text = ""
     self.session.findById("wnd[0]/usr/ctxtFKKL1-VTREF").text = contrato
     self.session.findById("wnd[0]/tbar[0]/btn[0]").Press()
-    self.session.findById("wnd[0]/tbar[1]/btn[39]").Press()
+    try:
+      self.session.findById("wnd[0]/tbar[1]/btn[39]").Press()
+    except:
+      if(so_passivas == True): return []
+      raise Exception("Cliente nao possui faturas pendentes!")
     #[char, line]
     col = 1
     row = 0
