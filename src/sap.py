@@ -688,8 +688,11 @@ class sap:
     self.imprimir(passiveis)
     return self.monitorar(len(passiveis))
   def sanitizar(self, arg) -> str:
-    arg = str.replace(arg,',','.')
     arg = str.replace(arg, ' ', '')
+    arg = str.replace(arg, '.', '')
+    arg = str.replace(arg,',','.')
+    if '-' in arg:
+      arg = '-' + arg.replace('-', '')
     return arg
   def escrever_novo(self, arg, doc_impressao: bool=False, so_passivas: bool=False) -> str | list[str]:
     self.instalacao(arg)
