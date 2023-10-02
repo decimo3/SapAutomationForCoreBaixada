@@ -786,9 +786,10 @@ class sap:
     if(so_passivas):
       dt3["vencimento"] = pandas.to_datetime(dt3['vencimento'])
       prazo = datetime.date.today() - datetime.timedelta(days=15)
-      dt3 = dt3[dt3['vencimento'] > pandas.to_datetime(prazo)]
+      dt3 = dt3[dt3['vencimento'] < pandas.to_datetime(prazo)]
       return dt3['impressao'].to_list()
     if(doc_impressao):
+      dt3 = dt3[dt3['status'] != "Fat. no prazo"]
       return dt3['impressao'].to_list()
     return tamanhoString + dt3.to_csv(index = False)
   def fatura_novo(self, arg) -> str:
