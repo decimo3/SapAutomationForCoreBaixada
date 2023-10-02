@@ -780,9 +780,10 @@ class sap:
     dt3 = dt1.merge(dt2, on="impressao")
     del dt3['valores_x']
     dt3 = dt3.rename(columns={'valores_y': 'valores'})
+    dt3['impressao'].replace('', pandas.NA, inplace=True)
+    dt3 = dt3.dropna(subset=['impressao'])
     tamanhoString = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]},{tamanhos[5]}\n"
     if(so_passivas):
-      dt3.dropna(inplace=True)
       dt3["vencimento"] = pandas.to_datetime(dt3['vencimento'])
       prazo = datetime.date.today() - datetime.timedelta(days=15)
       dt3 = dt3[dt3['vencimento'] > pandas.to_datetime(prazo)]
