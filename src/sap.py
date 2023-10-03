@@ -797,18 +797,22 @@ class sap:
     if(len(debitos) > 6): raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
     self.imprimir(debitos)
     return self.monitorar(len(debitos))
-  # Método para analizar débitos passíveis pelo FPL9
   def passivas_novo(self, arg) -> bool:
     debitos = self.escrever_novo(arg, False, True)
     return (len(debitos) > 0)
 
 if __name__ == "__main__":
+  # Validação dos argumentos da linha de comando
+  aplicacao = re.match("[a-z]{8,16}", sys.argv[1])
+  argumento = int(sys.argv[2])
+  instancia = int(sys.argv[3])
+  if '--sap-restrito' in sys.argv: have_authorization = False
   if (len(sys.argv) < 3):
     raise Exception("Falta argumentos para relizar alguma acao!")
   if (len(sys.argv) > 4):
     raise Exception("Script nao foi programado para essa quantidade de argumentos!")
   try:
-    robo = sap() if (len(sys.argv) == 3) else sap(int(sys.argv[3]))
+    robo = sap() if (len(sys.argv) == 3) else sap(instancia)
   except:
     raise Exception("ERRO: Nao pode se conectar ao sistema SAP!")
   if(os.getenv("SAP_PERMISSIONS") == None):
@@ -816,35 +820,35 @@ if __name__ == "__main__":
   else:
     have_authorization = bool(int(os.getenv("SAP_PERMISSIONS", "0")))
   try:
-    if ((sys.argv[1] == "coordenada") or (sys.argv[1] == "localizacao")):
-      print(robo.coordenadas(int(sys.argv[2])))
-    elif ((sys.argv[1] == "telefone") or (sys.argv[1] == "contato")):
-      print(robo.telefone(int(sys.argv[2]), have_authorization))
-    elif (sys.argv[1] == "medidor"):
-      print(robo.novo_medidor(int(sys.argv[2])))
-    elif ((sys.argv[1] == "leiturista") or (sys.argv[1] == "roteiro")):
+    if ((aplicacao == "coordenada") or (aplicacao == "localizacao")):
+      print(robo.coordenadas(argumento))
+    elif ((aplicacao == "telefone") or (aplicacao == "contato")):
+      print(robo.telefone(argumento, have_authorization))
+    elif (aplicacao == "medidor"):
+      print(robo.novo_medidor(argumento))
+    elif ((aplicacao == "leiturista") or (aplicacao == "roteiro")):
       try:
-        print(robo.leiturista(int(sys.argv[2])))
+        print(robo.leiturista(argumento))
       except:
-        print(robo.leiturista(int(sys.argv[2]), True))
-    elif ((sys.argv[1] == "debito") or (sys.argv[1] == "fatura")):
+        print(robo.leiturista(argumento, True))
+    elif ((aplicacao == "debito") or (aplicacao == "fatura")):
       if(have_authorization):
-        print(robo.fatura(int(sys.argv[2])))
+        print(robo.fatura(argumento))
       else:
-        print(robo.fatura_novo(int(sys.argv[2])))
-    elif (sys.argv[1] == "relatorio"):
-      robo.relatorio(int(sys.argv[2]))
-    elif ((sys.argv[1] == "historico") or (sys.argv[1] == "historico")):
+        print(robo.fatura_novo(argumento))
+    elif (aplicacao == "relatorio"):
+      robo.relatorio(argumento)
+    elif ((aplicacao == "historico") or (aplicacao == "historico")):
       print(robo.historico(sys.argv[2]))
-    elif (sys.argv[1] == "agrupamento"):
+    elif (aplicacao == "agrupamento"):
         print(robo.agrupamento(sys.argv[2], have_authorization))
-    elif (sys.argv[1] == "pendente"):
+    elif (aplicacao == "pendente"):
       if(have_authorization):
-        print(robo.escrever(int(sys.argv[2])))
+        print(robo.escrever(argumento))
       else:
-        print(robo.escrever_novo(int(sys.argv[2])))
-    elif (sys.argv[1] == "manobra"):
-      print(robo.manobra(int(sys.argv[2])))
+        print(robo.escrever_novo(argumento))
+    elif (aplicacao == "manobra"):
+      print(robo.manobra(argumento))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
   except Exception as erro:
