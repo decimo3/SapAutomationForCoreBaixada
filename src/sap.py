@@ -13,7 +13,7 @@ import win32com.client
 import pandas
 
 class sap:
-  def __init__(self, instancia=0) -> None:
+  def __init__(self, instancia) -> None:
       self.CURRENT_FOLDER = os.getcwd() + "\\tmp\\"
       if (not(os.path.exists(self.CURRENT_FOLDER))):
         makedirs(self.CURRENT_FOLDER)
@@ -804,25 +804,44 @@ class sap:
     return (len(debitos) > 0)
 
 if __name__ == "__main__":
-  # Validação dos argumentos da linha de comando
-  aplicacao = re.match("[a-z]{8,16}", sys.argv[1])
+  # Validação dos argumentos da linha de comando:
+  # 1. Será possível realizar a tarefa se no mínimo
+  #    três argumentos forem passados para a aplicação
+  #    (script path mais dois do usuário). Caso contrário
+  #    não será possível inferir a posição dos argumentos;
+  # 2. Os argumentos devem obedecer a ordem:
+  #    0. Caminho do script e nome;
+  #    1. Nome da aplicação desejada (somente letras);
+  #    2. Número associado ao serviço;
+  #    3. Número da instância utilizada;
+  #    4. Outros argumentos opcionais;
+  # 3. Se houver somente 3 argumentos, então é uma consulta simples
+  #    e o script é configurado automaticamente para usar a 0.
+  if(len(sys.argv) < 3): raise Exception("Falta argumentos necessarios!")
+  if(not str.isalpha(sys.argv[1])): raise Exception("O primeiro argumento é inválido!")
+  aplicacao = sys.argv[1]
   argumento = int(sys.argv[2])
-  instancia = int(sys.argv[3])
-  if '--sap-restrito' in sys.argv: have_authorization = False
-  if (len(sys.argv) < 3):
-    raise Exception("Falta argumentos para relizar alguma acao!")
-  if (len(sys.argv) > 4):
-    raise Exception("Script nao foi programado para essa quantidade de argumentos!")
-  try:
-    robo = sap() if (len(sys.argv) == 3) else sap(instancia)
-  except:
-    raise Exception("ERRO: Nao pode se conectar ao sistema SAP!")
+  if(len(sys.argv) == 3): instancia = 0
+  else: instancia = int(sys.argv[3])
+  # Attempts to connect to SAP FrontEnd on the specified instance
+  try: robo = sap(instancia)
+  except: raise Exception("ERRO: Nao pode se conectar ao sistema SAP!")
+  # Check the access permission setting
   if(os.getenv("SAP_PERMISSIONS") == None):
     have_authorization = True
   else:
     have_authorization = bool(int(os.getenv("SAP_PERMISSIONS", "0")))
+  # If the number of arguments is greater than the minimum (4),
+  # then it checks the other arguments (now, only one optional argument is accepted).
+  if(len(sys.argv) > 4):
+    apontador = 4
+    while(apontador < len(sys.argv)):
+      if ('--sap-restrito' == sys.argv[apontador]): have_authorization = False
+      else: raise Exception("O argumento fornecido nao eh valido!")
+      apontador = apontador + 1
+  # Attempts to execute the method requested in the first argument
   try:
-    if ((aplicacao == "coordenada") or (aplicacao == "localizacao")):
+    if (aplicacao == "coordenada"):
       print(robo.coordenadas(argumento))
     elif ((aplicacao == "telefone") or (aplicacao == "contato")):
       print(robo.telefone(argumento, have_authorization))
@@ -841,9 +860,9 @@ if __name__ == "__main__":
     elif (aplicacao == "relatorio"):
       robo.relatorio(argumento)
     elif ((aplicacao == "historico") or (aplicacao == "historico")):
-      print(robo.historico(sys.argv[2]))
+      print(robo.historico(argumento))
     elif (aplicacao == "agrupamento"):
-        print(robo.agrupamento(sys.argv[2], have_authorization))
+        print(robo.agrupamento(argumento, have_authorization))
     elif (aplicacao == "pendente"):
       if(have_authorization):
         print(robo.escrever(argumento))
@@ -853,5 +872,6 @@ if __name__ == "__main__":
       print(robo.manobra(argumento))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
+  # Returns the error with an 'ERROR:' prefix on method failure
   except Exception as erro:
     print(f"ERRO: {erro.args[0]}")
