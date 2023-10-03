@@ -3,6 +3,7 @@ REM cls
 venv\Scripts\Activate
 pyinstaller --onefile .\\src\\sap.py
 pyinstaller --onefile .\\src\\img.py
+pyinstaller --onefile .\\src\\etc.py
 cd ..
 mkdir tmp
 copy .\SapAutomationForCoreBaixada\src\fileDialog.vbs tmp
