@@ -191,7 +191,9 @@ class sap:
     self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
   def escrever(self, nota) -> str:
     self.debito(nota)
+    self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110").Select()
     linhas = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").RowCount
+    if(linhas < 1): raise Exception("Cliente nao possui faturas pendentes!")
     debString = 'Cor,Mes ref.,Vencimento,Valor,Tipo,Status\n'
     apontador = 1
     tamanhos = [0,7,10,12,0,0]
