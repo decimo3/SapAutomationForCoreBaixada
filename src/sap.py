@@ -246,7 +246,7 @@ class sap:
         continue
       debitos.append(self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"ZIMPRES"))
       apontador = apontador + 1
-    if(len(debitos) > 5 and self.instancia == 0):
+    if(len(debitos) > 6 and self.instancia == 0):
       raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
     if(len(debitos) == 0):
       raise Exception("Cliente nao possui faturas vencidas!")
