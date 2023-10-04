@@ -1,6 +1,6 @@
 REM @echo OFF
 REM cls
-venv\Scripts\Activate
+rem venv\Scripts\Activate
 pyinstaller --onefile .\\src\\sap.py
 pyinstaller --onefile .\\src\\img.py
 pyinstaller --onefile .\\src\\etc.py
@@ -12,7 +12,8 @@ cd .\TelegramBotForFieldTeamHelper
 dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained true --output ..\tmp\
 cd ..
 robocopy tmp %USERPROFILE%\MestreRuan\ /XF database.db
+7z u mestreruan.zip .\tmp\*
 REM https://superuser.com/questions/1654994/how-to-copy-folder-structure-but-exclude-certain-files-in-windows
 cd .\SapAutomationForCoreBaixada
-venv\Scripts\deactivate.bat
+rem venv\Scripts\deactivate.bat
 pause
