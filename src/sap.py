@@ -703,9 +703,9 @@ class sap:
     self.session.findById("wnd[0]/usr/ctxtFKKL1-GPART").text = ""
     self.session.findById("wnd[0]/usr/ctxtFKKL1-VTREF").text = contrato
     self.session.findById("wnd[0]/tbar[0]/btn[0]").Press()
-    try:
-      self.session.findById("wnd[0]/tbar[1]/btn[39]").Press()
-    except:
+    self.session.findById("wnd[0]/tbar[1]/btn[39]").Press()
+    # Check if you are still on the FPL9 transaction form screen
+    if(self.session.findById("wnd[0]/usr/ctxtFKKL1-VTREF", False) != None):
       if(so_passivas == True): return []
       raise Exception("Cliente nao possui faturas pendentes!")
     #[char, line]
@@ -787,8 +787,10 @@ class sap:
     tamanhoString = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]},{tamanhos[5]}\n"
     if(so_passivas):
       dt3["vencimento"] = pandas.to_datetime(dt3['vencimento'])
-      prazo = datetime.date.today() - datetime.timedelta(days=15)
-      dt3 = dt3[dt3['vencimento'] < pandas.to_datetime(prazo)]
+      prazo_minimo = datetime.date.today() - datetime.timedelta(days=15)
+      prazo_maximo = datetime.date.today() - datetime.timedelta(days=90)
+      dt3 = dt3[dt3['vencimento'] < pandas.to_datetime(prazo_minimo)]
+      dt3 = dt3[dt3['vencimento'] > pandas.to_datetime(prazo_maximo)]
       return dt3['impressao'].to_list()
     if(doc_impressao):
       dt3 = dt3[dt3['status'] != "Fat. no prazo"]
