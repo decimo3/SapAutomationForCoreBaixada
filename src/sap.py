@@ -562,9 +562,6 @@ class sap:
     return "\n".join(listdir(self.CURRENT_FOLDER))
   def novo_medidor(self, arg) -> str:
     instalacao = self.instalacao(arg)
-    self.session.StartTransaction(Transaction="ES32")
-    self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
-    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
     statusInstalacao = self.session.findById('wnd[0]/usr/txtEANLD-DISCSTAT').text
     endereco = self.session.FindById("wnd[0]/usr/txtEANLD-LINE1").text
     endereco = str.split(endereco, ",")[1]
