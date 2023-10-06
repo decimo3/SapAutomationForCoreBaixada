@@ -801,6 +801,26 @@ class sap:
   def passivas_novo(self, arg) -> bool:
     debitos = self.escrever_novo(arg, False, True)
     return (len(debitos) > 0)
+  def informacao(self, arg) -> str:
+    instalacao = self.instalacao(arg)
+    parceiro = self.session.findById("wnd[0]/usr/txtEANLD-PARTNER").text
+    self.session.StartTransaction(Transaction="BP")
+    # close search side panel
+    self.session.findById("wnd[0]/tbar[1]/btn[9]").Press()
+    phone_field_partial_string = "wnd[0]/usr/subSCREEN_3000_RESIZING_AREA:SAPLBUS_LOCATOR:2000/subSCREEN_1010_RIGHT_AREA:SAPLBUPA_DIALOG_JOEL:1000/"
+    # Click 'Open PN' button
+    self.session.findById("wnd[0]/tbar[1]/btn[17]").Press()
+    self.session.findById("wnd[1]/usr/ctxtBUS_JOEL_MAIN-OPEN_NUMBER").text = parceiro
+    self.session.findById("wnd[1]/tbar[0]/btn[0]").Press()
+    # Click 'dados gerais' button
+    self.session.findById("wnd[0]/tbar[1]/btn[25]").Press()
+    self.session.findById("wnd[0]/usr/subSCREEN_3000_RESIZING_AREA:SAPLBUS_LOCATOR:2000/subSCREEN_1010_RIGHT_AREA:SAPLBUPA_DIALOG_JOEL:1000/ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/subSCREEN_1100_ROLE_AND_TIME_AREA:SAPLBUPA_DIALOG_JOEL:1110/cmbBUS_JOEL_MAIN-PARTNER_ROLE").key = "MKK"
+    if(self.session.findById("wnd[1]", False) != None): self.session.findById("wnd[1]/usr/btnSPOP-OPTION2").Press()
+    nome_cliente = self.session.FindById(phone_field_partial_string + "subSCREEN_1000_HEADER_AREA:SAPLBUPA_DIALOG_JOEL:1510/txtBUS_JOEL_MAIN-CHANGE_DESCRIPTION").text
+    nome_cliente = str.split(nome_cliente, "/")[0]
+    self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04").Select()
+    pessoa_fisica = self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04/ssubSCREEN_1100_TABSTRIP_AREA:SAPLBUSS:0028/ssubGENSUB:SAPLBUSS:7006/subA04P01:SAPLBUPA_BUTX_DIALOG:0100/tblSAPLBUPA_BUTX_DIALOGTCTRL_BPTAX/txtDFKKBPTAXNUM-TAXNUM[2,0]").text
+    return f"Instalacao: {instalacao}\n*Cod. do cliente:* {parceiro}\n*Cadastro Pessoa Fisica (CPF):* {pessoa_fisica}\n*Nome do cliente:* {nome_cliente}"
 
 if __name__ == "__main__":
   # Validação dos argumentos da linha de comando:
@@ -869,6 +889,9 @@ if __name__ == "__main__":
         print(robo.escrever_novo(argumento))
     elif (aplicacao == "manobra"):
       print(robo.manobra(argumento))
+    elif(aplicacao == "informacao"):
+      if(not have_authorization): raise Exception("Nao eh possivel consultar essas informacoes no modo restrito")
+      else: print(robo.informacao(argumento))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
   # Returns the error with an 'ERROR:' prefix on method failure
