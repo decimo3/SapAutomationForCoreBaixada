@@ -845,11 +845,7 @@ if __name__ == "__main__":
   # Attempts to connect to SAP FrontEnd on the specified instance
   try: robo = sap(instancia)
   except: raise Exception("ERRO: Nao pode se conectar ao sistema SAP!")
-  # Check the access permission setting
-  if(os.getenv("SAP_PERMISSIONS") == None):
-    have_authorization = True
-  else:
-    have_authorization = bool(int(os.getenv("SAP_PERMISSIONS", "0")))
+  have_authorization = True
   # If the number of arguments is greater than the minimum (4),
   # then it checks the other arguments (now, only one optional argument is accepted).
   if(len(sys.argv) > 4):
