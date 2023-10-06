@@ -54,5 +54,18 @@ def coletor() -> None:
   print("")
   print(f"O chatbot está sendo utilizado a {quantidade_de_dias} dias, atendendo as solicitações num tempo médio de {tempo_medio.seconds} segundos, com precisão de {porcentagem_sucesso}% de sucesso!") # type: ignore
   return
+def exportar():
+  connection = sqlite3.connect('database.db')
+  query_string = "SELECT * FROM logsmodel;"
+  dataframe = pandas.read_sql_query(query_string,connection)
+  dataframe['received_at'] = pandas.to_datetime(dataframe['received_at'])
+  dataframe['create_at'] = pandas.to_datetime(dataframe['create_at'])
+  dataframe['received_at'] = dataframe['received_at'].dt.tz_localize(None)
+  dataframe['create_at'] = dataframe['received_at'].dt.tz_localize(None)
+  dataframe['aplicacao'].replace('debito', 'fatura', inplace=True)
+  dataframe['aplicacao'].replace('roteiro', 'leiturista', inplace=True)
+  dataframe['aplicacao'].replace('contato', 'telefone', inplace=True)
+  dataframe.to_excel("database.xlsx", index=False)
 if __name__ == "__main__":
   coletor()
+  exportar()
