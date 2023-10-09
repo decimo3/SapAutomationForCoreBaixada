@@ -95,7 +95,7 @@ class sap:
           raise Exception("O relatorio de notas em aberto esto vazio!")
       except:
         raise Exception("O relatorio de notas em aberto esto vazio!")
-  def leiturista(self, nota, retry=False) -> str:
+  def leiturista(self, nota, retry=False, order_by_sequence: bool=False) -> str:
       instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ES32")
       self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
@@ -122,7 +122,7 @@ class sap:
         self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").clickCurrentCell()
       except:
         raise Exception("Nao ho relatorio de leitura para o periodo especificado!")
-      if(retry):
+      if(retry or order_by_sequence):
         self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectColumn("ZZ_NUMSEQ")
         self.session.FindById("wnd[0]/tbar[1]/btn[28]").Press()
       self.session.FindById("wnd[0]/tbar[0]/btn[71]").Press()
@@ -864,9 +864,15 @@ if __name__ == "__main__":
       print(robo.novo_medidor(argumento))
     elif ((aplicacao == "leiturista") or (aplicacao == "roteiro")):
       try:
-        print(robo.leiturista(argumento))
+        if(aplicacao == "roteiro"):
+          print(robo.leiturista(argumento, False, True))
+        else:
+          print(robo.leiturista(argumento, False, False))
       except:
-        print(robo.leiturista(argumento, True))
+        if(aplicacao == "roteiro"):
+          print(robo.leiturista(argumento, True, True))
+        else:
+          print(robo.leiturista(argumento, True, False))
     elif ((aplicacao == "debito") or (aplicacao == "fatura")):
       if(have_authorization):
         print(robo.fatura(argumento))
