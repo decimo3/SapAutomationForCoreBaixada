@@ -820,7 +820,7 @@ class sap:
     nome_cliente = str.split(nome_cliente, "/")[0]
     self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04").Select()
     pessoa_fisica = self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04/ssubSCREEN_1100_TABSTRIP_AREA:SAPLBUSS:0028/ssubGENSUB:SAPLBUSS:7006/subA04P01:SAPLBUPA_BUTX_DIALOG:0100/tblSAPLBUPA_BUTX_DIALOGTCTRL_BPTAX/txtDFKKBPTAXNUM-TAXNUM[2,0]").text
-    return f"Instalacao: {instalacao}\n*Cod. do cliente:* {parceiro}\n*Cadastro Pessoa Fisica (CPF):* {pessoa_fisica}\n*Nome do cliente:* {nome_cliente}"
+    return f"*Instalacao:* {instalacao}\n*Cod. do cliente:* {parceiro}\n*Cadastro Pessoa Fisica (CPF):* {pessoa_fisica}\n*Nome do cliente:* {nome_cliente}"
 
 if __name__ == "__main__":
   # Validação dos argumentos da linha de comando:
