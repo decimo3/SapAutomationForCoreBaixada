@@ -458,39 +458,11 @@ class sap:
       return f"https://www.google.com/maps?z=12&t=m&q=loc:{coordenada[0]}+{coordenada[1]}"
     else:
       raise Exception("A instalacao nao possui coordenada cadastrada!")
-  def telefone(self, info, have_authorization: bool) -> str:
-    SAPLBUS_LOCATOR = "2000" if(have_authorization) else "2036"
-    phone_field_partial_string = f"wnd[0]/usr/subSCREEN_3000_RESIZING_AREA:SAPLBUS_LOCATOR:{SAPLBUS_LOCATOR}/subSCREEN_1010_RIGHT_AREA:SAPLBUPA_DIALOG_JOEL:1000/"
+  def telefone(self, arg) -> str:
+    instalacao = self.instalacao(arg)
+    parceiro = self.session.findById("wnd[0]/usr/txtEANLD-PARTNER").text
+    phone_field_partial_string = self.parceiro(parceiro)
     telefone = []
-    nome_solicitante = ""
-    try:
-      info = int(info)
-    except:
-      raise Exception("Informacao nao e um numero valido!")
-    if (info > 999999999):
-      self.session.StartTransaction(Transaction="IW53")
-      self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = info
-      try:
-        self.session.FindById("wnd[0]/tbar[1]/btn[5]").Press()
-      except:
-        raise Exception("Numero da nota e invalido!")
-      self.session.FindById(r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09").Select()
-      nome_solicitante = self.session.FindById(r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/txtVIQMEL-ZZ_NOME_SOLICIT").text
-      telefone.append(self.session.FindById(r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/txtVIQMEL-ZZ_TEL_SOLICIT").text)
-      telefone.append(self.session.FindById(r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/txtVIQMEL-ZZ_CEL_SOLICIT").text)
-      info = self.session.FindById(r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/ctxtVIQMEL-ZZINSTLN").text
-    self.session.StartTransaction(Transaction="ES32")
-    self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = info
-    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
-    cliente = self.session.FindById("wnd[0]/usr/txtEANLD-PARTNER").text
-    cliente = str.split(cliente, "/")[0]
-    self.session.StartTransaction(Transaction="BP")
-    try:
-      self.session.FindById(phone_field_partial_string + "subSCREEN_1000_HEADER_AREA:SAPLBUPA_DIALOG_JOEL:1510/ctxtBUS_JOEL_MAIN-CHANGE_NUMBER").text = cliente
-    except:
-      self.session.FindById(f"wnd[0]/tbar[1]/btn[9]").Press()
-      self.session.FindById(phone_field_partial_string + "subSCREEN_1000_HEADER_AREA:SAPLBUPA_DIALOG_JOEL:1510/ctxtBUS_JOEL_MAIN-CHANGE_NUMBER").text = cliente
-    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
     nome_cliente = self.session.FindById(phone_field_partial_string + "subSCREEN_1000_HEADER_AREA:SAPLBUPA_DIALOG_JOEL:1510/txtBUS_JOEL_MAIN-CHANGE_DESCRIPTION").text
     nome_cliente = str.split(nome_cliente, "/")[0]
     self.session.FindById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_01").Select()
@@ -524,7 +496,7 @@ class sap:
       telefone.remove("______________________________")
     except:
       pass
-    texto = nome_solicitante + " " if (len(nome_solicitante) > 0) else nome_cliente + " "
+    texto = nome_cliente + " "
     for tel in telefone:
       texto += tel + " " if (len(tel) > 0) else ""
     return texto
@@ -804,23 +776,27 @@ class sap:
   def informacao(self, arg) -> str:
     instalacao = self.instalacao(arg)
     parceiro = self.session.findById("wnd[0]/usr/txtEANLD-PARTNER").text
+    phone_field_partial_string = self.parceiro(parceiro)
+    nome_cliente = self.session.FindById(phone_field_partial_string + "subSCREEN_1000_HEADER_AREA:SAPLBUPA_DIALOG_JOEL:1510/txtBUS_JOEL_MAIN-CHANGE_DESCRIPTION").text
+    nome_cliente = str.split(nome_cliente, "/")[0]
+    self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04").Select()
+    pessoa_fisica = self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04/ssubSCREEN_1100_TABSTRIP_AREA:SAPLBUSS:0028/ssubGENSUB:SAPLBUSS:7006/subA04P01:SAPLBUPA_BUTX_DIALOG:0100/tblSAPLBUPA_BUTX_DIALOGTCTRL_BPTAX/txtDFKKBPTAXNUM-TAXNUM[2,0]").text
+    return f"*Instalacao:* {instalacao}\n*Cod. do cliente:* {parceiro}\n*Cadastro Pessoa Fisica (CPF):* {pessoa_fisica}\n*Nome do cliente:* {nome_cliente}"
+  def parceiro(self, parceiro, have_authorization: bool=True) -> str:
+    SAPLBUS_LOCATOR = "2000" if(have_authorization) else "2036"
+    phone_field_partial_string = f"wnd[0]/usr/subSCREEN_3000_RESIZING_AREA:SAPLBUS_LOCATOR:{SAPLBUS_LOCATOR}/subSCREEN_1010_RIGHT_AREA:SAPLBUPA_DIALOG_JOEL:1000/"
     self.session.StartTransaction(Transaction="BP")
     # close search side panel
     self.session.findById("wnd[0]/tbar[1]/btn[9]").Press()
-    phone_field_partial_string = "wnd[0]/usr/subSCREEN_3000_RESIZING_AREA:SAPLBUS_LOCATOR:2000/subSCREEN_1010_RIGHT_AREA:SAPLBUPA_DIALOG_JOEL:1000/"
     # Click 'Open PN' button
     self.session.findById("wnd[0]/tbar[1]/btn[17]").Press()
     self.session.findById("wnd[1]/usr/ctxtBUS_JOEL_MAIN-OPEN_NUMBER").text = parceiro
     self.session.findById("wnd[1]/tbar[0]/btn[0]").Press()
     # Click 'dados gerais' button
     self.session.findById("wnd[0]/tbar[1]/btn[25]").Press()
-    self.session.findById("wnd[0]/usr/subSCREEN_3000_RESIZING_AREA:SAPLBUS_LOCATOR:2000/subSCREEN_1010_RIGHT_AREA:SAPLBUPA_DIALOG_JOEL:1000/ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/subSCREEN_1100_ROLE_AND_TIME_AREA:SAPLBUPA_DIALOG_JOEL:1110/cmbBUS_JOEL_MAIN-PARTNER_ROLE").key = "MKK"
+    self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/subSCREEN_1100_ROLE_AND_TIME_AREA:SAPLBUPA_DIALOG_JOEL:1110/cmbBUS_JOEL_MAIN-PARTNER_ROLE").key = "MKK"
     if(self.session.findById("wnd[1]", False) != None): self.session.findById("wnd[1]/usr/btnSPOP-OPTION2").Press()
-    nome_cliente = self.session.FindById(phone_field_partial_string + "subSCREEN_1000_HEADER_AREA:SAPLBUPA_DIALOG_JOEL:1510/txtBUS_JOEL_MAIN-CHANGE_DESCRIPTION").text
-    nome_cliente = str.split(nome_cliente, "/")[0]
-    self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04").Select()
-    pessoa_fisica = self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04/ssubSCREEN_1100_TABSTRIP_AREA:SAPLBUSS:0028/ssubGENSUB:SAPLBUSS:7006/subA04P01:SAPLBUPA_BUTX_DIALOG:0100/tblSAPLBUPA_BUTX_DIALOGTCTRL_BPTAX/txtDFKKBPTAXNUM-TAXNUM[2,0]").text
-    return f"*Instalacao:* {instalacao}\n*Cod. do cliente:* {parceiro}\n*Cadastro Pessoa Fisica (CPF):* {pessoa_fisica}\n*Nome do cliente:* {nome_cliente}"
+    return phone_field_partial_string
 
 if __name__ == "__main__":
   # Validação dos argumentos da linha de comando:
@@ -859,7 +835,8 @@ if __name__ == "__main__":
     if (aplicacao == "coordenada"):
       print(robo.coordenadas(argumento))
     elif ((aplicacao == "telefone") or (aplicacao == "contato")):
-      print(robo.telefone(argumento, have_authorization))
+      if(not have_authorization): raise Exception("Nao eh possivel consultar essas informacoes no modo restrito")
+      print(robo.telefone(argumento))
     elif (aplicacao == "medidor"):
       print(robo.novo_medidor(argumento))
     elif ((aplicacao == "leiturista") or (aplicacao == "roteiro")):
@@ -894,6 +871,8 @@ if __name__ == "__main__":
     elif(aplicacao == "informacao"):
       if(not have_authorization): raise Exception("Nao eh possivel consultar essas informacoes no modo restrito")
       else: print(robo.informacao(argumento))
+    elif(aplicacao == "desperta"):
+      print(robo.instalacao(argumento))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
   # Returns the error with an 'ERROR:' prefix on method failure
