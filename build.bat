@@ -1,6 +1,5 @@
-REM @echo OFF
-REM cls
-rem venv\Scripts\Activate
+@echo OFF
+if defined VIRTUAL_ENV (
 pyinstaller --onefile .\\src\\sap.py
 pyinstaller --onefile .\\src\\img.py
 pyinstaller --onefile .\\src\\etc.py
@@ -15,5 +14,6 @@ robocopy tmp %USERPROFILE%\MestreRuan\ /XF database.db
 7z u mestreruan.zip .\tmp\*
 REM https://superuser.com/questions/1654994/how-to-copy-folder-structure-but-exclude-certain-files-in-windows
 cd .\SapAutomationForCoreBaixada
-rem venv\Scripts\deactivate.bat
-pause
+) else (
+echo "Environment variable VIRTUAL_ENV was not defined"
+)
