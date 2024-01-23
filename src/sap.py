@@ -797,6 +797,66 @@ class sap:
     self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/subSCREEN_1100_ROLE_AND_TIME_AREA:SAPLBUPA_DIALOG_JOEL:1110/cmbBUS_JOEL_MAIN-PARTNER_ROLE").key = "MKK"
     if(self.session.findById("wnd[1]", False) != None): self.session.findById("wnd[1]/usr/btnSPOP-OPTION2").Press()
     return phone_field_partial_string
+  def cruzamento(self, arg) -> str:
+    instalacao = self.instalacao(arg)
+    self.session.StartTransaction(Transaction="ES32")
+    self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
+    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    consumo = self.session.FindById("wnd[0]/usr/ctxtEANLD-VSTELLE").text
+    self.session.StartTransaction(Transaction="ES61")
+    self.session.findById("wnd[0]/usr/ctxtEVBSD-VSTELLE").text = consumo
+    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    ligacao = self.session.FindById("wnd[0]/usr/ctxtEVBSD-HAUS").text
+    self.session.StartTransaction(Transaction="ES57")
+    self.session.FindById("wnd[0]/usr/ctxtEHAUD-HAUS").text = ligacao
+    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    logradouro = self.session.findById("wnd[0]/usr/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:0301/txtADDR1_DATA-NAME_CO").text
+    self.session.StartTransaction(Transaction="ZMED95")
+    self.session.FindById("wnd[0]/usr/ctxtADRSTREET-STRT_CODE").text = logradouro
+    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    self.session.FindById("wnd[0]/tbar[1]/btn[7]").Press()
+    container = self.session.FindById("wnd[0]/usr/cntlCONTAINER_200/shellcont/shell")
+    linhas = container.RowCount
+    apontador = 0
+    dataframe = {
+      "#": [],
+      "Numero": [],
+      "Cod. Cruza": [],
+      "Cod. rua": [],
+      "Logradouro": [],
+      "Numero 2": [],
+      "Latitude": [],
+      "Longitude": [],
+      "Cidade": [],
+    }
+    tamanhos = [0,6,10,9,0,6,16,16,0]
+    while(apontador < linhas):
+      # 0. "COLORACAO"
+      dataframe['#'].append("0")
+      # 1. "NUMERO"
+      dataframe['Num. 1'].append(container.getCellValue(apontador, "NUMERO"))
+      # 2. "COD_CRUZAMENTO"
+      dataframe['Cod. Cruza'].append(container.getCellValue(apontador, "COD_CRUZAMENTO"))
+      # 3. "STRT_CODE"
+      dataframe['Cod. rua'].append(container.getCellValue(apontador, "STRT_CODE"))
+      # 4. "STREET"
+      dataframe['Logradouro'].append(container.getCellValue(apontador, "STREET"))
+      tamanho_campo = len(container.getCellValue(apontador, "STREET"))
+      tamanhos[4] = tamanhos[4] if(tamanhos[4] > tamanho_campo) else tamanho_campo
+      # 5. "NUMERO_OUTR"
+      dataframe['Num. 2'].append(container.getCellValue(apontador, "NUMERO_OUTR"))
+      # 6. "LATITUDE"
+      dataframe['Latitude'].append(str.replace(container.getCellValue(apontador, "LATITUDE"), ',', '.'))
+      # 7. "LONGITUDE"
+      dataframe['Longitude'].append(str.replace(container.getCellValue(apontador, "LONGITUDE"), ',', '.'))
+      # 8. "CITY_NAME"
+      dataframe['Cidade'].append(container.getCellValue(apontador, "CITY_NAME"))
+      tamanho_campo = len(container.getCellValue(apontador, "CITY_NAME"))
+      tamanhos[8] = tamanhos[8] if(tamanhos[8] > tamanho_campo) else tamanho_campo
+      apontador = apontador + 1
+    tamanhos_string = ",".join([str(x) for x in tamanhos])
+    resultados_csv = pandas.DataFrame(dataframe).to_csv(index=False, sep=',')
+    return tamanhos_string + '\n' + resultados_csv
 
 if __name__ == "__main__":
   # Validação dos argumentos da linha de comando:
@@ -873,6 +933,8 @@ if __name__ == "__main__":
       else: print(robo.informacao(argumento))
     elif(aplicacao == "desperta"):
       print(robo.instalacao(argumento))
+    elif(aplicacao == "cruzamento"):
+      print(robo.cruzamento(argumento))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
   # Returns the error with an 'ERROR:' prefix on method failure
