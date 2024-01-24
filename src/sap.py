@@ -820,11 +820,11 @@ class sap:
     apontador = 0
     dataframe = {
       "#": [],
-      "Numero": [],
+      "Num. 1": [],
       "Cod. Cruza": [],
       "Cod. rua": [],
       "Logradouro": [],
-      "Numero 2": [],
+      "Num. 2": [],
       "Latitude": [],
       "Longitude": [],
       "Cidade": [],
