@@ -18,7 +18,7 @@ if __name__ == "__main__":
     time.sleep(3)
     SapGuiAuto = win32com.client.GetObject("SAPGUI")
   if not type(SapGuiAuto) == win32com.client.CDispatch:
-      raise Exception("SAP GUI Scripting API is not available.")
+      raise Exception("ERRO: SAP GUI Scripting API is not available.")
   application = SapGuiAuto.GetScriptingEngine
   # Get connection
   if not (len(application.connections) > 0):
@@ -26,7 +26,7 @@ if __name__ == "__main__":
       connection = application.OpenConnection("#PCL", True)
       print(connection.connectionString)
     except:
-      raise Exception("SAP FrontEnd connection is not available.")
+      raise Exception("ERRO: SAP FrontEnd connection is not available.")
   else:
     connection = application.connections[0]
   # Get session
