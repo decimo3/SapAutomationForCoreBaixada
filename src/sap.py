@@ -26,9 +26,7 @@ class sap:
       self.inicializar()
   def inicializar(self) -> bool:
     subprocess.Popen("cscript erroDialog.vbs", stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
-    dotenv_path = os.path.dirname(__file__)
-    dotenv_file = os.path.join(dotenv_path, 'sap.conf')
-    dotenv.load_dotenv(dotenv_file)
+    dotenv.load_dotenv('sap.conf')
     # Get scripting
     try:
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
