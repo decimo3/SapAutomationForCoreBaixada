@@ -73,8 +73,8 @@ class sap:
       self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "LIBE"
       self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,2]").text = "TABL"
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
-      self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = "RB"
-      self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
+      self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = os.environ.get("REGIAO")
+      self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = os.environ.get("ZSVC20")
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       try:
         exist = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell", False)
