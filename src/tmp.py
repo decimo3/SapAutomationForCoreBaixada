@@ -6,6 +6,7 @@ import dotenv
 import subprocess
 import win32com.client
 if __name__ == "__main__":
+  subprocess.Popen("cscript erroDialog.vbs", stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
   dotenv_path = os.path.dirname(__file__)
   dotenv_file = os.path.join(dotenv_path, 'sap.conf')
   dotenv.load_dotenv(dotenv_file)
