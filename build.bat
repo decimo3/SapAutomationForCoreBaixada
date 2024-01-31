@@ -5,6 +5,8 @@ pyinstaller --onefile .\\src\\img.py
 pyinstaller --onefile .\\src\\etc.py
 cd ..
 mkdir tmp
+copy .\SapAutomationForCoreBaixada\src\sap.conf tmp
+copy .\SapAutomationForCoreBaixada\src\erroDialog.vbs tmp
 copy .\SapAutomationForCoreBaixada\src\fileDialog.vbs tmp
 copy .\SapAutomationForCoreBaixada\dist\* tmp
 cd .\TelegramBotForFieldTeamHelper
