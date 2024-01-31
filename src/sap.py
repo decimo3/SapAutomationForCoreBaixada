@@ -11,6 +11,7 @@ from os import makedirs
 from os import listdir
 import win32com.client
 import pandas
+import dotenv
 
 class sap:
   def __init__(self, instancia) -> None:
@@ -22,8 +23,40 @@ class sap:
       self.DESTAQUE_VERDEJANTE = 4
       self.DESTAQUE_AUSENTE = 0
       self.instancia = instancia
+      self.inicializar()
+  def inicializar(self) -> bool:
+    subprocess.Popen("cscript erroDialog.vbs", stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+    dotenv_path = os.path.dirname(__file__)
+    dotenv_file = os.path.join(dotenv_path, 'sap.conf')
+    dotenv.load_dotenv(dotenv_file)
+    # Get scripting
+    try:
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
-      self.session = self.SapGui.FindById(f"ses[{self.instancia}]")
+    except:
+      saplogon = "C:\\Program Files (x86)\\SAP\\FrontEnd\\SAPgui\\saplogon.exe"
+      subprocess.Popen(saplogon, start_new_session=True)
+      time.sleep(3)
+      self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
+    if not type(self.SapGui) == win32com.client.CDispatch:
+        raise Exception("ERRO: SAP GUI Scripting API is not available.")
+    # Get connection
+    if not (len(self.SapGui.connections) > 0):
+      try:
+        self.connection = self.SapGui.OpenConnection("#PCL", True)
+      except:
+        raise Exception("ERRO: SAP FrontEnd connection is not available.")
+    else:
+      self.connection = self.SapGui.connections[0]
+    # Get session
+    self.session = self.connection.Children(self.instancia)
+    if (self.session.info.user == ''):
+      self.session.findById("wnd[0]/usr/txtRSYST-BNAME").text = os.environ.get("USUARIO")
+      self.session.findById("wnd[0]/usr/pwdRSYST-BCODE").text = os.environ.get("PALAVRA")
+      self.session.findById("wnd[0]/tbar[0]/btn[0]").Press()
+      if (self.session.findById("wnd[1]", False) != None):
+        self.session.findById("wnd[1]/usr/radMULTI_LOGON_OPT1").Select()
+        self.session.findById("wnd[1]/tbar[0]/btn[0]").Press()
+    return (self.session.info.user != '')
   def relatorio(self, dia=7) -> str:
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
