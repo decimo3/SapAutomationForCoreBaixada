@@ -32,7 +32,12 @@ if __name__ == "__main__":
     connection = application.connections[0]
   # Get session
   session = connection.Children(0)
-  session.findById("wnd[0]/usr/txtRSYST-BNAME").text = os.environ.get("USUARIO")
-  session.findById("wnd[0]/usr/pwdRSYST-BCODE").text = os.environ.get("PALAVRA")
-  session.findById("wnd[0]/tbar[0]/btn[0]").Press()
+  if (session.info.user == ''):
+    session.findById("wnd[0]/usr/txtRSYST-BNAME").text = os.environ.get("USUARIO")
+    session.findById("wnd[0]/usr/pwdRSYST-BCODE").text = os.environ.get("PALAVRA")
+    session.findById("wnd[0]/tbar[0]/btn[0]").Press()
+    if (session.findById("wnd[1]", False) != None):
+      session.findById("wnd[1]/usr/radMULTI_LOGON_OPT1").Select()
+      session.findById("wnd[1]/tbar[0]/btn[0]").Press()
+  
   # /app/con[0]/ses[0]/wnd[0]/usr/txtRSYST-BNAME
