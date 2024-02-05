@@ -328,19 +328,20 @@ class sap:
     self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
     linhas = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").RowCount
     apontador = 0
-    tamanhos = [0,10,0,0,10]
-    historico = "Cor,Nota,Texto breve para dano,Texto breve para code,Data\n"
+    tamanhos = [0,10,4,0,0,10]
+    historico = "Cor,Nota,Tipo,Texto breve para dano,Texto breve para code,Data\n"
     while(apontador < linhas and apontador < 10):
       destaque = 0
       notaServico = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"QMNUM")
+      dano = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador, "QMART")
       textoDano = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador, "KURZTEXT")
-      tamanhos[2] = len(textoDano) if (len(textoDano) > tamanhos[2]) else tamanhos[2]
+      tamanhos[3] = len(textoDano) if (len(textoDano) > tamanhos[3]) else tamanhos[3]
       textoCode = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"MATXT")
-      tamanhos[3] = len(textoCode) if (len(textoCode) > tamanhos[3]) else tamanhos[3]
+      tamanhos[4] = len(textoCode) if (len(textoCode) > tamanhos[4]) else tamanhos[4]
       FimAvaria = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"AUSBS")
-      historico = f"{historico}{destaque},{notaServico},{textoDano},{textoCode},{FimAvaria}\n"
+      historico = f"{historico}{destaque},{notaServico},{dano},{textoDano},{textoCode},{FimAvaria}\n"
       apontador = apontador + 1
-    tamanho = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]}\n"
+    tamanho = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]},{tamanhos[5]}\n"
     return tamanho + historico
   def agrupamento(self, nota, have_authorization: bool):
     instalacao = self.instalacao(nota)
