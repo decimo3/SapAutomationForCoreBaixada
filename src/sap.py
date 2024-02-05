@@ -636,7 +636,7 @@ class sap:
       apontador = apontador + 1
     if(textoStatus == None):
       textoStatus = "nao esta retirado"
-    return f"*Medidor:* {medidor}\n*Tipo:* {txtCodMedidor}\n*Status medidor:* {textoStatus}\n*Instalacao:* {instalacao}\n*Status Instalacao:* {statusInstalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
+    return f"*Instalacao:* {instalacao}\n*Status Instalacao:* {statusInstalacao}\n*Medidor:* {medidor}\n*Status medidor:* {textoStatus}\n*Tipo:* {txtCodMedidor}"
   def novo_analisar(self, arg) -> bool:
     self.debito(arg, True)
     apontador = 0
@@ -806,6 +806,7 @@ class sap:
     debitos = self.escrever_novo(arg, False, True)
     return (len(debitos) > 0)
   def informacao(self, arg) -> str:
+    result = self.novo_medidor(arg)
     instalacao = self.instalacao(arg)
     parceiro = self.session.findById("wnd[0]/usr/txtEANLD-PARTNER").text
     phone_field_partial_string = self.parceiro(parceiro)
@@ -813,7 +814,7 @@ class sap:
     nome_cliente = str.split(nome_cliente, "/")[0]
     self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04").Select()
     pessoa_fisica = self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04/ssubSCREEN_1100_TABSTRIP_AREA:SAPLBUSS:0028/ssubGENSUB:SAPLBUSS:7006/subA04P01:SAPLBUPA_BUTX_DIALOG:0100/tblSAPLBUPA_BUTX_DIALOGTCTRL_BPTAX/txtDFKKBPTAXNUM-TAXNUM[2,0]").text
-    return f"*Instalacao:* {instalacao}\n*Cod. do cliente:* {parceiro}\n*Cadastro Pessoa Fisica (CPF):* {pessoa_fisica}\n*Nome do cliente:* {nome_cliente}"
+    return result + f"\n*Cod. do cliente:* {parceiro}\n*Cadastro Pessoa Fisica (CPF):* {pessoa_fisica}\n*Nome do cliente:* {nome_cliente}"
   def parceiro(self, parceiro, have_authorization: bool=True) -> str:
     SAPLBUS_LOCATOR = "2000" if(have_authorization) else "2036"
     phone_field_partial_string = f"wnd[0]/usr/subSCREEN_3000_RESIZING_AREA:SAPLBUS_LOCATOR:{SAPLBUS_LOCATOR}/subSCREEN_1010_RIGHT_AREA:SAPLBUPA_DIALOG_JOEL:1000/"
