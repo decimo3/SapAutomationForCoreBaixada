@@ -24,9 +24,22 @@ class sap:
       self.DESTAQUE_AUSENTE = 0
       self.instancia = instancia
       self.inicializar()
+  def IfIsRunning(self, arg: str) -> bool:
+    # Define the command to list processes
+    command = f"tasklist /FI \"IMAGENAME eq {arg}\""
+    # Execute the command and capture its output
+    output = subprocess.check_output(command, shell=True)
+    # Decode the output to string and split it by lines
+    processes = output.decode(encoding='ISO-8859-1').split('\n')
+    # Iterate over the processes and find the one you want to kill
+    for line in processes:
+      if arg in line:
+        return True
+    return False
   def inicializar(self) -> bool:
-    subprocess.Popen("cscript erroDialog.vbs", stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
     dotenv.load_dotenv('sap.conf')
+    if not (self.IfIsRunning('cscript.exe')):
+      subprocess.Popen("cscript erroDialog.vbs", stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     # Get scripting
     try:
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
