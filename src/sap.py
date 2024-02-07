@@ -65,7 +65,8 @@ class sap:
       self.session.findById("wnd[0]/usr/pwdRSYST-BCODE").text = os.environ.get("PALAVRA")
       self.session.findById("wnd[0]/tbar[0]/btn[0]").Press()
       if (self.session.findById("wnd[1]", False) != None):
-        self.session.findById("wnd[1]/usr/radMULTI_LOGON_OPT1").Select()
+        if (self.session.findById("wnd[1]/usr/radMULTI_LOGON_OPT1", False) != None):
+          self.session.findById("wnd[1]/usr/radMULTI_LOGON_OPT1").Select()
         self.session.findById("wnd[1]/tbar[0]/btn[0]").Press()
     return (self.session.info.user != '')
   def relatorio(self, dia=7) -> str:
