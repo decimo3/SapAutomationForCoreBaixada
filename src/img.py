@@ -2,15 +2,14 @@
 # coding: utf8
 import os
 import sys
-from os import path
 from wand.image import Image 
 from wand.drawing import Drawing 
 from wand.color import Color
 
 SEPARADOR_ENTRE_COLUNAS = ","
 SEPARADOR_ENTRE_LINHAS = "\n"
-MARGEM_ESQUERDA = 13
-LARGURA_CARACTERE = 14
+MARGEM_ESQUERDA = 15
+LARGURA_CARACTERE = 15
 ALTURA_CARACTERE = 20
 nRow = 0 # contador de linha atual
 nCol = 0 # contador de coluna atual
@@ -21,21 +20,39 @@ CORES = ['rgb(255,255,255)', 'rgb(0,0,0)', 'rgb(255,128,128)', 'rgb(255,255,128)
 
 valores = sys.stdin.read() if (len(sys.argv) < 2) else sys.argv[1]
 linhas = valores.split(SEPARADOR_ENTRE_LINHAS)
-TAMANHO_COLUNAS_RELATORIO = linhas[0].split(SEPARADOR_ENTRE_COLUNAS)
-TAMANHO_COLUNAS_RELATORIO = [int(x) for x in TAMANHO_COLUNAS_RELATORIO]
+TAMANHO_COLUNAS_RELATORIO = [0] * len(linhas[0].split(SEPARADOR_ENTRE_COLUNAS))
+QUANTIDADE_LINHAS_RELATORIO = 0
+
+while(nRow < len(linhas)):
+  if(linhas[nRow] == "" or linhas[nRow] == None):
+    nRow = nRow + 1
+    continue
+  colunas = linhas[nRow].split(SEPARADOR_ENTRE_COLUNAS)
+  while(nCol < len(colunas)):
+    if(nCol == 0):
+      nCol = nCol + 1
+      continue
+    TAMANHO_COLUNAS_RELATORIO[nCol] = len(colunas[nCol]) if len(colunas[nCol]) > TAMANHO_COLUNAS_RELATORIO[nCol] else TAMANHO_COLUNAS_RELATORIO[nCol]
+    nCol = nCol + 1
+  nCol = 0
+  nRow = nRow + 1
+  QUANTIDADE_LINHAS_RELATORIO += 1
+
+
 CARACTERES_TOTAL = sum(TAMANHO_COLUNAS_RELATORIO)
 
 LARGURA_TOTAL_IMAGEM = CARACTERES_TOTAL * LARGURA_CARACTERE
-ALTURA_TOTAL_IMAGEM = len(linhas) * ALTURA_CARACTERE
+ALTURA_TOTAL_IMAGEM = QUANTIDADE_LINHAS_RELATORIO * ALTURA_CARACTERE
 
-nRow = 1
+nRow = 0
+nCol = 0
 
 with Drawing() as draw:
   with Image(width = LARGURA_TOTAL_IMAGEM, height = ALTURA_TOTAL_IMAGEM, background = Color(CORES[0])) as img:
     draw.font_family = 'Consolas'
     draw.font = 'Consolas'
     draw.font_size = ALTURA_CARACTERE # 15x15 cada letra
-    while(nRow < len(linhas)):
+    while(nRow < QUANTIDADE_LINHAS_RELATORIO):
       if(linhas[nRow] == ""):
         nRow = nRow + 1
         continue
@@ -46,7 +63,7 @@ with Drawing() as draw:
             cor = int(colunas[nCol])
             if(cor > 0):
               draw.fill_color = Color(CORES[int(colunas[nCol])])
-              draw.rectangle(left = 0, top = ((nRow - 1) * ALTURA_CARACTERE) + 1, right = LARGURA_TOTAL_IMAGEM, bottom = ((nRow - 1) * ALTURA_CARACTERE) + ALTURA_CARACTERE + 1)
+              draw.rectangle(left = 0, top = (nRow * ALTURA_CARACTERE) + 1, right = LARGURA_TOTAL_IMAGEM, bottom = (nRow * ALTURA_CARACTERE) + ALTURA_CARACTERE + 1)
               draw.fill_color = Color(CORES[1])
           except:
             pass
@@ -54,7 +71,7 @@ with Drawing() as draw:
             nCol = nCol + 1
             continue
         col = " " if (colunas[nCol] == None or colunas[nCol] == "") else colunas[nCol]
-        draw.text(x = cursor, y = (nRow * ALTURA_CARACTERE), body = col)
+        draw.text(x = cursor, y = ((nRow + 1) * ALTURA_CARACTERE), body = col)
         cursor = cursor + (TAMANHO_COLUNAS_RELATORIO[nCol] * LARGURA_CARACTERE)
         nCol = nCol + 1
       nCol = 0
