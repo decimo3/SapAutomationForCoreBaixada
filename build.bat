@@ -15,8 +15,8 @@ copy .\SapAutomationForCoreBaixada\dist\* tmp
 cd .\TelegramBotForFieldTeamHelper
 dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained true --output ..\tmp\
 cd ..
-robocopy tmp %USERPROFILE%\MestreRuan\ /XF database.db
-7z u mestreruan.zip .\tmp\*
+robocopy tmp %USERPROFILE%\MestreRuan\ /XF database.db /XF .env
+7z u -x!database.db -x!sap.conf -x!.env mestreruan.zip .\tmp\*
 REM https://superuser.com/questions/1654994/how-to-copy-folder-structure-but-exclude-certain-files-in-windows
 cd .\SapAutomationForCoreBaixada
 ) else (
