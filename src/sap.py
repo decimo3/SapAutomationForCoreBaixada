@@ -12,6 +12,7 @@ from os import listdir
 import win32com.client
 import pandas
 import dotenv
+import sqlite3
 
 class sap:
   def __init__(self, instancia) -> None:
@@ -584,30 +585,7 @@ class sap:
     self.session.FindById("wnd[0]/usr/ctxtRISA0-SERNR").text = medidor
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
     codMedidor = self.session.findById("wnd[0]/usr/subSUB_EQKO:SAPLITO0:0152/subSUB_0152A:SAPLITO0:1521/ctxtITOB-MATNR").text
-    if (codMedidor == "392030"): txtCodMedidor = "CONVENCIONAL MONO"
-    elif (codMedidor == "392016"): txtCodMedidor = "CONVENCIONAL MONO"
-    elif (codMedidor == "392107"): txtCodMedidor = "CONVENCIONAL BIFASICO"
-    elif (codMedidor == "392031"): txtCodMedidor = "CONVENCIAL TRIFASICO"
-    elif (codMedidor == "392106"): txtCodMedidor = "CONVENCIAL RURAL"
-    elif (codMedidor == "392158"): txtCodMedidor = "CONVENCIONAL MONO"
-    elif (codMedidor == "392200"): txtCodMedidor = "TARIFA BRANCA MONO"
-    elif (codMedidor == "392201"): txtCodMedidor = "TARIFA BRANCA BIFASICO"
-    elif (codMedidor == "392202"): txtCodMedidor = "TARIFA BRANCA TRIFASICA"
-    elif (codMedidor == "392143"): txtCodMedidor = "MICRO GERACAO MONO"
-    elif (codMedidor == "392144"): txtCodMedidor = "MICRO GERACAO RURAL"
-    elif (codMedidor == "392145"): txtCodMedidor = "MICRO GERACAO TRI"
-    elif (codMedidor == "392146"): txtCodMedidor = "MICRO GERACAO 30A"
-    elif (codMedidor == "392147"): txtCodMedidor = "MICRO GERACAO INDIRETO"
-    elif (codMedidor == "391105"): txtCodMedidor = "MODULO MONO"
-    elif (codMedidor == "392150"): txtCodMedidor = "MODULO BI"
-    elif (codMedidor == "392151"): txtCodMedidor = "MODULO TRI"
-    elif (codMedidor == "391108"): txtCodMedidor = "200 AMP"
-    elif (codMedidor == "392032"): txtCodMedidor = "BT INDIRETO"
-    elif (codMedidor == "392181"): txtCodMedidor = "E-450"
-    elif (codMedidor == "601178"): txtCodMedidor = "TELEMEDIDO-SHUNT"
-    elif (codMedidor == "313043"): txtCodMedidor = "TRANSF 400-5A"
-    elif (codMedidor == "313044"): txtCodMedidor = "TRANSF 1000-5A"
-    else: txtCodMedidor = "tipo medidor desconhecido"
+    txtCodMedidor = self.depara("material_codigo", codMedidor)
     if not(dataRetirado == None):
       textoStatus = f"retirado no sistema desde {dataRetirado}"
       return f"*Medidor:* {medidor}\n*Tipo:* {txtCodMedidor}\n*Status do medidor:* {textoStatus}\n*Instalacao:* {instalacao}\n*Status Instalacao:* {statusInstalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
@@ -876,7 +854,14 @@ class sap:
       dataframe['Cidade'].append(container.getCellValue(apontador, "CITY_NAME"))
       apontador = apontador + 1
     return pandas.DataFrame(dataframe).to_csv(index=False, sep=',')
-
+  def depara(self, tipo: str, de: str) -> str:
+    try:
+      connection = sqlite3.connect('sap.db')
+      cursor = connection.execute(f"SELECT para FROM depara WHERE tipo = '{tipo}' AND de = '{de}'")
+      result = cursor.fetchone()
+      return result[0] if result else "Codigo desconhecido!"
+    except Exception as e:
+      return f"An error occurred: {e}"
 
 if __name__ == "__main__":
   # Validação dos argumentos da linha de comando:
