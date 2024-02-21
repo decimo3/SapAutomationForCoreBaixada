@@ -528,7 +528,7 @@ class sap:
     for tel in telefone:
       texto += tel + " " if (len(tel) > 0) else ""
     return texto
-  def medidor(self, nota) -> str:
+  def consumo(self, nota) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ZATC66")
     self.session.FindById("wnd[0]/usr/ctxtP_ANLAGE").text = instalacao
@@ -537,16 +537,53 @@ class sap:
       self.session.FindById("wnd[0]/usr/subSUB1:SAPLZATC_INFO_CRM:0900/radXSCREEN-HEADER-RB_LEIT").Select()
     except:
       raise Exception(f"A instalacao {instalacao} nao possui historico de consumo para o contrato atual.")
-    linhas = self.session.FindById("wnd[0]/usr/cntlCONTROL/shellcont/shell").RowCount
+    tabela = "wnd[0]/usr/cntlCONTROL/shellcont/shell"
+    linhas = self.session.FindById(tabela).RowCount
+    dataframe = {
+      "Cor": [],
+      "Mes ref.": [],
+      "Data leit.": [],
+      "Medidor": [],
+      "Leitura": [],
+      "Registrador": [],
+      "Nota do leiturista": [],
+      "Tipo de leitura": [],
+      "Motivo da leitura": [],
+    }
     apontador = 0
     while(apontador < linhas):
-      codigo = self.session.FindById("wnd[0]/usr/cntlCONTROL/shellcont/shell").getCellValue(apontador,"OCORRENCIA")
-      if ((codigo == "3201") or (codigo == "3202") or (codigo == "3203") or (codigo == "3251")):
-        medidor = int(self.session.FindById("wnd[0]/usr/cntlCONTROL/shellcont/shell").getCellValue(apontador,"GERNR"))
-        leitura = self.session.FindById("wnd[0]/usr/cntlCONTROL/shellcont/shell").getCellValue(apontador,"ADATSOLL")
-        return f"Medidor {medidor} com codigo de retirado pelo leiturista desde {leitura}"
+      dataframe["Cor"].append(self.DESTAQUE_AUSENTE)
+      dataframe["Mes ref."].append(self.session.FindById(tabela).getCellValue(apontador, "MES_ANO"))
+      dataframe["Data leit."].append(self.session.FindById(tabela).getCellValue(apontador, "ADATSOLL"))
+      dataframe["Medidor"].append(int(self.session.FindById(tabela).getCellValue(apontador, "GERNR")))
+      dataframe["Leitura"].append(self.session.FindById(tabela).getCellValue(apontador, "LEIT_FATURADA"))
+      # Código do registrador e texto breve descritivo
+      registrador = self.session.FindById(tabela).getCellValue(apontador, "ZWNUMMER")
+      if (registrador != ""):
+        registrador = "0" + str(registrador) if len(registrador) == 1 else registrador
+        texto_registrador = self.depara("medidor_registrador", registrador)
+        dataframe["Registrador"].append(f"{registrador} - {texto_registrador}")
+      else:
+        dataframe["Registrador"].append("00 - Sem codigo do registrador")
+      # Código do leiturista e texto breve descritivo
+      codigo_leiturista = self.session.FindById(tabela).getCellValue(apontador, "OCORRENCIA")
+      texto_codigo_leiturista = codigo_leiturista + " - " + self.depara("leitura_codigo", codigo_leiturista) if codigo_leiturista else ""
+      dataframe["Nota do leiturista"].append(texto_codigo_leiturista)
+      # Código do tipo de leitura e texto breve descritivo
+      tipo_leitura = self.session.FindById(tabela).getCellValue(apontador, "TIPO_LEITURA")
+      texto_tipo_leitura = self.depara("leitura_tipo", tipo_leitura)
+      dataframe["Tipo de leitura"].append(f"{tipo_leitura} - {texto_tipo_leitura}")
+      # Código do motivo da leitura e texto breve descritivo
+      motivo_leitura = self.session.FindById(tabela).getCellValue(apontador, "MOTIVO_LEITURA")
+      texto_motivo_leitura = self.depara("leitura_motivo", motivo_leitura)
+      dataframe["Motivo da leitura"].append(f"{motivo_leitura} - {texto_motivo_leitura}")
       apontador = apontador + 1
-    return "Medidor *nao* consta como retirado"
+    media_tri = self.session.findById("wnd[0]/usr/subSUB1:SAPLZATC_INFO_CRM:0900/txtXSCREEN-HEADER-MEDIA_03M").text
+    media_sem = self.session.findById("wnd[0]/usr/subSUB1:SAPLZATC_INFO_CRM:0900/txtXSCREEN-HEADER-MEDIA_06M").text
+    media_ano = self.session.findById("wnd[0]/usr/subSUB1:SAPLZATC_INFO_CRM:0900/txtXSCREEN-HEADER-MEDIA_12M").text
+    texto_medias_consumo = f"Media trimestral: {media_tri}\nMedia semestral: {media_sem}\nMedia anual: {media_ano}"
+    resultados_csv = pandas.DataFrame(dataframe).to_csv(index=False, sep=',')
+    return "datatype:img\n" + resultados_csv + 'datatype:txt\n' + texto_medias_consumo
   def analisar(self, apontador=0, verificar_15_dias=False) -> bool:
     if(apontador == 0): return False
     if (self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador, "STATUS") != "@5C@"): return False
@@ -940,6 +977,8 @@ if __name__ == "__main__":
       print(robo.instalacao(argumento))
     elif(aplicacao == "cruzamento"):
       print(robo.cruzamento(argumento))
+    elif(aplicacao == "consumo"):
+      print(robo.consumo(argumento))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
   # Returns the error with an 'ERROR:' prefix on method failure
