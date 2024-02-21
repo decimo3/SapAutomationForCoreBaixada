@@ -207,22 +207,17 @@ class sap:
         offset = (28 - (linhas - celula)) + 1
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectedRows = celula
       leitString = "Cor,Seq,Instalacao,Endereco,Bairro,Medidor,Hora,Cod\n"
-      tamanhos = [0,4,10,0,0,8,8,4]
       while (apontador < limite and apontador < linhas):
         destaque = self.DESTAQUE_AMARELO if(apontador == celula) else self.DESTAQUE_AUSENTE
         sequencia = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZZ_NUMSEQ")
         instalRoteiro = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ANLAGE")
         endereco = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZENDERECO")
-        tamanhos[3] = len(endereco) if (len(endereco) > tamanhos[3]) else tamanhos[3]
         subbairro = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"BAIRRO")
-        tamanhos[4] = len(subbairro) if (len(subbairro) > tamanhos[4]) else tamanhos[4]
         medidor = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"GERAET")
         horaleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZHORALEIT")
         codleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ABLHINW")
         leitString = f"{leitString}{destaque},{sequencia},{instalRoteiro},{endereco},{subbairro},{medidor},{horaleit},{codleit}\n"
         apontador = apontador + 1
-      tamanhosString = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]},{tamanhos[5]},{tamanhos[6]},{tamanhos[7]}\n"
-      leitString = tamanhosString + leitString
       return leitString
   def debito(self, nota, reavisos: bool=False) -> None:
     instalacao = self.instalacao(nota)
@@ -241,13 +236,11 @@ class sap:
     if(linhas < 1): raise Exception("Cliente nao possui faturas pendentes!")
     debString = 'Cor,Mes ref.,Vencimento,Valor,Tipo,Status\n'
     apontador = 1
-    tamanhos = [0,7,10,12,0,0]
     while (apontador < linhas):
       referencia = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"BILLING_PERIOD")
       vencimento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"FAEDN")
       valorPendente = self.sanitizar(self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TOTAL_AMNT"))
       tipoDebito = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TIP_FATURA")
-      tamanhos[4] = len(tipoDebito) if (len(tipoDebito) > tamanhos[4]) else tamanhos[4]
       statusFat = self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador, "STATUS")
       if(statusFat == "@5B@"): # Status no prazo de vencimento da fatura
         destaque = self.DESTAQUE_VERDEJANTE
@@ -261,11 +254,8 @@ class sap:
       else:
         destaque = self.DESTAQUE_AUSENTE
         textStatus = "Consultar"
-      tamanhos[5] = len(textStatus) if (len(textStatus) > tamanhos[5]) else tamanhos[5]
       debString = f"{debString}{destaque},{referencia},{vencimento},R$:{valorPendente},{tipoDebito},{textStatus}\n"
       apontador = apontador + 1
-    tamanhosString = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]},{tamanhos[5]}\n"
-    debString = tamanhosString + debString
     return debString
   def imprimir(self, documento):
     self.session.StartTransaction(Transaction="ZATC73")
@@ -342,21 +332,17 @@ class sap:
     self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
     linhas = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").RowCount
     apontador = 0
-    tamanhos = [0,10,4,0,0,10]
     historico = "Cor,Nota,Tipo,Texto breve para dano,Texto breve para code,Data\n"
     while(apontador < linhas and apontador < 10):
       destaque = 0
       notaServico = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"QMNUM")
       dano = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador, "QMART")
       textoDano = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador, "KURZTEXT")
-      tamanhos[3] = len(textoDano) if (len(textoDano) > tamanhos[3]) else tamanhos[3]
       textoCode = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"MATXT")
-      tamanhos[4] = len(textoCode) if (len(textoCode) > tamanhos[4]) else tamanhos[4]
       FimAvaria = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"AUSBS")
       historico = f"{historico}{destaque},{notaServico},{dano},{textoDano},{textoCode},{FimAvaria}\n"
       apontador = apontador + 1
-    tamanho = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]},{tamanhos[5]}\n"
-    return tamanho + historico
+    return historico
   def agrupamento(self, nota, have_authorization: bool):
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ES32")
@@ -419,7 +405,6 @@ class sap:
     statusInstalacao = []
     textoDescricao = []
     destaques = []
-    tamanhos = [0,0,10,0,10,20]
     agrupamentoString = "Cor,End.,Instalacao,Nome cliente,Tipo cliente,Observacao\n"
     # Coleta das informacões do agrupamento
     apontador = 0
@@ -428,12 +413,9 @@ class sap:
       if(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-ANLAGE[1,0]").text == ultima_instalacao):
         break
       enderecos.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-COMPLS[0,0]").text)
-      tamanhos[1] = len(enderecos[apontador]) if (len(enderecos[apontador]) > tamanhos[1]) else tamanhos[1]
       instalacoes.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-ANLAGE[1,0]").text)
       nomeCliente.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-NOME[2,0]").text)
-      tamanhos[3] = len(nomeCliente[apontador]) if (len(nomeCliente[apontador]) > tamanhos[3]) else tamanhos[3]
       tipoinstal.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-CLASSE[3,0]").text)
-      tamanhos[4] = len(tipoinstal[apontador]) if (len(tipoinstal[apontador]) > tamanhos[4]) else tamanhos[4]
       ultima_instalacao = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-ANLAGE[1,0]").text
       apontador = apontador + 1
       self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX").verticalScrollbar.position = apontador
@@ -479,11 +461,10 @@ class sap:
       apontador = apontador + 1
     apontador = 0
     # Preparacao da string final
-    tamanhosString = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]},{tamanhos[5]}\n"
     while (apontador < len(instalacoes)):
       agrupamentoString = f"{agrupamentoString}{destaques[apontador]},{enderecos[apontador]},{instalacoes[apontador]},{nomeCliente[apontador]},{tipoinstal[apontador]},{textoDescricao[apontador]}\n"
       apontador = apontador + 1
-    return f"{tamanhosString}{agrupamentoString}\n"
+    return agrupamentoString
   def coordenadas(self, nota) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ES32")
@@ -726,7 +707,6 @@ class sap:
     #[char, line]
     col = 1
     row = 0
-    tamanhos = [0,13,10,12,10,9]
     colunas = [0,0,0,0,0,0]
     datasete = {
       "destaques": [],
@@ -799,7 +779,6 @@ class sap:
     dt3 = dt3.rename(columns={'valores_y': 'valores'})
     dt3['impressao'].replace('', pandas.NA, inplace=True)
     dt3 = dt3.dropna(subset=['impressao'])
-    tamanhoString = f"{tamanhos[0]},{tamanhos[1]},{tamanhos[2]},{tamanhos[3]},{tamanhos[4]},{tamanhos[5]}\n"
     if(so_passivas):
       dt3["vencimento"] = pandas.to_datetime(dt3['vencimento'])
       prazo_minimo = datetime.date.today() - datetime.timedelta(days=15)
@@ -810,7 +789,7 @@ class sap:
     if(doc_impressao):
       dt3 = dt3[dt3['status'] != "Fat. no prazo"]
       return dt3['impressao'].to_list()
-    return tamanhoString + dt3.to_csv(index = False)
+    return dt3.to_csv(index = False)
   def fatura_novo(self, arg) -> str:
     debitos = self.escrever_novo(arg, True)
     if(len(debitos) > 6): raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
@@ -876,7 +855,6 @@ class sap:
       "Longitude": [],
       "Cidade": [],
     }
-    tamanhos = [0,6,10,9,0,6,16,16,0]
     while(apontador < linhas):
       # 0. "COLORACAO"
       dataframe['#'].append("0")
@@ -888,8 +866,6 @@ class sap:
       dataframe['Cod. rua'].append(container.getCellValue(apontador, "STRT_CODE"))
       # 4. "STREET"
       dataframe['Logradouro'].append(container.getCellValue(apontador, "STREET"))
-      tamanho_campo = len(container.getCellValue(apontador, "STREET"))
-      tamanhos[4] = tamanhos[4] if(tamanhos[4] > tamanho_campo) else tamanho_campo
       # 5. "NUMERO_OUTR"
       dataframe['Num. 2'].append(container.getCellValue(apontador, "NUMERO_OUTR"))
       # 6. "LATITUDE"
@@ -898,12 +874,9 @@ class sap:
       dataframe['Longitude'].append(str.replace(container.getCellValue(apontador, "LONGITUDE"), ',', '.'))
       # 8. "CITY_NAME"
       dataframe['Cidade'].append(container.getCellValue(apontador, "CITY_NAME"))
-      tamanho_campo = len(container.getCellValue(apontador, "CITY_NAME"))
-      tamanhos[8] = tamanhos[8] if(tamanhos[8] > tamanho_campo) else tamanho_campo
       apontador = apontador + 1
-    tamanhos_string = ",".join([str(x) for x in tamanhos])
-    resultados_csv = pandas.DataFrame(dataframe).to_csv(index=False, sep=',')
-    return tamanhos_string + '\n' + resultados_csv
+    return pandas.DataFrame(dataframe).to_csv(index=False, sep=',')
+
 
 if __name__ == "__main__":
   # Validação dos argumentos da linha de comando:
