@@ -3,8 +3,11 @@ if defined VIRTUAL_ENV (
 pyinstaller --onefile .\\src\\sap.py
 pyinstaller --onefile .\\src\\img.py
 pyinstaller --onefile .\\src\\etc.py
+rm .\\src\\sap.db
+sqlite3 .\\src\\sap.db < .\\src\\sap.sql
 cd ..
 mkdir tmp
+copy .\SapAutomationForCoreBaixada\src\sap.db tmp
 copy .\SapAutomationForCoreBaixada\src\sap.conf tmp
 copy .\SapAutomationForCoreBaixada\src\erroDialog.vbs tmp
 copy .\SapAutomationForCoreBaixada\src\fileDialog.vbs tmp
