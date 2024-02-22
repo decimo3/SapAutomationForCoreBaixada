@@ -1,10 +1,11 @@
 @echo OFF
 if defined VIRTUAL_ENV (
-pyinstaller --onefile .\\src\\sap.py
-pyinstaller --onefile .\\src\\img.py
-pyinstaller --onefile .\\src\\etc.py
-rm .\\src\\sap.db
-sqlite3 .\\src\\sap.db < .\\src\\sap.sql
+pyinstaller --onefile sap.py
+pyinstaller --onefile img.py
+pyinstaller --onefile etc.py
+rm sap.db
+sqlite3 sap.db < sap.sql
+cd ..
 cd ..
 mkdir tmp
 copy .\SapAutomationForCoreBaixada\src\sap.db tmp
