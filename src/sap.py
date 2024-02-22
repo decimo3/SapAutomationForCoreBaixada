@@ -539,6 +539,7 @@ class sap:
       "Data leit.": [],
       "Medidor": [],
       "Leitura": [],
+      "Consumo": [],
       "Registrador": [],
       "Tipo de leitura": [],
       "Motivo da leitura": [],
@@ -550,7 +551,8 @@ class sap:
       dataframe["Mes ref."].append(self.session.FindById(tabela).getCellValue(apontador, "MES_ANO"))
       dataframe["Data leit."].append(self.session.FindById(tabela).getCellValue(apontador, "ADATSOLL"))
       dataframe["Medidor"].append(int(self.session.FindById(tabela).getCellValue(apontador, "GERNR")))
-      dataframe["Leitura"].append(self.session.FindById(tabela).getCellValue(apontador, "LEIT_FATURADA"))
+      dataframe["Leitura"].append(int(self.sanitizar(self.session.FindById(tabela).getCellValue(apontador, "LEIT_FATURADA"))))
+      dataframe["Consumo"].append(0)
       # Código do registrador e texto breve descritivo
       registrador = self.session.FindById(tabela).getCellValue(apontador, "ZWNUMMER")
       if (registrador != ""):
@@ -572,12 +574,11 @@ class sap:
       texto_motivo_leitura = self.depara("leitura_motivo", motivo_leitura)
       dataframe["Motivo da leitura"].append(f"{motivo_leitura} - {texto_motivo_leitura}")
       apontador = apontador + 1
-    media_tri = self.session.findById("wnd[0]/usr/subSUB1:SAPLZATC_INFO_CRM:0900/txtXSCREEN-HEADER-MEDIA_03M").text
-    media_sem = self.session.findById("wnd[0]/usr/subSUB1:SAPLZATC_INFO_CRM:0900/txtXSCREEN-HEADER-MEDIA_06M").text
-    media_ano = self.session.findById("wnd[0]/usr/subSUB1:SAPLZATC_INFO_CRM:0900/txtXSCREEN-HEADER-MEDIA_12M").text
-    texto_medias_consumo = f"Media trimestral: {media_tri}\nMedia semestral: {media_sem}\nMedia anual: {media_ano}"
-    resultados_csv = pandas.DataFrame(dataframe).to_csv(index=False, sep=',')
-    return "datatype:img\n" + resultados_csv + 'datatype:txt\n' + texto_medias_consumo
+    dataframe = pandas.DataFrame(dataframe)
+    leitura_anterior = dataframe["Leitura"].shift(-1)
+    consumo = dataframe["Leitura"] - leitura_anterior
+    dataframe["Consumo"] = consumo
+    return dataframe.to_csv(index=False, sep=',')
   def analisar(self, apontador=0, verificar_15_dias=False) -> bool:
     if(apontador == 0): return False
     if (self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador, "STATUS") != "@5C@"): return False
