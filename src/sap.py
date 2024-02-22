@@ -542,9 +542,9 @@ class sap:
       "Medidor": [],
       "Leitura": [],
       "Registrador": [],
-      "Nota do leiturista": [],
       "Tipo de leitura": [],
       "Motivo da leitura": [],
+      "Nota do leiturista": [],
     }
     apontador = 0
     while(apontador < linhas):
