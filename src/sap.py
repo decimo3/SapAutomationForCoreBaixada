@@ -185,28 +185,25 @@ class sap:
       # se a linhaAtual e maior que linhasTotais - 14, entao primeiraVisivel e linhasTotais - 28 e offset e igual a
       apontador = 0
       limite = 0
-      offset = 0
-      # Se a instalacao foi encontrada no início do relatorio
-      if (celula <= 14):
-        self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = 0
+      # Se a quantidade de linhas for menor que o padrão
+      if (linhas <= 60):
         apontador = 0
-        limite = 28
-        offset = celula + 1
-      # Se a instalacao foi encontrada no meio do relatorio
-      if (celula > 14 and celula < (linhas - 14)):
-        self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = celula - 14
-        apontador = celula - 14
-        limite = celula + 14
-        offset = 14 + 1
-      # Se a instalacao foi encontrada no final do relatorio
-      if(celula > 14 and celula >= (linhas - 14)):
-        self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").firstVisibleRow = linhas - 28
-        apontador = celula - 28
         limite = linhas
-        offset = (28 - (linhas - celula)) + 1
+      # Se a instalacao foi encontrada no início do relatorio
+      elif (celula <= 14):
+        apontador = 0
+        limite = 60
+      # Se a instalacao foi encontrada no final do relatorio
+      elif(celula > (linhas - 30)):
+        apontador = linhas - 60
+        limite = linhas
+      # Se a instalacao foi encontrada no meio do relatorio
+      else:
+        apontador = celula - 30
+        limite = celula + 30
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectedRows = celula
       leitString = "Cor,Seq,Instalacao,Endereco,Bairro,Medidor,Hora,Cod\n"
-      while (apontador < limite and apontador < linhas):
+      while (apontador < limite):
         destaque = self.DESTAQUE_AMARELO if(apontador == celula) else self.DESTAQUE_AUSENTE
         sequencia = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZZ_NUMSEQ")
         instalRoteiro = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ANLAGE")
@@ -214,7 +211,8 @@ class sap:
         subbairro = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"BAIRRO")
         medidor = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"GERAET")
         horaleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZHORALEIT")
-        codleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ABLHINW")
+        cod = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ABLHINW")
+        codleit = cod + " - " + self.depara("leitura_codigo", cod) if cod != "" else ""
         leitString = f"{leitString}{destaque},{sequencia},{instalRoteiro},{endereco},{subbairro},{medidor},{horaleit},{codleit}\n"
         apontador = apontador + 1
       return leitString
