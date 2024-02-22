@@ -12,18 +12,18 @@ venv\Scripts\Activate
 ```bash
 pip install -r requirements.txt
 ```
-4. Inicie o *SAP runner*:
+4. Configure `sap.conf` com sua autenticação
+```txt
+USUARIO=sua_matricula_aqui
+PALAVRA=sua_senha_aqui
+```
+6. Para atualizar o executável, execute:
 ```bash
-python3 main.py
+pyinstaller --onefile sap.py
 ```
 5. Para finalizar, execute:
 ```bash
 Deactivate
-```
-
-6. Para atualizar o executável, execute:
-```bash
-pyinstaller --onefile main.py
 ```
 
 Obs.0: Esse script contém dependências específicas para o sistema operacional `Windowns`.
