@@ -895,7 +895,8 @@ class sap:
       return result[0] if result else "Codigo desconhecido!"
     except Exception as e:
       return f"An error occurred: {e}"
-
+  def retorno(self) -> None:
+    self.session.sendCommand('/n')
 if __name__ == "__main__":
   # Validação dos argumentos da linha de comando:
   # 1. Será possível realizar a tarefa se no mínimo
@@ -977,6 +978,7 @@ if __name__ == "__main__":
       print(robo.consumo(argumento))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
+    robo.retorno()
   # Returns the error with an 'ERROR:' prefix on method failure
   except Exception as erro:
     print(f"ERRO: {erro.args[0]}")
