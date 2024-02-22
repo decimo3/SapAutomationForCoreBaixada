@@ -217,7 +217,7 @@ class sap:
         codleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ABLHINW")
         leitString = f"{leitString}{destaque},{sequencia},{instalRoteiro},{endereco},{subbairro},{medidor},{horaleit},{codleit}\n"
         apontador = apontador + 1
-      return "datatype:img\n" + leitString
+      return leitString
   def debito(self, nota, reavisos: bool=False) -> None:
     instalacao = self.instalacao(nota)
     contrato = self.session.FindById("wnd[0]/usr/txtEANLD-VERTRAG").text
@@ -255,7 +255,7 @@ class sap:
         textStatus = "Consultar"
       debString = f"{debString}{destaque},{referencia},{vencimento},R$:{valorPendente},{tipoDebito},{textStatus}\n"
       apontador = apontador + 1
-    return "datatype:img\n" + debString
+    return debString
   def imprimir(self, documento) -> None:
     self.session.StartTransaction(Transaction="ZATC73")
     shutil.rmtree(self.CURRENT_FOLDER)
@@ -285,7 +285,7 @@ class sap:
     if(len(debitos) == 0):
       raise Exception("Cliente nao possui faturas vencidas!")
     self.imprimir(debitos)
-    return "datatype:pdf\n" + self.monitorar(len(debitos))
+    return self.monitorar(len(debitos))
   def instalacao(self, arg) -> int:
     try:
       arg = int(arg)
@@ -341,7 +341,7 @@ class sap:
       FimAvaria = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"AUSBS")
       historico = f"{historico}{destaque},{notaServico},{dano},{textoDano},{textoCode},{FimAvaria}\n"
       apontador = apontador + 1
-    return "datatype:img\n" + historico
+    return historico
   def agrupamento(self, nota, have_authorization: bool) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ES32")
@@ -463,7 +463,7 @@ class sap:
     while (apontador < len(instalacoes)):
       agrupamentoString = f"{agrupamentoString}{destaques[apontador]},{enderecos[apontador]},{instalacoes[apontador]},{nomeCliente[apontador]},{tipoinstal[apontador]},{textoDescricao[apontador]}\n"
       apontador = apontador + 1
-    return "datatype:img\n" + agrupamentoString
+    return agrupamentoString
   def coordenadas(self, nota) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ES32")
@@ -479,7 +479,7 @@ class sap:
     self.session.FindById("wnd[0]/usr/ssubSUB:SAPLXES60:0100/tabsTS0100/tabpTAB2").Select()
     coordenada = self.session.FindById("wnd[0]/usr/ssubSUB:SAPLXES60:0100/tabsTS0100/tabpTAB2/ssubSUB1:SAPLXES60:0201/txtEVBSD-ZZ_COORDENADAS").text
     if (len(coordenada) > 0):
-      return "datatype:xyz\n" + re.sub(',', '.', coordenada)
+      return re.sub(',', '.', coordenada)
     else:
       raise Exception("A instalacao nao possui coordenada cadastrada!")
   def telefone(self, arg) -> str:
@@ -523,7 +523,7 @@ class sap:
     texto = nome_cliente + " "
     for tel in telefone:
       texto += tel + " " if (len(tel) > 0) else ""
-    return "datatype:txt\n" + texto
+    return texto
   def consumo(self, nota) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ZATC66")
@@ -621,7 +621,7 @@ class sap:
     txtCodMedidor = self.depara("material_codigo", codMedidor)
     if not(dataRetirado == None):
       textoStatus = f"retirado no sistema desde {dataRetirado}"
-      return "datatype:txt\n" + f"*Medidor:* {medidor}\n*Tipo:* {txtCodMedidor}\n*Status do medidor:* {textoStatus}\n*Instalacao:* {instalacao}\n*Status Instalacao:* {statusInstalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
+      return f"*Medidor:* {medidor}\n*Tipo:* {txtCodMedidor}\n*Status do medidor:* {textoStatus}\n*Instalacao:* {instalacao}\n*Status Instalacao:* {statusInstalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
     self.session.FindById(r'wnd[0]/usr/tabsTABSTRIP/tabpT\03/ssubSUB_DATA:SAPMIEQ0:0500/subISUSUB:SAPLE10R:1000/btnBUTTON_ISABL').Press()
     apontador = 0
     linhas = self.session.FindById("wnd[0]/usr/cntlBCALVC_EVENT2_D100_C1/shellcont/shell").RowCount
@@ -642,7 +642,7 @@ class sap:
       apontador = apontador + 1
     if(textoStatus == None):
       textoStatus = "nao esta retirado"
-    return "datatype:txt\n" + f"*Instalacao:* {instalacao}\n*Status Instalacao:* {statusInstalacao}\n*Medidor:* {medidor}\n*Status medidor:* {textoStatus}\n*Tipo:* {txtCodMedidor}"
+    return f"*Instalacao:* {instalacao}\n*Status Instalacao:* {statusInstalacao}\n*Medidor:* {medidor}\n*Status medidor:* {textoStatus}\n*Tipo:* {txtCodMedidor}"
   def novo_analisar(self, arg) -> bool:
     self.debito(arg, True)
     apontador = 0
@@ -695,7 +695,7 @@ class sap:
     if(len(passiveis) > 5 and self.instancia == 0):
       raise Exception(f"Cliente possui muitas faturas ({len(passiveis)}) passivas")
     self.imprimir(passiveis)
-    return "datatype:pdf\n" + self.monitorar(len(passiveis))
+    return self.monitorar(len(passiveis))
   def sanitizar(self, arg) -> str:
     arg = str.replace(arg, ' ', '')
     arg = str.replace(arg, '.', '')
@@ -800,12 +800,12 @@ class sap:
     if(doc_impressao):
       dt3 = dt3[dt3['status'] != "Fat. no prazo"]
       return dt3['impressao'].to_list()
-    return "datatype:img\n" + dt3.to_csv(index = False)
+    return dt3.to_csv(index = False)
   def fatura_novo(self, arg) -> str:
     debitos = self.escrever_novo(arg, True)
     if(len(debitos) > 6): raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
     self.imprimir(debitos)
-    return "datatype:pdf\n" + self.monitorar(len(debitos))
+    return self.monitorar(len(debitos))
   def passivas_novo(self, arg) -> bool:
     debitos = self.escrever_novo(arg, False, True)
     return (len(debitos) > 0)
@@ -818,7 +818,7 @@ class sap:
     nome_cliente = str.split(nome_cliente, "/")[0]
     self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04").Select()
     pessoa_fisica = self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04/ssubSCREEN_1100_TABSTRIP_AREA:SAPLBUSS:0028/ssubGENSUB:SAPLBUSS:7006/subA04P01:SAPLBUPA_BUTX_DIALOG:0100/tblSAPLBUPA_BUTX_DIALOGTCTRL_BPTAX/txtDFKKBPTAXNUM-TAXNUM[2,0]").text
-    return "datatype:txt\n" + result + f"\n*Cod. do cliente:* {parceiro}\n*Cadastro Pessoa Fisica (CPF):* {pessoa_fisica}\n*Nome do cliente:* {nome_cliente}"
+    return result + f"\n*Cod. do cliente:* {parceiro}\n*Cadastro Pessoa Fisica (CPF):* {pessoa_fisica}\n*Nome do cliente:* {nome_cliente}"
   def parceiro(self, parceiro, have_authorization: bool=True) -> str:
     SAPLBUS_LOCATOR = "2000" if(have_authorization) else "2036"
     phone_field_partial_string = f"wnd[0]/usr/subSCREEN_3000_RESIZING_AREA:SAPLBUS_LOCATOR:{SAPLBUS_LOCATOR}/subSCREEN_1010_RIGHT_AREA:SAPLBUPA_DIALOG_JOEL:1000/"
@@ -886,7 +886,7 @@ class sap:
       # 8. "CITY_NAME"
       dataframe['Cidade'].append(container.getCellValue(apontador, "CITY_NAME"))
       apontador = apontador + 1
-    return "datatype:img\n" + pandas.DataFrame(dataframe).to_csv(index=False, sep=',')
+    return pandas.DataFrame(dataframe).to_csv(index=False, sep=',')
   def depara(self, tipo: str, de: str) -> str:
     try:
       connection = sqlite3.connect('sap.db')
