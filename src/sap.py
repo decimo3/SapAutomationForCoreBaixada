@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # coding: utf8
+#startregion
 import os
 import sys
 import time
@@ -7,18 +8,17 @@ import datetime
 import re
 import shutil
 import subprocess
-from os import makedirs
-from os import listdir
 import win32com.client
 import pandas
 import dotenv
 import sqlite3
+#endregion
 
 class sap:
   def __init__(self, instancia) -> None:
       self.CURRENT_FOLDER = os.getcwd() + "\\tmp\\"
       if (not(os.path.exists(self.CURRENT_FOLDER))):
-        makedirs(self.CURRENT_FOLDER)
+        os.makedirs(self.CURRENT_FOLDER)
       self.DESTAQUE_AMARELO = 3
       self.DESTAQUE_VERMELHO = 2
       self.DESTAQUE_VERDEJANTE = 4
@@ -257,7 +257,7 @@ class sap:
   def imprimir(self, documento) -> None:
     self.session.StartTransaction(Transaction="ZATC73")
     shutil.rmtree(self.CURRENT_FOLDER)
-    makedirs(self.CURRENT_FOLDER)
+    os.makedirs(self.CURRENT_FOLDER)
     self.session.FindById("wnd[0]/usr/chkP_LOCL").selected = True
     self.session.FindById("wnd[0]/usr/chkP_IMPLOC").selected = True
     apontador = 0
@@ -589,9 +589,9 @@ class sap:
       if (datetime.date.today() > prazo_mais_15_dias): return False
     return True
   def monitorar(self, qnt) -> str:
-    while(len(listdir(self.CURRENT_FOLDER)) < qnt):
+    while(len(os.listdir(self.CURRENT_FOLDER)) < qnt):
       time.sleep(3)
-    return "\n".join(listdir(self.CURRENT_FOLDER))
+    return "\n".join(os.listdir(self.CURRENT_FOLDER))
   def novo_medidor(self, arg) -> str:
     instalacao = self.instalacao(arg)
     statusInstalacao = self.session.findById('wnd[0]/usr/txtEANLD-DISCSTAT').text
