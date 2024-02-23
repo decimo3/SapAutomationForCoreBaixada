@@ -8,15 +8,13 @@ from wand.color import Color
 
 SEPARADOR_ENTRE_COLUNAS = ","
 SEPARADOR_ENTRE_LINHAS = "\n"
-MARGEM_ESQUERDA = 15
-LARGURA_CARACTERE = 15
+LARGURA_CARACTERE = 13
 ALTURA_CARACTERE = 20
 nRow = 0 # contador de linha atual
 nCol = 0 # contador de coluna atual
-cursor = MARGEM_ESQUERDA # distância a esqueda da escrita do texto
+cursor = LARGURA_CARACTERE # distância a esqueda da escrita do texto
 # CORES: branco, preto, vermelho, amarelo, verde
 CORES = ['rgb(255,255,255)', 'rgb(0,0,0)', 'rgb(255,128,128)', 'rgb(255,255,128)', 'rgb(128,255,128)']
-# OFFSET_LINHAS_RELATORIO = []
 
 valores = sys.stdin.read() if (len(sys.argv) < 2) else sys.argv[1]
 linhas = valores.split(SEPARADOR_ENTRE_LINHAS)
@@ -41,8 +39,8 @@ while(nRow < len(linhas)):
 
 CARACTERES_TOTAL = sum(TAMANHO_COLUNAS_RELATORIO)
 
-LARGURA_TOTAL_IMAGEM = CARACTERES_TOTAL * LARGURA_CARACTERE
-ALTURA_TOTAL_IMAGEM = QUANTIDADE_LINHAS_RELATORIO * ALTURA_CARACTERE
+LARGURA_TOTAL_IMAGEM = (CARACTERES_TOTAL * LARGURA_CARACTERE) + LARGURA_CARACTERE
+ALTURA_TOTAL_IMAGEM = (QUANTIDADE_LINHAS_RELATORIO * ALTURA_CARACTERE) + ALTURA_CARACTERE
 
 nRow = 0
 nCol = 0
@@ -75,7 +73,7 @@ with Drawing() as draw:
         cursor = cursor + (TAMANHO_COLUNAS_RELATORIO[nCol] * LARGURA_CARACTERE)
         nCol = nCol + 1
       nCol = 0
-      cursor = MARGEM_ESQUERDA
+      cursor = LARGURA_CARACTERE
       nRow = nRow + 1
     draw(img)
     savefilename = os.getcwd() + "\\tmp\\temporario.png"
