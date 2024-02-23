@@ -202,20 +202,35 @@ class sap:
         apontador = celula - 30
         limite = celula + 30
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectedRows = celula
-      leitString = "Cor,Seq,Instalacao,Endereco,Bairro,Medidor,Hora,Cod\n"
+      leitString = {
+        "Cor": [],
+        "Seq": [],
+        "Instalacao": [],
+        "Endereco": [],
+        "Bairro": [],
+        "Medidor": [],
+        "Hora": [],
+        "Cod": [],
+      }
+      texto_codigo_leiturista = ""
       while (apontador < limite):
-        destaque = self.DESTAQUE_AMARELO if(apontador == celula) else self.DESTAQUE_AUSENTE
-        sequencia = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZZ_NUMSEQ")
-        instalRoteiro = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ANLAGE")
-        endereco = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZENDERECO")
-        subbairro = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"BAIRRO")
-        medidor = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"GERAET")
-        horaleit = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZHORALEIT")
+        leitString["Cor"].append(str(self.DESTAQUE_AMARELO if(apontador == celula) else self.DESTAQUE_AUSENTE))
+        leitString["Seq"].append(self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZZ_NUMSEQ"))
+        leitString["Instalacao"].append(self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ANLAGE"))
+        leitString["Endereco"].append(self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZENDERECO"))
+        leitString["Bairro"].append(self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"BAIRRO"))
+        leitString["Medidor"].append(self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"GERAET"))
+        leitString["Hora"].append(self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ZHORALEIT"))
         cod = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador,"ABLHINW")
-        codleit = cod + " - " + self.depara("leitura_codigo", cod) if cod != "" else ""
-        leitString = f"{leitString}{destaque},{sequencia},{instalRoteiro},{endereco},{subbairro},{medidor},{horaleit},{codleit}\n"
+        leitString["Cod"].append(cod)
+        texto_codigo_leiturista = self.depara("leitura_codigo", cod) if(apontador == celula and cod != "") else texto_codigo_leiturista
         apontador = apontador + 1
-      return leitString
+      dataframe = pandas.DataFrame(leitString)
+      if(texto_codigo_leiturista != ""):
+        apontador = len(dataframe)
+        dataframe.loc[apontador, "Cor"] = str(self.DESTAQUE_VERMELHO)
+        dataframe.loc[apontador, "Endereco"] = texto_codigo_leiturista
+      return dataframe.to_csv(index=False)
   def debito(self, nota, reavisos: bool=False) -> None:
     instalacao = self.instalacao(nota)
     contrato = self.session.FindById("wnd[0]/usr/txtEANLD-VERTRAG").text
