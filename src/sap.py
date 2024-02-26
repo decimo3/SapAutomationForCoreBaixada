@@ -929,47 +929,46 @@ class sap:
     self.session.sendCommand('/n')
   def inspecao(self, arg) -> str:
     instalacao = self.instalacao(arg)
+    retorno = f"A instalacao {instalacao} nao esta apta para abertura de nota de recuperacao devido "
     # Collecting installation information
     statusInstalacao = self.session.findById('wnd[0]/usr/txtEANLD-DISCSTAT').text
-    if(statusInstalacao != ' Instalação não suspensa'): raise Exception("A instalacao nao esta ativa!")
-    cliente = self.session.FindById("wnd[0]/usr/txtEANLD-PARTTEXT").text
-    if(cliente == ""): raise Exception("A instalacao nao tem cliente")
+    if(statusInstalacao != ' Instalação não suspensa'): raise Exception(retorno + "nao estar ativa!")
+    cliente = str(self.session.FindById("wnd[0]/usr/txtEANLD-PARTTEXT").text)
+    if(cliente == ""): raise Exception(retorno + "nao ter cliente vinculado")
+    if(str(cliente).startswith("UNIDADE C/ CONSUMO")): raise Exception(retorno + "nao ter cliente vinculado")
+    if(str(cliente).startswith("PARCEIRO DE NEGOCIO")): raise Exception(retorno + "nao ter cliente vinculado")
     consumo = self.session.FindById("wnd[0]/usr/ctxtEANLD-VSTELLE").text
     # Collecting measurement information
     try:
       self.session.FindById("wnd[0]/usr/btnEANLD-DEVSBUT").Press()
     except:
-      raise Exception("Instalacao nao tem medidor")
+      raise Exception(retorno + " nao tem medidor vinculado")
     medidor = self.session.FindById("wnd[0]/usr/tblSAPLEG70TC_DEVRATE_C/ctxtREG70_D-GERAET[0,0]").text
     self.session.StartTransaction(Transaction="IQ03")
     self.session.FindById("wnd[0]/usr/ctxtRISA0-SERNR").text = medidor
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
     statusMedidor = self.session.findById("wnd[0]/usr/subSUB_EQKO:SAPLITO0:0152/subSUB_0152C:SAPLITO0:1526/txtITOBATTR-STTXU").text
-    if(statusMedidor != "INST"): raise Exception(f"O medidor {medidor} da instalacao {instalacao} esta com status {statusMedidor}!")
+    if(statusMedidor != "INST"): raise Exception(retorno + f"ao medidor {medidor} estar com status {statusMedidor}!")
     # Collecting installation type information
     self.session.StartTransaction(Transaction="ES61")
     self.session.FindById("wnd[0]/usr/ctxtEVBSD-VSTELLE").text = consumo
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
     tipoInstalacao = self.session.FindById("wnd[0]/usr/ssubSUB:SAPLXES60:0100/tabsTS0100/tabpTAB1/ssubSUB1:SAPLXES60:0101/ctxtEVBSD-ZZ_TP_LIGACAO").text
-    if(int(tipoInstalacao) == 1): raise Exception("A instalacao e monofasica!")
+    if(int(tipoInstalacao) == 1): raise Exception(retorno + "o tipo de ligacao ser monofasica!")
     # Collecting information on outstanding debts
     # debitos = pandas.read_csv(io.StringIO(self.escrever(instalacao)))
     # debitos = debitos[debitos["Cor"] != str(self.DESTAQUE_VERMELHO)]
-    # if(len(debitos) > 0): raise Exception("Cliente possui debito pendentes!")
+    # if(len(debitos) > 0): raise Exception(retorno + "o cliente possuir debito(s) pendente(s)!")
     # Collecting service history information
     historico = pandas.read_csv(io.StringIO(self.historico(instalacao)))
-    print(historico)
     historico["Data"] = pandas.to_datetime(historico['Data'])
     prazo_maximo = datetime.date.today() - datetime.timedelta(days=90)
     historico = historico[historico["Data"] >= pandas.to_datetime(prazo_maximo)]
-    print(historico)
-    historico = historico[historico["Tipo"] == "BI"]
-    historico = historico[historico["Tipo"] == "BU"]
-    print(historico)
+    historico = historico[(historico["Tipo"] == "BI") | (historico["Tipo"] == "BU")]
     historico = historico[historico["Status"] == "EXEC"]
-    print(historico)
-    if(len(historico) > 0): raise Exception("Ja possui nota de inspecao executada!")
-    return "OK"
+    historico["Nota"]
+    if(len(historico) > 0): raise Exception(retorno + f"ja possuir nota {historico['Nota'].to_string(index=False)} de recuperacao executada!")
+    return f"Instalacao {instalacao} apta para abertura de nota de recuperacao!"
 if __name__ == "__main__":
   # Validação dos argumentos da linha de comando:
   # 1. Será possível realizar a tarefa se no mínimo
