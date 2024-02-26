@@ -2,6 +2,7 @@
 # coding: utf8
 #startregion
 import os
+import io
 import sys
 import time
 import datetime
@@ -911,6 +912,49 @@ class sap:
       return f"An error occurred: {e}"
   def retorno(self) -> None:
     self.session.sendCommand('/n')
+  def inspecao(self, arg) -> str:
+    instalacao = self.instalacao(arg)
+    # Collecting installation information
+    statusInstalacao = self.session.findById('wnd[0]/usr/txtEANLD-DISCSTAT').text
+    if(statusInstalacao != ' Instalação não suspensa'): raise Exception("A instalacao nao esta ativa!")
+    cliente = self.session.FindById("wnd[0]/usr/txtEANLD-PARTTEXT").text
+    if(cliente == ""): raise Exception("A instalacao nao tem cliente")
+    consumo = self.session.FindById("wnd[0]/usr/ctxtEANLD-VSTELLE").text
+    # Collecting measurement information
+    try:
+      self.session.FindById("wnd[0]/usr/btnEANLD-DEVSBUT").Press()
+    except:
+      raise Exception("Instalacao nao tem medidor")
+    medidor = self.session.FindById("wnd[0]/usr/tblSAPLEG70TC_DEVRATE_C/ctxtREG70_D-GERAET[0,0]").text
+    self.session.StartTransaction(Transaction="IQ03")
+    self.session.FindById("wnd[0]/usr/ctxtRISA0-SERNR").text = medidor
+    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    statusMedidor = self.session.findById("wnd[0]/usr/subSUB_EQKO:SAPLITO0:0152/subSUB_0152C:SAPLITO0:1526/txtITOBATTR-STTXU").text
+    if(statusMedidor != "INST"): raise Exception(f"O medidor {medidor} da instalacao {instalacao} esta com status {statusMedidor}!")
+    # Collecting installation type information
+    self.session.StartTransaction(Transaction="ES61")
+    self.session.FindById("wnd[0]/usr/ctxtEVBSD-VSTELLE").text = consumo
+    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    tipoInstalacao = self.session.FindById("wnd[0]/usr/ssubSUB:SAPLXES60:0100/tabsTS0100/tabpTAB1/ssubSUB1:SAPLXES60:0101/ctxtEVBSD-ZZ_TP_LIGACAO").text
+    if(int(tipoInstalacao) == 1): raise Exception("A instalacao e monofasica!")
+    # Collecting information on outstanding debts
+    # debitos = pandas.read_csv(io.StringIO(self.escrever(instalacao)))
+    # debitos = debitos[debitos["Cor"] != str(self.DESTAQUE_VERMELHO)]
+    # if(len(debitos) > 0): raise Exception("Cliente possui debito pendentes!")
+    # Collecting service history information
+    historico = pandas.read_csv(io.StringIO(self.historico(instalacao)))
+    print(historico)
+    historico["Data"] = pandas.to_datetime(historico['Data'])
+    prazo_maximo = datetime.date.today() - datetime.timedelta(days=90)
+    historico = historico[historico["Data"] >= pandas.to_datetime(prazo_maximo)]
+    print(historico)
+    historico = historico[historico["Tipo"] == "BI"]
+    historico = historico[historico["Tipo"] == "BU"]
+    print(historico)
+    historico = historico[historico["Status"] == "EXEC"]
+    print(historico)
+    if(len(historico) > 0): raise Exception("Ja possui nota de inspecao executada!")
+    return "OK"
 if __name__ == "__main__":
   # Validação dos argumentos da linha de comando:
   # 1. Será possível realizar a tarefa se no mínimo
@@ -990,6 +1034,8 @@ if __name__ == "__main__":
       print(robo.cruzamento(argumento))
     elif(aplicacao == "consumo"):
       print(robo.consumo(argumento))
+    elif(aplicacao == "inspecao"):
+      print(robo.inspecao(argumento))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
     robo.retorno()
