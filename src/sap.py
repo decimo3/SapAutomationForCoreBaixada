@@ -247,29 +247,35 @@ class sap:
     self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110").Select()
     linhas = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").RowCount
     if(linhas < 1): raise Exception("Cliente nao possui faturas pendentes!")
-    debString = 'Cor,Mes ref.,Vencimento,Valor,Tipo,Status\n'
+    dataframe = {
+      "Cor": [],
+      "Mes ref": [],
+      "Vencimento": [],
+      "Valor": [],
+      "Tipo": [],
+      "Status": [],
+    }
     apontador = 1
     while (apontador < linhas):
-      referencia = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"BILLING_PERIOD")
-      vencimento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"FAEDN")
-      valorPendente = self.sanitizar(self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TOTAL_AMNT"))
-      tipoDebito = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TIP_FATURA")
+      dataframe["Mes ref"].append(self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"BILLING_PERIOD"))
+      dataframe["Vencimento"].append(self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"FAEDN"))
+      dataframe["Valor"].append(self.sanitizar(self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TOTAL_AMNT")))
+      dataframe["Tipo"].append(self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"TIP_FATURA"))
       statusFat = self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador, "STATUS")
       if(statusFat == "@5B@"): # Status no prazo de vencimento da fatura
-        destaque = self.DESTAQUE_VERDEJANTE
-        textStatus = "Fat. no prazo"
+        dataframe["Cor"].append(str(self.DESTAQUE_VERDEJANTE))
+        dataframe["Status"].append("Fat. no prazo")
       elif(statusFat == "@5C@"): # Status prazo de pagamento vencido
-        destaque = self.DESTAQUE_VERMELHO
-        textStatus = "Fat. vencida"
+        dataframe["Cor"].append(str(self.DESTAQUE_VERMELHO))
+        dataframe["Status"].append("Fat. vencida")
       elif(statusFat == "@06@"): # Status prazo de pagamento vencido
-        destaque = self.DESTAQUE_AMARELO
-        textStatus = "Fat. Retida"
+        dataframe["Cor"].append(str(self.DESTAQUE_AMARELO))
+        dataframe["Status"].append("Fat. Retida")
       else:
-        destaque = self.DESTAQUE_AUSENTE
-        textStatus = "Consultar"
-      debString = f"{debString}{destaque},{referencia},{vencimento},R$:{valorPendente},{tipoDebito},{textStatus}\n"
+        dataframe["Cor"].append(str(self.DESTAQUE_AUSENTE))
+        dataframe["Status"].append("Consultar")
       apontador = apontador + 1
-    return debString
+    return pandas.DataFrame(dataframe).to_csv(index=False)
   def imprimir(self, documento) -> None:
     self.session.StartTransaction(Transaction="ZATC73")
     shutil.rmtree(self.CURRENT_FOLDER)
@@ -345,17 +351,25 @@ class sap:
     self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
     linhas = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").RowCount
     apontador = 0
-    historico = "Cor,Nota,Tipo,Texto breve para dano,Texto breve para code,Data\n"
+    historico = {
+      "Cor": [],
+      "Nota": [],
+      "Tipo": [],
+      "Texto breve para dano": [],
+      "Texto breve para code": [],
+      "Status": [],
+      "Data": [],
+    }
     while(apontador < linhas and apontador < 10):
-      destaque = 0
-      notaServico = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"QMNUM")
-      dano = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador, "QMART")
-      textoDano = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador, "KURZTEXT")
-      textoCode = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"MATXT")
-      FimAvaria = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"AUSBS")
-      historico = f"{historico}{destaque},{notaServico},{dano},{textoDano},{textoCode},{FimAvaria}\n"
+      historico["Cor"].append(0)
+      historico["Nota"].append(self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"QMNUM"))
+      historico["Tipo"].append(self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador, "QMART"))
+      historico["Texto breve para dano"].append(self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador, "KURZTEXT"))
+      historico["Texto breve para code"].append(self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"MATXT"))
+      historico["Data"].append(self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"AUSBS"))
+      historico["Status"].append(self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"ZZ_ST_USUARIO"))
       apontador = apontador + 1
-    return historico
+    return pandas.DataFrame(historico).to_csv(index=False)
   def agrupamento(self, nota, have_authorization: bool) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ES32")
@@ -411,6 +425,7 @@ class sap:
         break
       apontador = apontador + 1
       self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
+    # TODO - Convert string concatenation to dataframe
     enderecos = []
     instalacoes = []
     nomeCliente = []
