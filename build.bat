@@ -17,6 +17,7 @@ dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained true --outp
 cd ..
 7z u -x!database.db -x!sap.conf -x!.env mestreruan.zip .\tmp\*
 REM https://superuser.com/questions/1654994/how-to-copy-folder-structure-but-exclude-certain-files-in-windows
+robocopy tmp %USERPROFILE%\MestreRuan\ /XF database.db /XF .env /XF sap.conf
 cd .\SapAutomationForCoreBaixada
 ) else (
 echo "Environment variable VIRTUAL_ENV was not defined"
