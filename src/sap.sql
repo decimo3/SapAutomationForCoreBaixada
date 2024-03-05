@@ -721,12 +721,11 @@ INSERT INTO depara (tipo, de, para) VALUES
 ('material_codigo','811567','TRANSFORMADOR CORRENTE 145KV');
 -- Entering values ​​for sector activities
 INSERT INTO depara (tipo, de, para) VALUES
-('setor_atividades','CORE','CORTE,RELIGA'),
+('setor_atividades','CORE','RELIGA'),
 ('setor_atividades','REN','LIDE,ANEXO');
 -- Entering values ​​for report params
 INSERT INTO depara (tipo, de, para) VALUES
 ('relatorio_tipo','RELIGA','B1,BL,BR'),
-('relatorio_tipo','CORTE','BB,BD'),
 ('relatorio_tipo','LIDE','B8,BN,BS,BV'),
 ('relatorio_tipo','ANEXO','B5,BA,BC,BS');
 -- Entering values ​​for report filters
