@@ -75,23 +75,24 @@ class sap:
         self.session.findById("wnd[1]/tbar[0]/btn[0]").Press()
     return (self.session.info.user != '')
   def relatorio(self, dia=7) -> None:
-      self.session.StartTransaction(Transaction="ZSVC20")
-      self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "B1"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "BL"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,2]").text = "BR"
-      self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
       hoje = datetime.date.today()
       semana = hoje - datetime.timedelta(days=dia)
+      janela = "wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/"
+      self.session.StartTransaction(Transaction="ZSVC20")
+      self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
+      self.session.FindById(janela + "ctxtRSCSEL_255-SLOW_I[1,0]").text = "B1"
+      self.session.FindById(janela + "ctxtRSCSEL_255-SLOW_I[1,1]").text = "BL"
+      self.session.FindById(janela + "ctxtRSCSEL_255-SLOW_I[1,2]").text = "BR"
+      self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
       self.session.FindById("wnd[0]/usr/ctxtSO_QMDAT-LOW").text = semana.strftime("%d.%m.%Y")
       self.session.FindById("wnd[0]/usr/ctxtSO_QMDAT-HIGH").text = hoje.strftime("%d.%m.%Y")
       self.session.FindById("wnd[0]/usr/btn%_SO_USUAR_%_APP_%-VALU_PUSH").Press()
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "ENVI"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "LIBE"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,2]").text = "TABL"
+      self.session.FindById(janela + "ctxtRSCSEL_255-SLOW_I[1,0]").text = "ENVI"
+      self.session.FindById(janela + "ctxtRSCSEL_255-SLOW_I[1,1]").text = "LIBE"
+      self.session.FindById(janela + "ctxtRSCSEL_255-SLOW_I[1,2]").text = "TABL"
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
       self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = os.environ.get("REGIAO")
-      self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = os.environ.get("ZSVC20")
+      self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = os.environ.get("LAYOUT")
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       try:
         exist = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell", False)
