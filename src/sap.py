@@ -75,14 +75,17 @@ class sap:
         self.session.findById("wnd[1]/tbar[0]/btn[0]").Press()
     return (self.session.info.user != '')
   def relatorio(self, dia=7) -> None:
+      tipos_de_nota = []
       hoje = datetime.date.today()
       semana = hoje - datetime.timedelta(days=dia)
       janela = "wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/"
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
-      self.session.FindById(janela + "ctxtRSCSEL_255-SLOW_I[1,0]").text = "B1"
-      self.session.FindById(janela + "ctxtRSCSEL_255-SLOW_I[1,1]").text = "BL"
-      self.session.FindById(janela + "ctxtRSCSEL_255-SLOW_I[1,2]").text = "BR"
+      for atividade in self.ATIVIDADES:
+        tipos_de_nota.extend(self.depara('relatorio_tipo', atividade).split(','))
+      for i in range(len(tipos_de_nota)):
+        self.session.FindById(janela + f"ctxtRSCSEL_255-SLOW_I[1,{i}]").text = tipos_de_nota[i]
+        self.session.FindById(janela).verticalScrollbar.position = i
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
       self.session.FindById("wnd[0]/usr/ctxtSO_QMDAT-LOW").text = semana.strftime("%d.%m.%Y")
       self.session.FindById("wnd[0]/usr/ctxtSO_QMDAT-HIGH").text = hoje.strftime("%d.%m.%Y")
