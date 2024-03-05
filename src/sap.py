@@ -17,15 +17,21 @@ import sqlite3
 
 class sap:
   def __init__(self, instancia) -> None:
-      self.CURRENT_FOLDER = os.getcwd() + "\\tmp\\"
-      if (not(os.path.exists(self.CURRENT_FOLDER))):
-        os.makedirs(self.CURRENT_FOLDER)
-      self.DESTAQUE_AMARELO = 3
-      self.DESTAQUE_VERMELHO = 2
-      self.DESTAQUE_VERDEJANTE = 4
-      self.DESTAQUE_AUSENTE = 0
-      self.instancia = instancia
-      self.inicializar()
+    dotenv.load_dotenv('sap.conf')
+    self.SETOR = os.environ.get("SETOR")
+    if(self.SETOR == None): raise Exception("A variavel SETOR no arquivo `sap.config` nao esta definida!")
+    self.ATIVIDADES = self.depara('setor_atividades', self.SETOR).split(',')
+    if not (self.IfIsRunning('cscript.exe')):
+      subprocess.Popen("cscript erroDialog.vbs", stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    self.CURRENT_FOLDER = os.getcwd() + "\\tmp\\"
+    if (not(os.path.exists(self.CURRENT_FOLDER))):
+      os.makedirs(self.CURRENT_FOLDER)
+    self.DESTAQUE_AMARELO = 3
+    self.DESTAQUE_VERMELHO = 2
+    self.DESTAQUE_VERDEJANTE = 4
+    self.DESTAQUE_AUSENTE = 0
+    self.instancia = instancia
+    self.inicializar()
   def IfIsRunning(self, arg: str) -> bool:
     # Define the command to list processes
     command = f"tasklist /FI \"IMAGENAME eq {arg}\""
@@ -39,9 +45,6 @@ class sap:
         return True
     return False
   def inicializar(self) -> bool:
-    dotenv.load_dotenv('sap.conf')
-    if not (self.IfIsRunning('cscript.exe')):
-      subprocess.Popen("cscript erroDialog.vbs", stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     # Get scripting
     try:
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
