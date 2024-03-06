@@ -74,15 +74,19 @@ class sap:
           self.session.findById("wnd[1]/usr/radMULTI_LOGON_OPT1").Select()
         self.session.findById("wnd[1]/tbar[0]/btn[0]").Press()
     return (self.session.info.user != '')
-  def relatorio(self, dia=7) -> None:
+  def relatorio(self, dia=7, filtrar_dias=False) -> str:
       tipos_de_nota = []
+      danos_filtrar = []
       hoje = datetime.date.today()
+      agora = datetime.datetime.now()
       semana = hoje - datetime.timedelta(days=dia)
+      arquivo = self.CURRENT_FOLDER + '\\temporario.csv'
       janela = "wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/"
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
       for atividade in self.ATIVIDADES:
         tipos_de_nota.extend(self.depara('relatorio_tipo', atividade).split(','))
+        danos_filtrar.extend(self.depara('relatorio_filtro', atividade).split(','))
       for i in range(len(tipos_de_nota)):
         self.session.FindById(janela + f"ctxtRSCSEL_255-SLOW_I[1,{i}]").text = tipos_de_nota[i]
         self.session.FindById(janela).verticalScrollbar.position = i
@@ -97,16 +101,40 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = os.environ.get("REGIAO")
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = os.environ.get("LAYOUT")
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
-      try:
-        exist = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell", False)
-        if(exist):
-          subprocess.Popen(f"cscript fileDialog.vbs")
-          self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
-          self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
-        else:
-          raise Exception("O relatorio de notas em aberto esto vazio!")
-      except:
-        raise Exception("O relatorio de notas em aberto esto vazio!")
+      tabela = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell", False)
+      if(tabela == None): raise Exception("O relatorio de notas em aberto esto vazio!")
+      if(tabela.RowCount == 0): raise Exception("O relatorio de notas em aberto esto vazio!")
+      dataframe = {
+        "Cor": [],
+        "Nota": [],
+        "Instalacao": [],
+        "Tipo": [],
+        "Dano": [],
+        "Data": [],
+        "Hora": [],
+        "Status": [],
+      }
+      for i in range(tabela.RowCount):
+        dataframe["Cor"].append(str(self.DESTAQUE_AUSENTE))
+        dataframe["Nota"].append(tabela.getCellValue(i, "QMNUM"))
+        dataframe["Instalacao"].append(tabela.getCellValue(i, "ZZINSTLN"))
+        dataframe["Tipo"].append(tabela.getCellValue(i, "QMART"))
+        dataframe["Dano"].append(tabela.getCellValue(i, "FECOD"))
+        dataframe["Data"].append(tabela.getCellValue(i, "LTRMN"))
+        dataframe["Hora"].append(tabela.getCellValue(i, "LTRUR"))
+        dataframe["Status"].append(tabela.getCellValue(i, "ZZ_ST_USUARIO"))
+        tabela.firstVisibleRow = i
+      dataframe = pandas.DataFrame(dataframe)
+      dataframe["Data"] = pandas.to_datetime(dataframe["Data"], format="%d/%m/%Y")
+      dataframe["Hora"] = pandas.to_datetime(dataframe["Hora"], format="%H:%M:%S")
+      for dano in danos_filtrar:
+        dataframe = dataframe[dataframe["Dano"] != dano]
+      if(filtrar_dias):
+        hoje = pandas.to_datetime(datetime.date.today())
+        dataframe = dataframe[dataframe["Data"] <= hoje]
+      quantidade_total = len(dataframe)
+      dataframe.to_csv(arquivo, index=False)
+      return f"Relatorio gerado as {agora.strftime('%d/%m/%Y %H:%M:%S')}.\nHa {quantidade_total} notas no relatorio."
   def manobra(self, dia=0) -> None:
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
@@ -1034,7 +1062,7 @@ if __name__ == "__main__":
       else:
         print(robo.fatura_novo(argumento))
     elif (aplicacao == "relatorio"):
-      robo.relatorio(argumento)
+      print(robo.relatorio(argumento))
     elif ((aplicacao == "historico") or (aplicacao == "historico")):
       print(robo.historico(argumento))
     elif (aplicacao == "agrupamento"):
@@ -1057,6 +1085,8 @@ if __name__ == "__main__":
       print(robo.consumo(argumento))
     elif(aplicacao == "abertura"):
       print(robo.inspecao(argumento))
+    elif(aplicacao == "vencimento"):
+      print(robo.relatorio(argumento, True))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
     robo.retorno()
