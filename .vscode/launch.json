@@ -12,7 +12,7 @@
       "cwd": "${workspaceFolder}/src",
       "console": "integratedTerminal",
       "justMyCode": true,
-      "args": ["medidor", "001348600696", "1"]
+      "args": ["vencimento", "7"]
     }
   ]
 }
