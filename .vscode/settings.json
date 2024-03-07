@@ -1,5 +1,6 @@
 {
   "python.analysis.typeCheckingMode": "basic",
   "editor.fontFamily": "Consolas",
-  "files.autoSave": "afterDelay"
+  "files.autoSave": "afterDelay",
+  "python.analysis.autoImportCompletions": true
 }

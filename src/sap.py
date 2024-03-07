@@ -17,15 +17,21 @@ import sqlite3
 
 class sap:
   def __init__(self, instancia) -> None:
-      self.CURRENT_FOLDER = os.getcwd() + "\\tmp\\"
-      if (not(os.path.exists(self.CURRENT_FOLDER))):
-        os.makedirs(self.CURRENT_FOLDER)
-      self.DESTAQUE_AMARELO = 3
-      self.DESTAQUE_VERMELHO = 2
-      self.DESTAQUE_VERDEJANTE = 4
-      self.DESTAQUE_AUSENTE = 0
-      self.instancia = instancia
-      self.inicializar()
+    dotenv.load_dotenv('sap.conf')
+    self.SETOR = os.environ.get("SETOR")
+    if(self.SETOR == None): raise Exception("A variavel SETOR no arquivo `sap.config` nao esta definida!")
+    self.ATIVIDADES = self.depara('setor_atividades', self.SETOR).split(',')
+    if not (self.IfIsRunning('cscript.exe')):
+      subprocess.Popen("cscript erroDialog.vbs", stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    self.CURRENT_FOLDER = os.getcwd() + "\\tmp\\"
+    if (not(os.path.exists(self.CURRENT_FOLDER))):
+      os.makedirs(self.CURRENT_FOLDER)
+    self.DESTAQUE_AMARELO = 3
+    self.DESTAQUE_VERMELHO = 2
+    self.DESTAQUE_VERDEJANTE = 4
+    self.DESTAQUE_AUSENTE = 0
+    self.instancia = instancia
+    self.inicializar()
   def IfIsRunning(self, arg: str) -> bool:
     # Define the command to list processes
     command = f"tasklist /FI \"IMAGENAME eq {arg}\""
@@ -39,9 +45,6 @@ class sap:
         return True
     return False
   def inicializar(self) -> bool:
-    dotenv.load_dotenv('sap.conf')
-    if not (self.IfIsRunning('cscript.exe')):
-      subprocess.Popen("cscript erroDialog.vbs", stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     # Get scripting
     try:
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
@@ -71,35 +74,69 @@ class sap:
           self.session.findById("wnd[1]/usr/radMULTI_LOGON_OPT1").Select()
         self.session.findById("wnd[1]/tbar[0]/btn[0]").Press()
     return (self.session.info.user != '')
-  def relatorio(self, dia=7) -> None:
+  def relatorio(self, dia=7, filtrar_dias=False) -> str:
+      tipos_de_nota = []
+      danos_filtrar = []
+      hoje = datetime.date.today()
+      agora = datetime.datetime.now()
+      semana = hoje - datetime.timedelta(days=dia)
+      arquivo = self.CURRENT_FOLDER + '\\temporario.csv'
+      janela = "wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/"
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "B1"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "BL"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,2]").text = "BR"
+      for atividade in self.ATIVIDADES:
+        tipos_de_nota.extend(self.depara('relatorio_tipo', atividade).split(','))
+        danos_filtrar.extend(self.depara('relatorio_filtro', atividade).split(','))
+      for i in range(len(tipos_de_nota)):
+        self.session.FindById(janela + f"ctxtRSCSEL_255-SLOW_I[1,{i}]").text = tipos_de_nota[i]
+        self.session.FindById(janela).verticalScrollbar.position = i
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
-      hoje = datetime.date.today()
-      semana = hoje - datetime.timedelta(days=dia)
       self.session.FindById("wnd[0]/usr/ctxtSO_QMDAT-LOW").text = semana.strftime("%d.%m.%Y")
       self.session.FindById("wnd[0]/usr/ctxtSO_QMDAT-HIGH").text = hoje.strftime("%d.%m.%Y")
       self.session.FindById("wnd[0]/usr/btn%_SO_USUAR_%_APP_%-VALU_PUSH").Press()
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "ENVI"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "LIBE"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,2]").text = "TABL"
+      self.session.FindById(janela + "ctxtRSCSEL_255-SLOW_I[1,0]").text = "ENVI"
+      self.session.FindById(janela + "ctxtRSCSEL_255-SLOW_I[1,1]").text = "LIBE"
+      self.session.FindById(janela + "ctxtRSCSEL_255-SLOW_I[1,2]").text = "TABL"
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
       self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = os.environ.get("REGIAO")
-      self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = os.environ.get("ZSVC20")
+      self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = os.environ.get("LAYOUT")
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
-      try:
-        exist = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell", False)
-        if(exist):
-          subprocess.Popen(f"cscript fileDialog.vbs")
-          self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
-          self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
-        else:
-          raise Exception("O relatorio de notas em aberto esto vazio!")
-      except:
-        raise Exception("O relatorio de notas em aberto esto vazio!")
+      tabela = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell", False)
+      if(tabela == None): raise Exception("O relatorio de notas em aberto esto vazio!")
+      if(tabela.RowCount == 0): raise Exception("O relatorio de notas em aberto esto vazio!")
+      dataframe = {
+        "Cor": [],
+        "Nota": [],
+        "Instalacao": [],
+        "Tipo": [],
+        "Dano": [],
+        "Data": [],
+        "Hora": [],
+        "Status": [],
+      }
+      for i in range(tabela.RowCount):
+        dataframe["Cor"].append(str(self.DESTAQUE_AUSENTE))
+        dataframe["Nota"].append(tabela.getCellValue(i, "QMNUM"))
+        dataframe["Instalacao"].append(tabela.getCellValue(i, "ZZINSTLN"))
+        dataframe["Tipo"].append(tabela.getCellValue(i, "QMART"))
+        dataframe["Dano"].append(tabela.getCellValue(i, "FECOD"))
+        dataframe["Data"].append(tabela.getCellValue(i, "LTRMN"))
+        dataframe["Hora"].append(tabela.getCellValue(i, "LTRUR"))
+        dataframe["Status"].append(tabela.getCellValue(i, "ZZ_ST_USUARIO"))
+        tabela.firstVisibleRow = i
+      dataframe = pandas.DataFrame(dataframe)
+      dataframe["Data"] = pandas.to_datetime(dataframe["Data"], format="%d/%m/%Y")
+      dataframe["Hora"] = pandas.to_datetime(dataframe["Hora"], format="%H:%M:%S")
+      for dano in danos_filtrar:
+        dataframe = dataframe[dataframe["Dano"] != dano]
+      if(filtrar_dias):
+        hoje = pandas.to_datetime(datetime.date.today())
+        dataframe = dataframe[dataframe["Data"] <= hoje]
+      quantidade_total = len(dataframe)
+      if(quantidade_total == 0): raise Exception("O relatorio de notas em aberto esto vazio!")
+      dataframe.to_csv(arquivo, index=False)
+      final_texto = " vencendo hoje!" if filtrar_dias else "."
+      return f"Relatorio gerado as {agora.strftime('%d/%m/%Y %H:%M:%S')}.\nHa {quantidade_total} notas no relatorio{final_texto}"
   def manobra(self, dia=0) -> None:
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
@@ -514,6 +551,8 @@ class sap:
   def telefone(self, arg) -> str:
     instalacao = self.instalacao(arg)
     parceiro = self.session.findById("wnd[0]/usr/txtEANLD-PARTNER").text
+    if(str(parceiro).startswith("UNIDADE C/ CONSUMO")): raise Exception("Cliente ficticio! Sem telefone!")
+    if(str(parceiro).startswith("PARCEIRO DE NEGOCIO")): raise Exception("Cliente ficticio! Sem telefone!")
     phone_field_partial_string = self.parceiro(parceiro)
     telefone = []
     nome_cliente = self.session.FindById(phone_field_partial_string + "subSCREEN_1000_HEADER_AREA:SAPLBUPA_DIALOG_JOEL:1510/txtBUS_JOEL_MAIN-CHANGE_DESCRIPTION").text
@@ -1027,7 +1066,7 @@ if __name__ == "__main__":
       else:
         print(robo.fatura_novo(argumento))
     elif (aplicacao == "relatorio"):
-      robo.relatorio(argumento)
+      print(robo.relatorio(argumento))
     elif ((aplicacao == "historico") or (aplicacao == "historico")):
       print(robo.historico(argumento))
     elif (aplicacao == "agrupamento"):
@@ -1050,6 +1089,8 @@ if __name__ == "__main__":
       print(robo.consumo(argumento))
     elif(aplicacao == "abertura"):
       print(robo.inspecao(argumento))
+    elif(aplicacao == "vencimento"):
+      print(robo.relatorio(argumento, True))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
     robo.retorno()
