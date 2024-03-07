@@ -133,8 +133,10 @@ class sap:
         hoje = pandas.to_datetime(datetime.date.today())
         dataframe = dataframe[dataframe["Data"] <= hoje]
       quantidade_total = len(dataframe)
+      if(quantidade_total == 0): raise Exception("O relatorio de notas em aberto esto vazio!")
       dataframe.to_csv(arquivo, index=False)
-      return f"Relatorio gerado as {agora.strftime('%d/%m/%Y %H:%M:%S')}.\nHa {quantidade_total} notas no relatorio."
+      final_texto = " vencendo hoje!" if filtrar_dias else "."
+      return f"Relatorio gerado as {agora.strftime('%d/%m/%Y %H:%M:%S')}.\nHa {quantidade_total} notas no relatorio{final_texto}"
   def manobra(self, dia=0) -> None:
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
