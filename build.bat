@@ -1,5 +1,7 @@
 @echo OFF
 if defined VIRTUAL_ENV (
+git diff --exit-code comunicado.txt > nul
+if %errorlevel% equ 1 (
 pyinstaller --onefile .\\src\\sap.py
 pyinstaller --onefile .\\src\\img.py
 del .\\src\\sap.db
@@ -20,5 +22,8 @@ REM https://superuser.com/questions/1654994/how-to-copy-folder-structure-but-exc
 robocopy tmp %USERPROFILE%\MestreRuan\ /XF database.db /XF .env /XF sap.conf
 cd .\SapAutomationForCoreBaixada
 ) else (
-echo "Environment variable VIRTUAL_ENV was not defined"
+  echo Updating the 'comunicado.txt' file is necessary to build
+)
+) else (
+echo Environment variable VIRTUAL_ENV was not defined
 )
