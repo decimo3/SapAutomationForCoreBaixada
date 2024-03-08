@@ -882,6 +882,8 @@ class sap:
     result = self.novo_medidor(arg)
     instalacao = self.instalacao(arg)
     parceiro = self.session.findById("wnd[0]/usr/txtEANLD-PARTNER").text
+    if(str(parceiro).startswith("UNIDADE C/ CONSUMO")): raise Exception("Cliente ficticio! Sem informacoes!")
+    if(str(parceiro).startswith("PARCEIRO DE NEGOCIO")): raise Exception("Cliente ficticio! Sem informacoes!")
     phone_field_partial_string = self.parceiro(parceiro)
     nome_cliente = self.session.FindById(phone_field_partial_string + "subSCREEN_1000_HEADER_AREA:SAPLBUPA_DIALOG_JOEL:1510/txtBUS_JOEL_MAIN-CHANGE_DESCRIPTION").text
     nome_cliente = str.split(nome_cliente, "/")[0]
