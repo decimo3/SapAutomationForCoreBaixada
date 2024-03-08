@@ -314,6 +314,8 @@ class sap:
       apontador = apontador + 1
     return pandas.DataFrame(dataframe).to_csv(index=False)
   def imprimir(self, documento) -> None:
+    command = f"taskkill /F /FI \"IMAGENAME eq SAPLPD.exe\""
+    subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     self.session.StartTransaction(Transaction="ZATC73")
     shutil.rmtree(self.CURRENT_FOLDER)
     os.makedirs(self.CURRENT_FOLDER)
