@@ -1,7 +1,7 @@
-*Novidades do CHATBOT:*
+**NOVIDADES DO CHATBOT: SISTEMA DE COMUNICADOS**
 
-Essa é uma mensagem de teste para o novo sistema de transmissão de comunicados para todos os usuários do chatbot.
+Comunicados como esse serão comuns daqui pra frente, todos os cadastrados no chatbot receberão mensagens por ele, que podem ser: **comunicados internos**, **segurança do trabalho** ou **comunicado de vencimentos**.
 
-A partir de agora, vocês poderão receber ocasionalmente comunicados sobre: *funcionalidades do chatbot*, *segurança do trabalho*, e *comunicados gerenciais*.
+O **comunicado de vencimentos** enviará a quantidade de notas do ANEXO 4 e LIDE com vencimento no dia. É necessário prestar atenção nessa informação afim de evitar violações de prazos.
 
-Desejo a todos um ótimo dia de trabalho a todos.
+Supervisores receberão o arquivo com as notas e deverá questionar as equipes em relação ao atendimento dessas notas, assim como os administrativos responsáveis.
