@@ -177,7 +177,7 @@ class sap:
           raise Exception("O relatorio de notas em aberto esto vazio!")
       except:
         raise Exception("O relatorio de notas em aberto esto vazio!")
-  def leiturista(self, nota, retry=False, order_by_sequence: bool=False) -> str:
+  def leiturista(self, nota, retry:bool=False, order_by_sequence:bool=False, interval:int=30) -> str:
       instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ES32")
       self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
@@ -224,21 +224,21 @@ class sap:
       apontador = 0
       limite = 0
       # Se a quantidade de linhas for menor que o padrão
-      if (linhas <= 60):
+      if (linhas <= interval * 2):
         apontador = 0
         limite = linhas
       # Se a instalacao foi encontrada no início do relatorio
       elif (celula <= 14):
         apontador = 0
-        limite = 60
+        limite = interval * 2
       # Se a instalacao foi encontrada no final do relatorio
-      elif(celula > (linhas - 30)):
-        apontador = linhas - 60
+      elif(celula > (linhas - interval)):
+        apontador = linhas - (interval * 2)
         limite = linhas
       # Se a instalacao foi encontrada no meio do relatorio
       else:
-        apontador = celula - 30
-        limite = celula + 30
+        apontador = celula - interval
+        limite = celula + interval
       self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectedRows = celula
       leitString = {
         "Cor": [],
