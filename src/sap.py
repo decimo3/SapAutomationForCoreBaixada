@@ -368,6 +368,7 @@ class sap:
       return arg
     if(arg < 99999999):
       self.session.StartTransaction(Transaction="IQ03")
+      self.session.FindById("wnd[0]/usr/ctxtRISA0-MATNR").text = ""
       self.session.FindById("wnd[0]/usr/ctxtRISA0-SERNR").text = arg
       try:
         self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
@@ -686,6 +687,7 @@ class sap:
       pass
     medidor = self.session.FindById("wnd[0]/usr/tblSAPLEG70TC_DEVRATE_C/ctxtREG70_D-GERAET[0,0]").text
     self.session.StartTransaction(Transaction="IQ03")
+    self.session.FindById("wnd[0]/usr/ctxtRISA0-MATNR").text = ""
     self.session.FindById("wnd[0]/usr/ctxtRISA0-SERNR").text = medidor
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
     codMedidor = self.session.findById("wnd[0]/usr/subSUB_EQKO:SAPLITO0:0152/subSUB_0152A:SAPLITO0:1521/ctxtITOB-MATNR").text
@@ -988,6 +990,7 @@ class sap:
       return retorno + " nao tem medidor vinculado"
     medidor = self.session.FindById("wnd[0]/usr/tblSAPLEG70TC_DEVRATE_C/ctxtREG70_D-GERAET[0,0]").text
     self.session.StartTransaction(Transaction="IQ03")
+    self.session.FindById("wnd[0]/usr/ctxtRISA0-MATNR").text = ""
     self.session.FindById("wnd[0]/usr/ctxtRISA0-SERNR").text = medidor
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
     statusMedidor = self.session.findById("wnd[0]/usr/subSUB_EQKO:SAPLITO0:0152/subSUB_0152C:SAPLITO0:1526/txtITOBATTR-STTXU").text
