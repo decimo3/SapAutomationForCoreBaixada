@@ -1,7 +1,3 @@
-**NOVIDADES DO CHATBOT: SISTEMA DE COMUNICADOS**
+**NOVIDADES DO CHATBOT**
 
-Comunicados como esse serão comuns daqui pra frente, todos os cadastrados no chatbot receberão mensagens por ele, que podem ser: **comunicados internos**, **segurança do trabalho** ou **comunicado de vencimentos**.
-
-O **comunicado de vencimentos** enviará a quantidade de notas do ANEXO 4 e LIDE com vencimento no dia. É necessário prestar atenção nessa informação afim de evitar violações de prazos.
-
-Supervisores receberão o arquivo com as notas e deverá questionar as equipes em relação ao atendimento dessas notas, assim como os administrativos responsáveis.
+Adicionada aplicação REN360, que irá enviar os consumos e a passividade para abertura de nota de recuperação dos clientes próximos a instalação consultada.
