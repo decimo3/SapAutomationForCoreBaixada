@@ -1120,7 +1120,6 @@ if __name__ == "__main__":
   # 3. Se houver somente 3 argumentos, então é uma consulta simples
   #    e o script é configurado automaticamente para usar a 0.
   if(len(sys.argv) < 3): raise Exception("Falta argumentos necessarios!")
-  if(not str.isalpha(sys.argv[1])): raise Exception("O primeiro argumento é inválido!")
   aplicacao = sys.argv[1]
   argumento = int(sys.argv[2])
   if(len(sys.argv) == 3): instancia = 0
@@ -1188,6 +1187,8 @@ if __name__ == "__main__":
       print(robo.inspecao(argumento))
     elif(aplicacao == "vencimento"):
       print(robo.relatorio(argumento, True))
+    elif(aplicacao == "ren360"):
+      print(robo.procurar(argumento))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
     robo.retorno()
