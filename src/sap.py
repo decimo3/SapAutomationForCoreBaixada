@@ -1011,7 +1011,7 @@ class sap:
     # if(len(debitos) > 0): return retorno + "o cliente possuir debito(s) pendente(s)!"
     # Collecting service history information
     historico = pandas.read_csv(io.StringIO(self.historico(instalacao)))
-    historico["Data"] = pandas.to_datetime(historico['Data'])
+    historico["Data"] = pandas.to_datetime(historico['Data'], format="%d.%m.%Y")
     prazo_maximo = datetime.date.today() - datetime.timedelta(days=90)
     historico = historico[historico["Data"] >= pandas.to_datetime(prazo_maximo)]
     historico = historico[(historico["Tipo"] == "BI") | (historico["Tipo"] == "BU")]
