@@ -6,13 +6,13 @@
   "configurations": [
     {
       "name": "Python: Arquivo Atual",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "program": "${file}",
       "cwd": "${workspaceFolder}/src",
       "console": "integratedTerminal",
       "justMyCode": true,
-      "args": ["vencimento", "7"]
+      "args": ["ren360", "421164813"]
     }
   ]
 }
