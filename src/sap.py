@@ -1036,6 +1036,8 @@ class sap:
     instalacao = self.instalacao(arg)
     leiturista = self.leiturista(instalacao, False, False, 5)
     leiturista = pandas.read_csv(io.StringIO(leiturista))
+    leiturista['Instalacao'] = pandas.to_numeric(leiturista['Instalacao'], 'coerce').astype('Int64')
+    leiturista['Medidor'] = pandas.to_numeric(leiturista['Medidor'], 'coerce').astype('Int64')
     leiturista = leiturista[leiturista['Instalacao'].notna()]
     dataframe['Endereco'].extend(leiturista['Endereco'].to_list())
     dataframe['Instalacao'].extend(leiturista['Instalacao'].to_list())
