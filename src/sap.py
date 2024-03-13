@@ -1019,6 +1019,92 @@ class sap:
     historico["Nota"]
     if(len(historico) > 0): return retorno + f"ja possuir nota {historico['Nota'].to_string(index=False)} de recuperacao executada!"
     return f"Instalacao {instalacao} apta para abertura de nota de recuperacao!"
+  def procurar(self, arg) -> str:
+    dataframe = {
+      'Cor': [],
+      'Instalacao': [],
+      'Endereco': [],
+      'Medidor': [],
+      'Pri.': [],
+      'Seg.': [],
+      'Ter.': [],
+      'Qua.': [],
+      'Qui.': [],
+      'Sex.': [],
+      'Passivel': [],
+    }
+    instalacao = self.instalacao(arg)
+    leiturista = self.leiturista(instalacao, False, False, 5)
+    leiturista = pandas.read_csv(io.StringIO(leiturista))
+    leiturista = leiturista[leiturista['Instalacao'].notna()]
+    dataframe['Endereco'].extend(leiturista['Endereco'].to_list())
+    dataframe['Instalacao'].extend(leiturista['Instalacao'].to_list())
+    dataframe['Medidor'].extend(leiturista['Medidor'].to_list())
+    meses_de_referencia = []
+    for instalacao in dataframe['Instalacao']:
+      passivel = self.inspecao(instalacao)
+      if(passivel.startswith(f'A instalacao {instalacao} nao')):
+        dataframe['Cor'].append(str(self.DESTAQUE_VERMELHO))
+        dataframe['Passivel'].append('Nao')
+      else:
+        dataframe['Cor'].append(str(self.DESTAQUE_VERDEJANTE))
+        dataframe['Passivel'].append('Sim')
+      try:
+        consumos = self.consumo(instalacao)
+        consumos = pandas.read_csv(io.StringIO(consumos))
+        consumos['Mes ref.'] = pandas.to_datetime(consumos['Mes ref.'], format='%m/%Y')
+        consumos = consumos[consumos['Mes ref.'].notna()]
+        consumos = consumos[consumos['Motivo da leitura'] == '01 - Leitura periódica']
+        if(len(consumos) < 6): raise Exception('A instalacao nao tem um semestre de leituras')
+        if(len(meses_de_referencia) == 0):
+          meses_de_referencia = consumos['Mes ref.'].head(6).to_list()
+        try:
+          consumo = consumos[consumos['Mes ref.'] == meses_de_referencia[0]]['Consumo'].values[0]
+          dataframe['Pri.'].append(consumo)
+        except:
+          dataframe['Pri.'].append(pandas.NA)
+        try:
+          consumo = consumos[consumos['Mes ref.'] == meses_de_referencia[1]]['Consumo'].values[0]
+          dataframe['Seg.'].append(consumo)
+        except:
+          dataframe['Seg.'].append(pandas.NA)
+        try:
+          consumo = consumos[consumos['Mes ref.'] == meses_de_referencia[2]]['Consumo'].values[0]
+          dataframe['Ter.'].append(consumo)
+        except:
+          dataframe['Ter.'].append(pandas.NA)
+        try:
+          consumo = consumos[consumos['Mes ref.'] == meses_de_referencia[3]]['Consumo'].values[0]
+          dataframe['Qua.'].append(consumo)
+        except:
+          dataframe['Qua.'].append(pandas.NA)
+        try:
+          consumo = consumos[consumos['Mes ref.'] == meses_de_referencia[4]]['Consumo'].values[0]
+          dataframe['Qui.'].append(consumo)
+        except:
+          dataframe['Qui.'].append(pandas.NA)
+        try:
+          consumo = consumos[consumos['Mes ref.'] == meses_de_referencia[5]]['Consumo'].values[0]
+          dataframe['Sex.'].append(consumo)
+        except:
+          dataframe['Sex.'].append(pandas.NA)
+      except:
+        dataframe['Pri.'].append(pandas.NA)
+        dataframe['Seg.'].append(pandas.NA)
+        dataframe['Ter.'].append(pandas.NA)
+        dataframe['Qua.'].append(pandas.NA)
+        dataframe['Qui.'].append(pandas.NA)
+        dataframe['Sex.'].append(pandas.NA)
+    dataframe = pandas.DataFrame(dataframe)
+    dataframe['Instalacao'] = pandas.to_numeric(dataframe['Instalacao'], 'coerce').astype('Int64')
+    dataframe['Medidor'] = pandas.to_numeric(dataframe['Medidor'], 'coerce').astype('Int64')
+    dataframe['Pri.'] = pandas.to_numeric(dataframe['Pri.'], 'coerce').astype('Int64')
+    dataframe['Seg.'] = pandas.to_numeric(dataframe['Seg.'], 'coerce').astype('Int64')
+    dataframe['Ter.'] = pandas.to_numeric(dataframe['Ter.'], 'coerce').astype('Int64')
+    dataframe['Qua.'] = pandas.to_numeric(dataframe['Qua.'], 'coerce').astype('Int64')
+    dataframe['Qui.'] = pandas.to_numeric(dataframe['Qui.'], 'coerce').astype('Int64')
+    dataframe['Sex.'] = pandas.to_numeric(dataframe['Sex.'], 'coerce').astype('Int64')
+    return dataframe.to_csv(index=False)
 if __name__ == "__main__":
   # Validação dos argumentos da linha de comando:
   # 1. Será possível realizar a tarefa se no mínimo
