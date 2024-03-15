@@ -1061,7 +1061,7 @@ class sap:
       # 'Passivel': [],
     }
     instalacao = self.instalacao(arg)
-    leiturista = self.leiturista(instalacao, False, False, 5)
+    leiturista = self.leiturista(instalacao, False, False, 10)
     leiturista = pandas.read_csv(io.StringIO(leiturista))
     leiturista['Instalacao'] = pandas.to_numeric(leiturista['Instalacao'], 'coerce').astype('Int64')
     leiturista['Medidor'] = pandas.to_numeric(leiturista['Medidor'], 'coerce').astype('Int64')
