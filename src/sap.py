@@ -1046,13 +1046,19 @@ class sap:
       'Instalacao': [],
       'Endereco': [],
       'Medidor': [],
-      'Pri.': [],
-      'Seg.': [],
-      'Ter.': [],
-      'Qua.': [],
-      'Qui.': [],
-      'Sex.': [],
-      'Passivel': [],
+      ' 01 ': [],
+      ' 02 ': [],
+      ' 03 ': [],
+      ' 04 ': [],
+      ' 05 ': [],
+      ' 06 ': [],
+      ' 07 ': [],
+      ' 08 ': [],
+      ' 09 ': [],
+      ' 10 ': [],
+      ' 11 ': [],
+      ' 12 ': [],
+      # 'Passivel': [],
     }
     instalacao = self.instalacao(arg)
     leiturista = self.leiturista(instalacao, False, False, 5)
@@ -1091,52 +1097,24 @@ class sap:
         consumos['Mes ref.'] = pandas.to_datetime(consumos['Mes ref.'], format='%m/%Y')
         consumos = consumos[consumos['Mes ref.'].notna()]
         consumos = consumos[consumos['Motivo da leitura'] == '01 - Leitura periódica']
-        try:
-          consumo = consumos[consumos['Mes ref.'] == meses_de_referencia[0]]['Consumo'].values[0]
-          dataframe['Pri.'].append(consumo)
-        except:
-          dataframe['Pri.'].append(pandas.NA)
-        try:
-          consumo = consumos[consumos['Mes ref.'] == meses_de_referencia[1]]['Consumo'].values[0]
-          dataframe['Seg.'].append(consumo)
-        except:
-          dataframe['Seg.'].append(pandas.NA)
-        try:
-          consumo = consumos[consumos['Mes ref.'] == meses_de_referencia[2]]['Consumo'].values[0]
-          dataframe['Ter.'].append(consumo)
-        except:
-          dataframe['Ter.'].append(pandas.NA)
-        try:
-          consumo = consumos[consumos['Mes ref.'] == meses_de_referencia[3]]['Consumo'].values[0]
-          dataframe['Qua.'].append(consumo)
-        except:
-          dataframe['Qua.'].append(pandas.NA)
-        try:
-          consumo = consumos[consumos['Mes ref.'] == meses_de_referencia[4]]['Consumo'].values[0]
-          dataframe['Qui.'].append(consumo)
-        except:
-          dataframe['Qui.'].append(pandas.NA)
-        try:
-          consumo = consumos[consumos['Mes ref.'] == meses_de_referencia[5]]['Consumo'].values[0]
-          dataframe['Sex.'].append(consumo)
-        except:
-          dataframe['Sex.'].append(pandas.NA)
+        for i in range(1, 13):
+          mes_indice = f" 0{i} " if i < 10 else f" {i} "
+          try:
+            consumo = consumos[consumos['Mes ref.'] == meses_de_referencia[i-1]]['Consumo'].values[0]
+            dataframe[mes_indice].append(consumo)
+          except:
+            dataframe[mes_indice].append(pandas.NA)
       except:
-        dataframe['Pri.'].append(pandas.NA)
-        dataframe['Seg.'].append(pandas.NA)
-        dataframe['Ter.'].append(pandas.NA)
-        dataframe['Qua.'].append(pandas.NA)
-        dataframe['Qui.'].append(pandas.NA)
-        dataframe['Sex.'].append(pandas.NA)
+        for i in range(1, 13):
+          mes_indice = f" 0{i} " if i < 10 else f" {i} "
+          dataframe[mes_indice].append(pandas.NA)
     dataframe = pandas.DataFrame(dataframe)
+    dataframe['Cor'] = pandas.to_numeric(dataframe['Cor'], 'coerce').astype('Int64')
     dataframe['Instalacao'] = pandas.to_numeric(dataframe['Instalacao'], 'coerce').astype('Int64')
     dataframe['Medidor'] = pandas.to_numeric(dataframe['Medidor'], 'coerce').astype('Int64')
-    dataframe['Pri.'] = pandas.to_numeric(dataframe['Pri.'], 'coerce').astype('Int64')
-    dataframe['Seg.'] = pandas.to_numeric(dataframe['Seg.'], 'coerce').astype('Int64')
-    dataframe['Ter.'] = pandas.to_numeric(dataframe['Ter.'], 'coerce').astype('Int64')
-    dataframe['Qua.'] = pandas.to_numeric(dataframe['Qua.'], 'coerce').astype('Int64')
-    dataframe['Qui.'] = pandas.to_numeric(dataframe['Qui.'], 'coerce').astype('Int64')
-    dataframe['Sex.'] = pandas.to_numeric(dataframe['Sex.'], 'coerce').astype('Int64')
+    for i in range(1, 13):
+      mes_indice = f" 0{i} " if i < 10 else f" {i} "
+      dataframe[mes_indice] = pandas.to_numeric(dataframe[mes_indice], 'coerce').astype('Int64')
     return dataframe.to_csv(index=False)
 if __name__ == "__main__":
   # Validação dos argumentos da linha de comando:
