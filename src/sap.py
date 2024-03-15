@@ -982,11 +982,19 @@ class sap:
     # Collecting installation information
     statusInstalacao = self.session.findById('wnd[0]/usr/txtEANLD-DISCSTAT').text
     if(statusInstalacao != ' Instalação não suspensa'): return retorno + "nao estar ativa!"
+    parceiro = self.session.findById("wnd[0]/usr/txtEANLD-PARTNER").text
     cliente = str(self.session.FindById("wnd[0]/usr/txtEANLD-PARTTEXT").text)
     if(cliente == ""): return retorno + "nao ter cliente vinculado"
     if(str(cliente).startswith("UNIDADE C/ CONSUMO")): return retorno + "nao ter cliente vinculado"
     if(str(cliente).startswith("PARCEIRO DE NEGOCIO")): return retorno + "nao ter cliente vinculado"
     consumo = self.session.FindById("wnd[0]/usr/ctxtEANLD-VSTELLE").text
+    classe = self.session.FindById("wnd[0]/usr/tblSAPLES30TC_TIMESL/ctxtEANLD-ISTYPE[5,0]").text
+    is_residencial = int(classe) > 1000 and int(classe) < 2000
+    subclasse = self.depara('classe_subclasse', classe)
+    is_baixa_renda = is_residencial and subclasse.find('Baixa Renda') >= 0
+    if(is_baixa_renda): return retorno + "devido instalacao ser baixa renda"
+    unidade = self.session.FindById("wnd[0]/usr/tblSAPLES30TC_TIMESL/ctxtEANLD-ABLEINH[9,0]").text
+    localidade = unidade[2:6:1]
     # Collecting measurement information
     try:
       self.session.FindById("wnd[0]/usr/btnEANLD-DEVSBUT").Press()
@@ -1003,22 +1011,35 @@ class sap:
     self.session.StartTransaction(Transaction="ES61")
     self.session.FindById("wnd[0]/usr/ctxtEVBSD-VSTELLE").text = consumo
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
-    tipoInstalacao = self.session.FindById("wnd[0]/usr/ssubSUB:SAPLXES60:0100/tabsTS0100/tabpTAB1/ssubSUB1:SAPLXES60:0101/ctxtEVBSD-ZZ_TP_LIGACAO").text
-    if(int(tipoInstalacao) == 1): return retorno + "o tipo de ligacao ser monofasica!"
+    tipoInstalacao = int(self.session.FindById("wnd[0]/usr/ssubSUB:SAPLXES60:0100/tabsTS0100/tabpTAB1/ssubSUB1:SAPLXES60:0101/ctxtEVBSD-ZZ_TP_LIGACAO").text)
+    if(not self.is_passivel_ren(tipoInstalacao, is_residencial, localidade)): return retorno + "ser residencial em area restrita de inspecao pelo tipo de instalacao"
+    # Collecting customer registration information
+    phone_field_partial_string = self.parceiro(parceiro)
+    self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04").Select()
+    tipo_documento = self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04/ssubSCREEN_1100_TABSTRIP_AREA:SAPLBUSS:0028/ssubGENSUB:SAPLBUSS:7006/subA04P01:SAPLBUPA_BUTX_DIALOG:0100/tblSAPLBUPA_BUTX_DIALOGTCTRL_BPTAX/txtTFKTAXNUMTYPE_T-TEXT[1,0]").text
+    if(tipo_documento != "Brasil: nº CPF" and tipo_documento != "Brasil: nº CNPJ"): return retorno + "ao cliente nao tem CPF ou CNPJ no cadastro"
+    pessoa_fisica = self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04/ssubSCREEN_1100_TABSTRIP_AREA:SAPLBUSS:0028/ssubGENSUB:SAPLBUSS:7006/subA04P01:SAPLBUPA_BUTX_DIALOG:0100/tblSAPLBUPA_BUTX_DIALOGTCTRL_BPTAX/txtDFKKBPTAXNUM-TAXNUM[2,0]").text
+    if(pessoa_fisica == ""): return retorno + "ao cliente nao tem CPF ou CNPJ no cadastro"
     # Collecting information on outstanding debts
     # debitos = pandas.read_csv(io.StringIO(self.escrever(instalacao)))
     # debitos = debitos[debitos["Cor"] != str(self.DESTAQUE_VERMELHO)]
     # if(len(debitos) > 0): return retorno + "o cliente possuir debito(s) pendente(s)!"
     # Collecting service history information
+    meses_verificacao_inspecoes =  12 if(is_residencial) else 6
     historico = pandas.read_csv(io.StringIO(self.historico(instalacao)))
     historico["Data"] = pandas.to_datetime(historico['Data'], format="%d.%m.%Y")
-    prazo_maximo = datetime.date.today() - datetime.timedelta(days=90)
+    prazo_maximo = datetime.date.today() - datetime.timedelta(days=meses_verificacao_inspecoes * 30)
     historico = historico[historico["Data"] >= pandas.to_datetime(prazo_maximo)]
     historico = historico[(historico["Tipo"] == "BI") | (historico["Tipo"] == "BU")]
     historico = historico[historico["Status"] == "EXEC"]
-    historico["Nota"]
     if(len(historico) > 0): return retorno + f"ja possuir nota {historico['Nota'].to_string(index=False)} de recuperacao executada!"
-    return f"Instalacao {instalacao} apta para abertura de nota de recuperacao!"
+    return f"A instalacao {instalacao} esta apta sim para abertura de nota de recuperacao!"
+  def is_passivel_ren(self, fases_instalacao:int, residencial:bool, localidade:str) -> bool:
+    if(fases_instalacao == 3): return True
+    if(residencial == False): return True
+    if(localidade == 'L539'): return True
+    if(localidade == 'L595'): return True
+    return False
   def procurar(self, arg) -> str:
     dataframe = {
       'Cor': [],
