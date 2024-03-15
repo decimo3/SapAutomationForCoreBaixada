@@ -1,3 +1,5 @@
 **NOVIDADES DO CHATBOT**
 
-Adicionada aplicação REN360, que irá enviar os consumos e a passividade para abertura de nota de recuperação dos clientes próximos a instalação consultada.
+Adicionada aplicação `REN360` (aplicável para o REN), que irá enviar os consumos dos últimos 12 meses dos 20 clientes próximos a instalação consultada para verificação de alteração no consumo e possível atendimento com nota de recuperação de energia por iniciativa.
+
+Atualizados critérios de análise de abertura de nota de recuperação de energia.
