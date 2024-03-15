@@ -1064,6 +1064,16 @@ class sap:
     dataframe['Instalacao'].extend(leiturista['Instalacao'].to_list())
     dataframe['Medidor'].extend(leiturista['Medidor'].to_list())
     meses_de_referencia = []
+    hoje = datetime.datetime.today()
+    ano = hoje.year
+    mes = hoje.month
+    for i in range(1, 13):
+      mes_atual = mes - i if ((mes - i) > 0) else  (mes - i + 12)
+      ano_atual = ano if ((mes - i) > 0) else ano - 1
+      # Calcula o primeiro dia do mês atual menos i meses
+      data = datetime.datetime(year=ano_atual, month= mes_atual, day=1)
+      # Adiciona a data à lista
+      meses_de_referencia.append(data)
     for instalacao in dataframe['Instalacao']:
       passivel = self.inspecao(instalacao)
       if(passivel.startswith(f'A instalacao {instalacao} nao')):
@@ -1078,9 +1088,6 @@ class sap:
         consumos['Mes ref.'] = pandas.to_datetime(consumos['Mes ref.'], format='%m/%Y')
         consumos = consumos[consumos['Mes ref.'].notna()]
         consumos = consumos[consumos['Motivo da leitura'] == '01 - Leitura periódica']
-        if(len(consumos) < 6): raise Exception('A instalacao nao tem um semestre de leituras')
-        if(len(meses_de_referencia) == 0):
-          meses_de_referencia = consumos['Mes ref.'].head(6).to_list()
         try:
           consumo = consumos[consumos['Mes ref.'] == meses_de_referencia[0]]['Consumo'].values[0]
           dataframe['Pri.'].append(consumo)
