@@ -1074,16 +1074,19 @@ class sap:
       data = datetime.datetime(year=ano_atual, month= mes_atual, day=1)
       # Adiciona a data à lista
       meses_de_referencia.append(data)
-    for instalacao in dataframe['Instalacao']:
-      passivel = self.inspecao(instalacao)
-      if(passivel.startswith(f'A instalacao {instalacao} nao')):
-        dataframe['Cor'].append(str(self.DESTAQUE_VERMELHO))
-        dataframe['Passivel'].append('Nao')
-      else:
-        dataframe['Cor'].append(str(self.DESTAQUE_VERDEJANTE))
-        dataframe['Passivel'].append('Sim')
+    for instalacao_atual in dataframe['Instalacao']:
+      # Retirada análise de passividade devido ao nocaute de solicitações
+      # passivel = self.inspecao(instalacao_atual)
+      # if(passivel.startswith(f'A instalacao {instalacao_atual} nao')):
+      #   dataframe['Cor'].append(str(self.DESTAQUE_VERMELHO))
+      #   dataframe['Passivel'].append('Nao')
+      # else:
+      #   dataframe['Cor'].append(str(self.DESTAQUE_VERDEJANTE))
+      #   dataframe['Passivel'].append('Sim')
+      cor_destaque = self.DESTAQUE_AMARELO if(instalacao_atual == instalacao) else self.DESTAQUE_AUSENTE
+      dataframe['Cor'].append(cor_destaque)
       try:
-        consumos = self.consumo(instalacao)
+        consumos = self.consumo(instalacao_atual)
         consumos = pandas.read_csv(io.StringIO(consumos))
         consumos['Mes ref.'] = pandas.to_datetime(consumos['Mes ref.'], format='%m/%Y')
         consumos = consumos[consumos['Mes ref.'].notna()]
