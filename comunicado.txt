@@ -1,5 +1,6 @@
-**NOVIDADES DO CHATBOT**
+**NOVIDADES DO CHATBOT: versão 20240325**
 
-Adicionada aplicação `REN360` (aplicável para o REN), que irá enviar os consumos dos últimos 12 meses dos 20 clientes próximos a instalação consultada para verificação de alteração no consumo e possível atendimento com nota de recuperação de energia por iniciativa.
-
-Atualizados critérios de análise de abertura de nota de recuperação de energia.
+1. Adicionado mais níveis de permissão com funcionalidades específicas;
+2. Adicionado comando `/info` para informações do seu cadastro;
+3. Adicionado sistema de atualização automática do chatbot;
+4. Adicionado sistema de transmissão por envio de mensagem de mídia;
