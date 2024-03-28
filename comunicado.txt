@@ -4,4 +4,4 @@
 2. Adicionado comando `/info` para informações do seu cadastro;
 3. Adicionado sistema de atualização automática do chatbot;
 4. Adicionado sistema de transmissão por envio de mensagem de mídia;
-5. HOTFIX: correção no endereço do servidor de atualização; 
+5. HOTFIX: correção no endereço do servidor de atualização;
