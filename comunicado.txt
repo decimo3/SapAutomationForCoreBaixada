@@ -1,9 +1,4 @@
 **ATUALIZAÇÃO DO CHATBOT**
-*_Versão atual: 20240404_*
+**_Versão atual: 20240404_**
 
-Adicionado na aplicação `INFORMACAO`:
-1. O endereço completo da instalação;
-2. Classe da instalação (residencial, comercial e etc.);
-3. 
-4. Lista com os últimos códigos do leiturista;
-
+HOTFIX: Chatbot não estava enviando as informações para as consultas com o medidor quando há mais de um equipamento para o mesmo número de série para consulta posterior.
