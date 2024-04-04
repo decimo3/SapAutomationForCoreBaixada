@@ -1,7 +1,9 @@
-**NOVIDADES DO CHATBOT: versão 20240325**
+**ATUALIZAÇÃO DO CHATBOT**
+*_Versão atual: 20240404_*
 
-1. Adicionado mais níveis de permissão com funcionalidades específicas;
-2. Adicionado comando `/info` para informações do seu cadastro;
-3. Adicionado sistema de atualização automática do chatbot;
-4. Adicionado sistema de transmissão por envio de mensagem de mídia;
-5. HOTFIX: correção no endereço do servidor de atualização;
+Adicionado na aplicação `INFORMACAO`:
+1. O endereço completo da instalação;
+2. Classe da instalação (residencial, comercial e etc.);
+3. 
+4. Lista com os últimos códigos do leiturista;
+
