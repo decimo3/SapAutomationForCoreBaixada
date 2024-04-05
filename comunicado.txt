@@ -1,4 +1,4 @@
-**ATUALIZAÇÃO DO CHATBOT**
-**_Versão atual: 20240404_**
+**CORREÇÃO NO CHATBOT**
+**_Versão atual: 20240405_**
 
-HOTFIX: Chatbot não estava enviando as informações para as consultas com o medidor quando há mais de um equipamento para o mesmo número de série para consulta posterior.
+Corrigido envio de coordenadas. As coordenadas estavam sendo enviadas erroneamente como texto. Foi recuperado o envio das coordenadas da forma iterativa do Telegram (como mapa).
