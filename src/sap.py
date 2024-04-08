@@ -668,57 +668,66 @@ class sap:
     while(len(os.listdir(self.CURRENT_FOLDER)) < qnt):
       time.sleep(3)
     return "\n".join(os.listdir(self.CURRENT_FOLDER))
-  def novo_medidor(self, arg) -> str:
-    instalacao = self.instalacao(arg)
-    statusInstalacao = self.session.findById('wnd[0]/usr/txtEANLD-DISCSTAT').text
-    endereco = self.session.FindById("wnd[0]/usr/txtEANLD-LINE1").text
-    endereco = str.split(endereco, ",")[1]
-    cliente = self.session.FindById("wnd[0]/usr/txtEANLD-PARTTEXT").text
-    cliente = str.split(cliente, "/")[0]
-    dataRetirado = None
-    textoStatus = None
-    codMedidor = None
-    txtCodMedidor = None
-    try:
+  def info_medidor(self, medidor_serial = "", medidor_codigo = "") -> str:
+    texto_retorno = []
+    informar_instalacao = medidor_serial != ""
+    if(medidor_serial == ""):
+      txtCodMedidor = None
       self.session.FindById("wnd[0]/usr/btnEANLD-DEVSBUT").Press()
-    except:
-      raise Exception("Instalacao nao tem medidor")
-    try:
-      dataRetirado = self.session.FindById("wnd[1]/usr/tblSAPLET03UTS_TC/txtPERIODS-BIS[1,0]").text
-      self.session.FindById("wnd[1]").SendVKey(2)
-    except:
-      pass
-    medidor = self.session.FindById("wnd[0]/usr/tblSAPLEG70TC_DEVRATE_C/ctxtREG70_D-GERAET[0,0]").text
+      if(self.session.FindById("wnd[1]", False) != None):
+        return "*INSTALACAO SEM MEDIDOR VINCULADO!*"
+        dataRetirado = self.session.FindById("wnd[1]/usr/tblSAPLET03UTS_TC/txtPERIODS-BIS[1,0]").text
+        self.session.FindById("wnd[1]").SendVKey(2)
+      if(self.session.FindById("wnd[0]/usr/tblSAPLEG70TC_DEVRATE_C", False) == None):
+        return "*INSTALACAO SEM MEDIDOR VINCULADO!*"
+      medidor_codigo = self.session.FindById("wnd[0]/usr/tblSAPLEG70TC_DEVRATE_C/ctxtREG70_D-MATNR[8,0]").text
+      medidor_serial = self.session.FindById("wnd[0]/usr/tblSAPLEG70TC_DEVRATE_C/ctxtREG70_D-GERAET[0,0]").text
+    txtCodMedidor = self.depara("material_codigo", medidor_codigo)
     self.session.StartTransaction(Transaction="IQ03")
-    self.session.FindById("wnd[0]/usr/ctxtRISA0-MATNR").text = ""
-    self.session.FindById("wnd[0]/usr/ctxtRISA0-SERNR").text = medidor
+    self.session.FindById("wnd[0]/usr/ctxtRISA0-MATNR").text = medidor_codigo
+    self.session.FindById("wnd[0]/usr/ctxtRISA0-SERNR").text = medidor_serial
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
-    codMedidor = self.session.findById("wnd[0]/usr/subSUB_EQKO:SAPLITO0:0152/subSUB_0152A:SAPLITO0:1521/ctxtITOB-MATNR").text
-    txtCodMedidor = self.depara("material_codigo", codMedidor)
-    if not(dataRetirado == None):
-      textoStatus = f"retirado no sistema desde {dataRetirado}"
-      return f"*Medidor:* {medidor}\n*Tipo:* {txtCodMedidor}\n*Status do medidor:* {textoStatus}\n*Instalacao:* {instalacao}\n*Status Instalacao:* {statusInstalacao}\n*Endereco:* {endereco}\n*Cliente:* {cliente}"
+    code_montagem_medidor = self.session.FindById("wnd[0]/usr/subSUB_EQKO:SAPLITO0:0152/subSUB_0152C:SAPLITO0:1526/txtITOBATTR-STTXT").text
+    code_status_medidor = self.session.FindById("wnd[0]/usr/subSUB_EQKO:SAPLITO0:0152/subSUB_0152C:SAPLITO0:1526/txtITOBATTR-STTXU").text
+    texto_montagem_medidor = code_montagem_medidor + ' - ' + self.depara('medidor_montagem', code_montagem_medidor)
+    texto_status_medidor = code_status_medidor + ' - ' + self.depara('medidor_status', code_status_medidor)
+    texto_retorno.append(f"*Equipamento:* {medidor_serial}")
+    texto_retorno.append(f"*Tipo:* {txtCodMedidor}")
+    texto_retorno.append(f"*Montagem do equipamento:* {texto_montagem_medidor}")
+    texto_retorno.append(f"*Status do equipamento:* {texto_status_medidor}")
     self.session.FindById(r'wnd[0]/usr/tabsTABSTRIP/tabpT\03/ssubSUB_DATA:SAPMIEQ0:0500/subISUSUB:SAPLE10R:1000/btnBUTTON_ISABL').Press()
+    if(self.session.FindById("wnd[0]/usr/cntlBCALVC_EVENT2_D100_C1/shellcont/shell", False) == None):
+      if(informar_instalacao): texto_retorno.append(f"*Instalacao:* `SEM ACESSO A INSTALACAO!`")
+      return '\n'.join(texto_retorno)
+    instalacao = self.session.FindById("wnd[0]/usr/txtIEANL-ANLAGE").text
+    if(informar_instalacao):
+      texto_retorno.append(f"*Instalacao:* `{instalacao}`")
+      self.instalacao(instalacao)
+      return '\n'.join(texto_retorno) + "\n" + self.info_instalacao()
     apontador = 0
     linhas = self.session.FindById("wnd[0]/usr/cntlBCALVC_EVENT2_D100_C1/shellcont/shell").RowCount
-    while(apontador < linhas and apontador < 12):
-      status = self.session.findById("wnd[0]/usr/cntlBCALVC_EVENT2_D100_C1/shellcont/shell").getCellValue(apontador,"ABLHINW")
-      if(status == "3201"):
-        textoStatus = "3201 - medidor retirado"
-        break
-      if(status == "3202"):
-        textoStatus = "3202 - medidor retirado"
-        break
-      if(status == "3203"):
-        textoStatus = "3203 - retirado telemedido"
-        break
-      if(status == "5800"):
-        textoStatus = "5800 - incendiado/demolido"
-        break
+    limite = 12 if linhas > 12 else linhas
+    dataframe = {
+      "Data": [],
+      "Codigo": [],
+      "Descricao": [],
+    }
+    while(apontador < limite):
+      data = self.session.FindById("wnd[0]/usr/cntlBCALVC_EVENT2_D100_C1/shellcont/shell").getCellValue(apontador,"ADATSOLL")
+      status = self.session.FindById("wnd[0]/usr/cntlBCALVC_EVENT2_D100_C1/shellcont/shell").getCellValue(apontador,"ABLHINW")
+      if(status != ""):
+        dataframe['Data'].append(data)
+        dataframe['Codigo'].append(status)
+        texto_status = self.depara('leitura_codigo', status)
+        dataframe['Descricao'].append(texto_status)
       apontador = apontador + 1
-    if(textoStatus == None):
-      textoStatus = "nao esta retirado"
-    return f"*Instalacao:* {instalacao}\n*Status Instalacao:* {statusInstalacao}\n*Medidor:* {medidor}\n*Status medidor:* {textoStatus}\n*Tipo:* {txtCodMedidor}"
+    dataframe = pandas.DataFrame(dataframe)
+    if(len(dataframe) > 0):
+      texto_retorno.append(f"*Codigos de leitura nas ultimas {limite} leituras:*")
+      texto_retorno.append(dataframe.to_string(index=False))
+    else:
+      texto_retorno.append(f"Sem codigos de leitura nas ultimas {limite} leituras!")
+    return '\n'.join(texto_retorno)
   def novo_analisar(self, arg) -> bool:
     self.debito(arg, True)
     apontador = 0
