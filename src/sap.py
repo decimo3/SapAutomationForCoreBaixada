@@ -370,15 +370,23 @@ class sap:
       self.session.StartTransaction(Transaction="IQ03")
       self.session.FindById("wnd[0]/usr/ctxtRISA0-MATNR").text = ""
       self.session.FindById("wnd[0]/usr/ctxtRISA0-SERNR").text = arg
+      self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+      if(self.session.findById("wnd[0]/usr/cntlGRID1/shellcont/shell", False) != None):
+        linhas = self.session.findById("wnd[0]/usr/cntlGRID1/shellcont/shell").RowCount
+        equipamentos = []
+        for linha in range(linhas):
+          equipamentos.append(self.session.findById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(linha, "MATNR"))
+        lista_informacoes = "####################\n"
+        for equipamento in equipamentos:
+          lista_informacoes = lista_informacoes + self.info_medidor(str(arg), str(equipamento)) + "\n####################\n"
+        raise Exception(f"*Ha mais de um equipamento com esse mesmo numero de serie! Verifique qual lhe atende e solicite pela instalacao!*\n\n{lista_informacoes}")
       try:
-        self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
         self.session.FindById(r'wnd[0]/usr/tabsTABSTRIP/tabpT\03/ssubSUB_DATA:SAPMIEQ0:0500/subISUSUB:SAPLE10R:1000/btnBUTTON_ISABL').Press()
         instalacao = self.session.findById("wnd[0]/usr/txtIEANL-ANLAGE").text
         self.instalacao(instalacao)
         return instalacao
       except:
         raise Exception("O numero informado nao eh nota, instalacao ou medidor")
-      pass
     raise Exception("O numero informado nao eh nota, instalacao ou medidor")
   def historico(self, nota) -> str:
     instalacao = self.instalacao(nota)
