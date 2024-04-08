@@ -589,14 +589,15 @@ class sap:
       telefone.append(self.session.FindById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_01/ssubSCREEN_1100_TABSTRIP_AREA:SAPLBUSS:0028/ssubGENSUB:SAPLBUSS:7016/subA06P01:SAPLBUA0:0700/subADDR_ICOMM:SAPLSZA11:0100/txtSZA11_0100-MOB_NUMBER").text)
     # Remove duplicadas do array
     telefone = list(dict.fromkeys(telefone))
+    espaco_vazio = "______________________________"
     try:
-      telefone.remove("______________________________")
+      telefone.remove(espaco_vazio)
     except:
       pass
-    texto = nome_cliente + " "
-    for tel in telefone:
-      texto += tel + " " if (len(tel) > 0) else ""
-    return texto
+    if(len(telefone) == 0):
+      return nome_cliente + " NAO TEM NUMERO DE TELEFONE CADASTRADO!"
+    else:
+      return nome_cliente + ' '.join(telefone)
   def consumo(self, nota) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ZATC66")
