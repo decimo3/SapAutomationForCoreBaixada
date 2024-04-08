@@ -817,3 +817,27 @@ INSERT INTO depara (tipo, de, para) VALUES
 ('classe_subclasse','8003','Interno - Distribuidora'),
 ('classe_subclasse','8004','Cons Próprio -Veíc. Elétricos'),
 ('classe_subclasse','9001','Suprim. Outras Concession.');
+INSERT INTO depara (tipo, de, para) VALUES
+('medidor_montagem','LIDI','A livre disposicao'),
+('medidor_montagem','MONT','Montado');
+INSERT INTO depara (tipo, de, para) VALUES
+('medidor_status','ENCO','Encomendado'),
+('medidor_status','DEPS','Deposito'),
+('medidor_status','PEXE','Em Poder do Executante'),
+('medidor_status','INST','Instalado'),
+('medidor_status','ALIE','Alienado'),
+('medidor_status','NLOC','Nao Localizado / Desaparecido'),
+('medidor_status','REDE','Na rede, mas desinstalado'),
+('medidor_status','BLCO','Balanco Energetico'),
+('medidor_status','CARB','Carbonizado s/ identificacao'),
+('medidor_status','NLIN','Equip. Nao Localizado na Instalacao'),
+('medidor_status','PCLI','Equip. Permaneceu no Cliente'),
+('medidor_status','TRIA','Para triagem'),
+('medidor_status','VERI','Para verificacao'),
+('medidor_status','QUAR','Em Quarentena no Laboratorio'),
+('medidor_status','INSP','Inspecao Aprovada/Liberada'),
+('medidor_status','LAUD','Para emissao de laudo'),
+('medidor_status','DEBI','Equip. Debitado'),
+('medidor_status','NOTI','Equip. Notificado'),
+('medidor_status','AGEN','Agendamento Entrega Realizado'),
+('medidor_status','MREL','Equipamento c/ PC Cancelado');
