@@ -902,20 +902,17 @@ class sap:
   def passivas_novo(self, arg) -> bool:
     debitos = self.escrever_novo(arg, False, True)
     return (len(debitos) > 0)
-  def informacao(self, arg) -> str:
-    result = self.novo_medidor(arg)
-    instalacao = self.instalacao(arg)
+  def info_parceiro(self) -> str:
     parceiro = self.session.findById("wnd[0]/usr/txtEANLD-PARTNER").text
     nome_cliente = self.session.findById("wnd[0]/usr/txtEANLD-PARTTEXT").text
-    if(len(parceiro) == 0): raise Exception("Instalacao sem cliente! Sem informacoes!")
-    if(str(nome_cliente).startswith("UNIDADE C/ CONSUMO")): raise Exception("Cliente ficticio! Sem informacoes!")
-    if(str(nome_cliente).startswith("PARCEIRO DE NEGOCIO")): raise Exception("Cliente ficticio! Sem informacoes!")
+    if(len(parceiro) == 0): return "*INSTALACAO SEM CLIENTE VINCULADO!*"
+    if(str(nome_cliente).startswith("UNIDADE C/ CONSUMO")): return "*INSTALACAO SEM CLIENTE VINCULADO!*"
+    if(str(nome_cliente).startswith("PARCEIRO DE NEGOCIO")): return "*INSTALACAO SEM CLIENTE VINCULADO!*"
+    nome_cliente = str(nome_cliente).split("/")[0]
     phone_field_partial_string = self.parceiro(parceiro)
-    nome_cliente = self.session.FindById(phone_field_partial_string + "subSCREEN_1000_HEADER_AREA:SAPLBUPA_DIALOG_JOEL:1510/txtBUS_JOEL_MAIN-CHANGE_DESCRIPTION").text
-    nome_cliente = str.split(nome_cliente, "/")[0]
     self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04").Select()
     pessoa_fisica = self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04/ssubSCREEN_1100_TABSTRIP_AREA:SAPLBUSS:0028/ssubGENSUB:SAPLBUSS:7006/subA04P01:SAPLBUPA_BUTX_DIALOG:0100/tblSAPLBUPA_BUTX_DIALOGTCTRL_BPTAX/txtDFKKBPTAXNUM-TAXNUM[2,0]").text
-    return result + f"\n*Cod. do cliente:* {parceiro}\n*Cadastro Pessoa Fisica (CPF):* {pessoa_fisica}\n*Nome do cliente:* {nome_cliente}"
+    return f"*Cod. do cliente:* {parceiro}\n*Cadastro Pessoa Fisica (CPF):* {pessoa_fisica}\n*Nome do cliente:* {nome_cliente}"
   def parceiro(self, parceiro, have_authorization: bool=True) -> str:
     SAPLBUS_LOCATOR = "2000" if(have_authorization) else "2036"
     phone_field_partial_string = f"wnd[0]/usr/subSCREEN_3000_RESIZING_AREA:SAPLBUS_LOCATOR:{SAPLBUS_LOCATOR}/subSCREEN_1010_RIGHT_AREA:SAPLBUPA_DIALOG_JOEL:1000/"
@@ -1134,6 +1131,20 @@ class sap:
       mes_indice = f" 0{i} " if i < 10 else f" {i} "
       dataframe[mes_indice] = pandas.to_numeric(dataframe[mes_indice], 'coerce').astype('Int64')
     return dataframe.to_csv(index=False)
+  def info_instalacao(self) -> str:
+    instalacao_status = self.session.findById('wnd[0]/usr/txtEANLD-DISCSTAT').text
+    endereco = str.split(self.session.FindById("wnd[0]/usr/txtEANLD-LINE1").text, ",")[1]
+    classe = self.session.FindById("wnd[0]/usr/tblSAPLES30TC_TIMESL/ctxtEANLD-ISTYPE[5,0]").text
+    texto_classe = self.depara('classe_subclasse', classe)
+    return f"*Status Instalacao:* {instalacao_status}\n*Classe da instalacao:* {texto_classe}\n*Endereco:* {endereco}"
+  def novo_informacao(self, arg) -> str:
+    inst = self.instalacao(arg)
+    info_instalacao = self.info_instalacao()
+    self.instalacao(inst)
+    info_cliente = self.info_parceiro()
+    self.instalacao(inst)
+    info_medicao = self.info_medidor()
+    return f"*Instalacao:* {inst}\n{info_instalacao}\n{info_cliente}\n{info_medicao}"
 if __name__ == "__main__":
   # Validação dos argumentos da linha de comando:
   # 1. Será possível realizar a tarefa se no mínimo
@@ -1172,8 +1183,6 @@ if __name__ == "__main__":
     elif ((aplicacao == "telefone") or (aplicacao == "contato")):
       if(not have_authorization): raise Exception("Nao eh possivel consultar essas informacoes no modo restrito")
       print(robo.telefone(argumento))
-    elif (aplicacao == "medidor"):
-      print(robo.novo_medidor(argumento))
     elif ((aplicacao == "leiturista") or (aplicacao == "roteiro")):
       try:
         if(aplicacao == "roteiro"):
@@ -1203,14 +1212,14 @@ if __name__ == "__main__":
         print(robo.escrever_novo(argumento))
     elif (aplicacao == "manobra"):
       print(robo.manobra(argumento))
-    elif(aplicacao == "informacao"):
+    elif((aplicacao == "informacao") or (aplicacao == "medidor")):
       if(not have_authorization): raise Exception("Nao eh possivel consultar essas informacoes no modo restrito")
-      else: print(robo.informacao(argumento))
+      else: print(robo.novo_informacao(argumento))
     elif(aplicacao == "desperta"):
       print(robo.instalacao(argumento))
     elif(aplicacao == "cruzamento"):
       print(robo.cruzamento(argumento))
-    elif(aplicacao == "consumo"):
+    elif((aplicacao == "consumo") or (aplicacao == "leitura")):
       print(robo.consumo(argumento))
     elif(aplicacao == "abertura"):
       print(robo.inspecao(argumento))
