@@ -1,4 +1,7 @@
-**CORREÇÃO NO CHATBOT**
-**_Versão atual: 20240405_**
+**MELHORIAS NO CHATBOT**
+**_Versão atual: 20240417_**
 
-Corrigido envio de coordenadas. As coordenadas estavam sendo enviadas erroneamente como texto. Foi recuperado o envio das coordenadas da forma iterativa do Telegram (como mapa).
+1. Adicionada a identificação do responsável pelo envio dos comunicados;
+2. Aumentado prazo de expiração de acesso dos supervisores para 3 meses;
+3. Adicionado sistema de aviso de notas pendentes de bandeirada (setor REN);
+4. Corrigido o sistema de envio das planilhas de relatório;
