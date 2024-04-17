@@ -129,7 +129,7 @@ class sap:
         dataframe["Status"].append(tabela.getCellValue(i, "ZZ_ST_USUARIO"))
         tabela.firstVisibleRow = i
       dataframe = pandas.DataFrame(dataframe)
-      dataframe["Data"] = pandas.to_datetime(dataframe["Data"], format="%d/%m/%Y")
+      dataframe["Data"] = pandas.to_datetime(dataframe["Data"], format="%d/%m/%Y", errors='coerce')
       dataframe["Hora"] = pandas.to_datetime(dataframe["Hora"], format="%H:%M:%S")
       for dano in danos_filtrar:
         dataframe = dataframe[dataframe["Dano"] != dano]
