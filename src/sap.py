@@ -1205,6 +1205,9 @@ if __name__ == "__main__":
     apontador = 4
     while(apontador < len(sys.argv)):
       if ('--sap-restrito' == sys.argv[apontador]): have_authorization = False
+      if ('--baixada' == sys.argv[apontador]): robo.REGIAO = 'RB'
+      if ('--oeste' == sys.argv[apontador]): robo.REGIAO = 'RO'
+      if ('--leste' == sys.argv[apontador]): robo.REGIAO = 'RL'
       else: raise Exception("O argumento fornecido nao eh valido!")
       apontador = apontador + 1
   # Attempts to execute the method requested in the first argument
