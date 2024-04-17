@@ -232,7 +232,7 @@ class sap:
         apontador = 0
         limite = linhas
       # Se a instalacao foi encontrada no início do relatorio
-      elif (celula <= 14):
+      elif (celula <= interval):
         apontador = 0
         limite = interval * 2
       # Se a instalacao foi encontrada no final do relatorio
