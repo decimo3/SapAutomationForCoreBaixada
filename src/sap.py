@@ -20,6 +20,10 @@ class sap:
     dotenv.load_dotenv('sap.conf')
     self.SETOR = os.environ.get("SETOR")
     if(self.SETOR == None): raise Exception("A variavel SETOR no arquivo `sap.config` nao esta definida!")
+    self.REGIAO = os.environ.get("REGIAO")
+    if(self.REGIAO == None): raise Exception("A variavel REGIAO no arquivo `sap.config` nao esta definida!")
+    self.LAYOUT = os.environ.get("LAYOUT")
+    if(self.LAYOUT == None): raise Exception("A variavel LAYOUT no arquivo `sap.config` nao esta definida!")
     self.ATIVIDADES = self.depara('setor_atividades', self.SETOR).split(',')
     if not (self.IfIsRunning('cscript.exe')):
       subprocess.Popen("cscript erroDialog.vbs", stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -98,8 +102,8 @@ class sap:
       self.session.FindById(janela + "ctxtRSCSEL_255-SLOW_I[1,1]").text = "LIBE"
       self.session.FindById(janela + "ctxtRSCSEL_255-SLOW_I[1,2]").text = "TABL"
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
-      self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = os.environ.get("REGIAO")
-      self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = os.environ.get("LAYOUT")
+      self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = self.REGIAO
+      self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = self.LAYOUT
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       tabela = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell", False)
       if(tabela == None): raise Exception("O relatorio de notas em aberto esto vazio!")
@@ -164,8 +168,8 @@ class sap:
       self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "ENVI"
       self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "LIBE"
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
-      self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = "RB"
-      self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = "/MANSERVRELC"
+      self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = self.REGIAO
+      self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = self.LAYOUT
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       try:
         exist = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell", False)
