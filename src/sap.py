@@ -141,46 +141,73 @@ class sap:
       dataframe.to_csv(arquivo, index=False)
       final_texto = " vencendo hoje!" if filtrar_dias else "."
       return f"Relatorio gerado as {agora.strftime('%d/%m/%Y %H:%M:%S')}.\nHa {quantidade_total} notas no relatorio{final_texto}"
-  def manobra(self, dia=0) -> None:
+  def bandeirada(self, dia=45, filtrar_dias=True) -> str:
+      hoje = datetime.date.today()
+      agora = datetime.datetime.now()
+      semana = hoje - datetime.timedelta(days=dia)
+      arquivo = self.CURRENT_FOLDER + '\\temporario.csv'
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "BP"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "BB"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,2]").text = "BD"
+      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "BA"
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
       hoje = datetime.date.today()
       semana = hoje - datetime.timedelta(days=dia)
       self.session.FindById("wnd[0]/usr/ctxtSO_QMDAT-LOW").text = semana.strftime("%d.%m.%Y")
       self.session.FindById("wnd[0]/usr/ctxtSO_QMDAT-HIGH").text = hoje.strftime("%d.%m.%Y")
       self.session.FindById("wnd[0]/usr/btn%_SO_FECOD_%_APP_%-VALU_PUSH").Press()
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "AP04"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "AP99"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,2]").text = "AP11"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,3]").text = "AP25"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,4]").text = "AP79"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,5]").text = "APRA"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,6]").text = "APRT"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,7]").text = "APTC"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE").verticalScrollbar.position = 1
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,7]").text = "APCI"
+      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "OSTA"
+      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "OSJD"
+      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,2]").text = "OSFT"
+      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,3]").text = "OSAT"
+      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,4]").text = "OSAR"
+      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,5]").text = "OATI"
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
       self.session.FindById("wnd[0]/usr/btn%_SO_USUAR_%_APP_%-VALU_PUSH").Press()
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "ENVI"
-      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "LIBE"
+      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "ANAL"
+      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "POSB"
+      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,2]").text = "PCOM"
+      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,3]").text = "NEXE"
+      self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,4]").text = "EXEC"
       self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
       self.session.FindById("wnd[0]/usr/ctxtSO_BEBER-LOW").text = self.REGIAO
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = self.LAYOUT
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
-      try:
-        exist = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell", False)
-        if(exist):
-          subprocess.Popen(f"cscript fileDialog.vbs")
-          self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").pressToolbarContextButton("&MB_EXPORT")
-          self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").selectContextMenuItem("&XXL")
-        else:
-          raise Exception("O relatorio de notas em aberto esto vazio!")
-      except:
-        raise Exception("O relatorio de notas em aberto esto vazio!")
+      tabela = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell", False)
+      if(tabela == None): raise Exception("O relatorio de notas em aberto esto vazio!")
+      if(tabela.RowCount == 0): raise Exception("O relatorio de notas em aberto esto vazio!")
+      dataframe = {
+        "Cor": [],
+        "Nota": [],
+        "Instalacao": [],
+        "Tipo": [],
+        "Dano": [],
+        "Data": [],
+        "Hora": [],
+        "Status": [],
+        "Encerramento": [],
+      }
+      for i in range(tabela.RowCount):
+        dataframe["Cor"].append(str(self.DESTAQUE_AUSENTE))
+        dataframe["Nota"].append(tabela.getCellValue(i, "QMNUM"))
+        dataframe["Instalacao"].append(tabela.getCellValue(i, "ZZINSTLN"))
+        dataframe["Tipo"].append(tabela.getCellValue(i, "QMART"))
+        dataframe["Dano"].append(tabela.getCellValue(i, "FECOD"))
+        dataframe["Data"].append(tabela.getCellValue(i, "LTRMN"))
+        dataframe["Hora"].append(tabela.getCellValue(i, "LTRUR"))
+        dataframe["Status"].append(tabela.getCellValue(i, "ZZ_ST_USUARIO"))
+        dataframe["Encerramento"].append(tabela.getCellValue(i, "QMDAB"))
+        tabela.firstVisibleRow = i
+      dataframe = pandas.DataFrame(dataframe)
+      dataframe["Data"] = pandas.to_datetime(dataframe["Data"], format="%d/%m/%Y", errors='coerce')
+      dataframe["Hora"] = pandas.to_datetime(dataframe["Hora"], format="%H:%M:%S")
+      dataframe["Encerramento"] = pandas.to_datetime(dataframe["Encerramento"], format="%d/%m/%Y", errors='coerce')
+      if(filtrar_dias):
+        dataframe = dataframe[dataframe["Encerramento"].isnull()]
+      quantidade_total = len(dataframe)
+      if(quantidade_total == 0): raise Exception("O relatorio de notas em aberto esto vazio!")
+      dataframe.to_csv(arquivo, index=False)
+      final_texto = " ainda não bandeiradas" if filtrar_dias else "."
+      return f"Relatorio gerado as {agora.strftime('%d/%m/%Y %H:%M:%S')}.\nHa {quantidade_total} notas no relatorio{final_texto}"
   def leiturista(self, nota, retry:bool=False, order_by_sequence:bool=False, interval:int=30) -> str:
       instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ES32")
@@ -1214,8 +1241,8 @@ if __name__ == "__main__":
         print(robo.escrever(argumento))
       else:
         print(robo.escrever_novo(argumento))
-    elif (aplicacao == "manobra"):
-      print(robo.manobra(argumento))
+    elif (aplicacao == "bandeirada"):
+      print(robo.bandeirada(argumento))
     elif((aplicacao == "informacao") or (aplicacao == "medidor")):
       if(not have_authorization): raise Exception("Nao eh possivel consultar essas informacoes no modo restrito")
       else: print(robo.novo_informacao(argumento))
