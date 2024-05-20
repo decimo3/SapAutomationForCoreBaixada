@@ -4,4 +4,4 @@
 
 O sistema automatizado irá verificar pelas informações do OFS equipes que estão ofendendo o IDG em tempo real. O mesmo irá notificar os controladores sobre os infratores e a sua infração.
 
-_Versão atual: 20240517_
+_Versão atual: 20240520_
