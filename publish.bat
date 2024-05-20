@@ -13,8 +13,8 @@ call build.bat
 cd ..
 for /f "tokens=2 delims==" %%a in ('wmic os get localdatetime /value') do set datetime=%%a
 set "datestamp=%datetime:~0,4%%datetime:~4,2%%datetime:~6,2%"
-echo %datestamp% > ".\tmp\version"
-7z u -x!database.db -x!sap.conf -x!.env %UPDATE_FOLDER%%datestamp%.zip .\tmp\*
+7z u -x!database.db -x!.env -x!sap.conf -x!ofs.conf .\releases\%datestamp%.zip .\tmp\*
 cd .\SapAutomationForCoreBaixada
+pause
 git add comunicado.txt
-git commit -m "Update 'comunicado.txt' to version %datestamp%"
+git commit -m "Update 'comunicado.txt'"

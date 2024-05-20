@@ -17,6 +17,13 @@ copy .\SapAutomationForCoreBaixada\comunicado.txt tmp
 copy .\SapAutomationForCoreBaixada\src\erroDialog.vbs tmp
 copy .\SapAutomationForCoreBaixada\src\fileDialog.vbs tmp
 cd .\TelegramBotForFieldTeamHelper
+for /f "tokens=2 delims==" %%a in ('wmic os get localdatetime /value') do set datetime=%%a
+set "datestamp=%datetime:~0,4%%datetime:~4,2%%datetime:~6,2%"
+echo %datestamp% > version
 dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained true --output ..\tmp\
+cd ..
+cd .\monitoring-fieldteam\src
+dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained true --output ..\..\tmp\
+cd ..
 cd ..
 cd .\SapAutomationForCoreBaixada
