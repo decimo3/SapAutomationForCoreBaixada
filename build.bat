@@ -1,7 +1,6 @@
 @echo OFF
 if not defined VIRTUAL_ENV (
-  echo Environment variable 'VIRTUAL_ENV' was not defined
-  exit
+  call .venv\Scripts\activate
 )
 pyinstaller --onefile .\\src\\sap.py
 pyinstaller --onefile .\\src\\img.py
