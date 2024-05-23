@@ -1,5 +1,7 @@
 *COMUNICADO DE ATUALIZAÇÃO DO CHATBOT*
 
-Sistema de monitoramento dos ofensores do IDG com erros corrigidos e precisão melhorada!
+Corrigido problema com a coleta do último registro da rota do recurso.
 
-_Versão atual: 20240521_
+Após algum registro em vermelho na rota do recurso, o mesmo parava de coletar a informação atualizada da rota do mesmo gerando erroneamente alerta de `GPS sem registro`.
+
+_Versão atual: 20240523_
