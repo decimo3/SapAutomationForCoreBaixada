@@ -1,11 +1,7 @@
 *COMUNICADO DE ATUALIZAÇÃO DO CHATBOT*
 
-Correções e melhorias no monitor do OFS:
-1. Adicionada verificação para multiplos baldes;
-2. Adicionada navegação de baldes por hierarquia;
-3. Corrigida verificação de quantidade de notas restantes;
-4. Adicionada verificação de intervalo de janela de tempo;
-5. Adicionada verificação de tempo de execução demasiada longa;
-6. Aumentado intervalo de tempo para envio do relatório para supervisão e administradores;
+Adicionado sistema de *análise final do IDG das equipes* e coleta das informações referentes ao IDG (será enviado no final do dia);
+Melhorada a precisão da verificação da janela do calendário das equipes, e adicionado parametrização pelo arquivo de configuração;
+Corrigido os caminhos dos elementos, após a atualização do OFS, retornando o funcionamento do sistema;
 
-_Versão atual: 20240527_
+_Versão atual: 20240603_
