@@ -14,4 +14,5 @@ cd ..
 for /f "tokens=2 delims==" %%a in ('wmic os get localdatetime /value') do set datetime=%%a
 set "datestamp=%datetime:~0,4%%datetime:~4,2%%datetime:~6,2%"
 7z u -x!database.db -x!.env -x!sap.conf -x!ofs.conf .\releases\%datestamp%.zip .\tmp\*
+copy .\releases\%datestamp%.zip %UPDATE_FOLDER%\%datestamp%.zip
 cd .\SapAutomationForCoreBaixada
