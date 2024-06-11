@@ -1,7 +1,7 @@
 *COMUNICADO DE ATUALIZAÇÃO DO CHATBOT*
 
-Adicionado sistema de *análise final do IDG das equipes* e coleta das informações referentes ao IDG (será enviado no final do dia);
-Melhorada a precisão da verificação da janela do calendário das equipes, e adicionado parametrização pelo arquivo de configuração;
-Corrigido os caminhos dos elementos, após a atualização do OFS, retornando o funcionamento do sistema;
+Atualizado relatório final do OFS para um formato mais amigável;
+Direcionado envio de relatório do monitor do OFS para canais de transmissão do Telegram;
+Adicionada possibilidade de relatórios de `vencimento` e `bandeiradas` de mais de uma regional;
 
-_Versão atual: 20240603_
+_Versão atual: 20240611_
