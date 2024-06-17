@@ -1,7 +1,7 @@
 *COMUNICADO DE ATUALIZAÇÃO DO CHATBOT*
 
-Atualizado relatório final do OFS para um formato mais amigável;
-Direcionado envio de relatório do monitor do OFS para canais de transmissão do Telegram;
-Adicionada possibilidade de relatórios de `vencimento` e `bandeiradas` de mais de uma regional;
+Adicionada verificação de relatórios do IDG retroativos até 15 dias;
+Adicionado aplicação `evidencia` para coleta de informações e evidências das notas finalizadas no OFS (somente para supervisores e controladores);
+Realizadas melhorias e correções diversas; 
 
-_Versão atual: 20240611_
+_Versão atual: 20240617_
