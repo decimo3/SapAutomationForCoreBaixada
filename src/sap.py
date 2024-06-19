@@ -1300,6 +1300,9 @@ if __name__ == "__main__":
       print(robo.relatorio(argumento, True))
     elif(aplicacao == "ren360"):
       print(robo.procurar(argumento))
+    elif(aplicacao == "codbarra"):
+      if(telefone == None): raise Exception("Nao foi informado telefone")
+      print(robo.codbarra(argumento, telefone))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
     robo.retorno()
