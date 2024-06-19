@@ -1235,6 +1235,7 @@ if __name__ == "__main__":
   try: robo = sap(instancia)
   except: raise Exception("ERRO: Nao pode se conectar ao sistema SAP!")
   have_authorization = True
+  telefone = None
   # If the number of arguments is greater than the minimum (4),
   # then it checks the other arguments (now, only one optional argument is accepted).
   if(len(sys.argv) > 4):
@@ -1244,6 +1245,8 @@ if __name__ == "__main__":
       elif ('--baixada' == sys.argv[apontador]): robo.REGIAO = 'RB'
       elif ('--oeste' == sys.argv[apontador]): robo.REGIAO = 'RO'
       elif ('--leste' == sys.argv[apontador]): robo.REGIAO = 'RL'
+      elif (str(sys.argv[apontador]).startswith("--telefone")):
+        telefone = str(sys.argv[apontador]).split('=')[1]
       else: raise Exception("O argumento fornecido nao eh valido!")
       apontador = apontador + 1
   # Attempts to execute the method requested in the first argument
