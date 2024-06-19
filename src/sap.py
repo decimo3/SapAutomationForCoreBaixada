@@ -1178,6 +1178,40 @@ class sap:
     self.instalacao(inst)
     info_medicao = self.info_medidor()
     return f"*Instalacao:* {inst}\n{info_instalacao}\n{info_cliente}\n{info_medicao}"
+  def codbarra(self, arg, tel) -> str:
+    instalacao = self.instalacao(arg)
+    parceiro = self.session.findById("wnd[0]/usr/txtEANLD-PARTNER").text
+    self.session.StartTransaction(Transaction="ZATC45")
+    self.session.FindById("wnd[0]/usr/radP2VIA").Select()
+    self.session.findById("wnd[0]/usr/ctxtPPARTNER").text = parceiro
+    self.session.findById("wnd[0]/usr/ctxtPANLAGE").text = instalacao
+    self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
+    statusBar = self.session.FindById("wnd[0]/sbar").text
+    if(statusBar != ''): raise Exception(statusBar)
+    self.session.FindById("wnd[0]/usr/radCOD_BARRAS").Select()
+    linhas = int(self.session.FindById("wnd[0]/usr/txtZATCE_MENGE_BETRW-MENGE").text)
+    if(linhas > 10): raise Exception(f"Cliente possui muitas faturas ({linhas})")
+    for apontador in range(linhas):
+      situacao = self.session.FindById(f"wnd[0]/usr/tblSAPLZCRM_METODOSTC_FATURAS/txtIT_SAIDA-STATUS[7,{apontador}]").text
+      if(situacao != "A Vencer" and situacao != "Retida"):
+        self.session.FindById(f"wnd[0]/usr/tblSAPLZCRM_METODOSTC_FATURAS/chkIT_SAIDA-SELFAT[3,{apontador}]").selected = True
+    self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
+    statusBar = self.session.FindById("wnd[0]/sbar").text
+    if(statusBar != ''): raise Exception(statusBar)
+    self.session.FindById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[4,0]").Select()
+    self.session.FindById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[4,0]").setFocus()
+    self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
+    linhas = self.session.FindById("wnd[1]/usr/cntlGRID1/shellcont/shell").RowCount
+    for apontador in range(linhas):
+      telefone = self.session.FindById("wnd[1]/usr/cntlGRID1/shellcont/shell").getCellValue(apontador, "CELULAR")
+      if(telefone == "NENHUM DOS ANTERIORES"):
+        self.session.FindById("wnd[1]/usr/cntlGRID1/shellcont/shell").setCurrentCell(apontador, "CELULAR")
+        self.session.FindById("wnd[1]/usr/cntlGRID1/shellcont/shell").clickCurrentCell()
+    self.session.FindById("wnd[1]/usr/txtSPOP-VARVALUE1").text = tel
+    self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
+    self.session.FindById("wnd[1]/usr/btnBUTTON_1").Press()
+    self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
+    return "Solicitado envio do codigo de barras!"
 if __name__ == "__main__":
   # Validação dos argumentos da linha de comando:
   # 1. Será possível realizar a tarefa se no mínimo
