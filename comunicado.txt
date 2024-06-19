@@ -1,7 +1,5 @@
 *COMUNICADO DE ATUALIZAÇÃO DO CHATBOT*
 
-Adicionada verificação de relatórios do IDG retroativos até 15 dias;
-Adicionado aplicação `evidencia` para coleta de informações e evidências das notas finalizadas no OFS (somente para supervisores e controladores);
-Realizadas melhorias e correções diversas; 
+Adicionada aplicação `CODBARRA`, que solicita o envio do código de barras da fatura para o telefone da equipe, possibilitando o pagamento da fatura, quando o sistema está fora do ar.
 
-_Versão atual: 20240617_
+_Versão atual: 20240619_
