@@ -1249,6 +1249,10 @@ if __name__ == "__main__":
         telefone = str(sys.argv[apontador]).split('=')[1]
       else: raise Exception("O argumento fornecido nao eh valido!")
       apontador = apontador + 1
+  if(telefone != None):
+    telefone = re.search("[0-9]{11}$", telefone)
+    if(telefone != None):
+      telefone = telefone.group()
   # Attempts to execute the method requested in the first argument
   try:
     if (aplicacao == "coordenada"):
