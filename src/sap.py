@@ -1060,7 +1060,7 @@ class sap:
     self.session.FindById("wnd[0]/usr/ctxtEVBSD-VSTELLE").text = consumo
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
     tipoInstalacao = int(self.session.FindById("wnd[0]/usr/ssubSUB:SAPLXES60:0100/tabsTS0100/tabpTAB1/ssubSUB1:SAPLXES60:0101/ctxtEVBSD-ZZ_TP_LIGACAO").text)
-    if(not self.is_passivel_ren(tipoInstalacao, is_residencial, localidade)): return retorno + "ser residencial em area restrita de inspecao pelo tipo de instalacao"
+    # if(not self.is_passivel_ren(tipoInstalacao, is_residencial, localidade)): return retorno + "ser residencial em area restrita de inspecao pelo tipo de instalacao"
     # Collecting customer registration information
     phone_field_partial_string = self.parceiro(parceiro)
     self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04").Select()
@@ -1073,7 +1073,7 @@ class sap:
     # debitos = debitos[debitos["Cor"] != str(self.DESTAQUE_VERMELHO)]
     # if(len(debitos) > 0): return retorno + "o cliente possuir debito(s) pendente(s)!"
     # Collecting service history information
-    meses_verificacao_inspecoes =  12 if(is_residencial) else 6
+    meses_verificacao_inspecoes =  6  # if not is_residencial else 12
     historico = pandas.read_csv(io.StringIO(self.historico(instalacao)))
     historico["Data"] = pandas.to_datetime(historico['Data'], format="%d.%m.%Y")
     prazo_maximo = datetime.date.today() - datetime.timedelta(days=meses_verificacao_inspecoes * 30)
