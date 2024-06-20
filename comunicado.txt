@@ -1,5 +1,5 @@
 *COMUNICADO DE ATUALIZAÇÃO DO CHATBOT*
 
-Adicionada aplicação `CODBARRA`, que solicita o envio do código de barras da fatura para o telefone da equipe, possibilitando o pagamento da fatura, quando o sistema está fora do ar.
+Corrigido problema no sistema de fatura.
 
 _Versão atual: 20240619_
