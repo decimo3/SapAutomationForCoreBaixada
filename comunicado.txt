@@ -1,5 +1,5 @@
 *COMUNICADO DE ATUALIZAÇÃO DO CHATBOT*
 
-Corrigido problema no sistema de fatura.
+Atualizado critérios de análise de abertura de nota de recuperação (Id). Agora instalações monofásicas serão analisadas corretamente!
 
-_Versão atual: 20240619_
+_Versão atual: 20240620_
