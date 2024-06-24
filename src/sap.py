@@ -1292,7 +1292,7 @@ if __name__ == "__main__":
     elif((aplicacao == "informacao") or (aplicacao == "medidor")):
       if(not have_authorization): raise Exception("Nao eh possivel consultar essas informacoes no modo restrito")
       else: print(robo.novo_informacao(argumento))
-    elif(aplicacao == "desperta"):
+    elif(aplicacao == "instalacao"):
       print(robo.instalacao(argumento))
     elif(aplicacao == "cruzamento"):
       print(robo.cruzamento(argumento))
