@@ -25,8 +25,7 @@ cd .\monitoring-fieldteam\src
 dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained true --output ..\..\tmp\
 cd ..
 cd ..
-cd .\SapAutomationForWeb\src
-dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained true --output ..\..\tmp\
-cd ..
+cd .\SapAutomationForWeb
+dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained true --output ..\tmp\
 cd ..
 cd .\SapAutomationForCoreBaixada
