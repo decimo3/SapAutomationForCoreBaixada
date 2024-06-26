@@ -1,5 +1,6 @@
 *COMUNICADO DE ATUALIZAÇÃO DO CHATBOT*
 
-Atualizado critérios de análise de abertura de nota de recuperação (Id). Agora instalações monofásicas serão analisadas corretamente!
+Adicionado suporte a envio de faturas pelo PRL (em teste).
+Quando ativado o as faturas serão enviadas pelo sistema PRL, que é mais estável e robusto que o SAP.
 
 _Versão atual: 20240620_
