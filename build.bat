@@ -2,7 +2,7 @@
 if not defined VIRTUAL_ENV (
   call .venv\Scripts\activate
 )
-pyinstaller --onefile .\\src\\sap.py
+pyinstaller --onefile --icon appicon.ico .\\src\\sap.py
 pyinstaller --onefile .\\src\\img.py
 del .\\src\\sap.db
 sqlite3 .\\src\\sap.db < .\\src\\sap.sql
