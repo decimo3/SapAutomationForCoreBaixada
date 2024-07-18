@@ -1,6 +1,5 @@
 *COMUNICADO DE ATUALIZAÇÃO DO CHATBOT*
 
-Adicionado suporte a envio de faturas pelo PRL (em teste).
-Quando ativado o as faturas serão enviadas pelo sistema PRL, que é mais estável e robusto que o SAP.
+Correções no sistema de monitoramento dos ofensores do IDG via OFS.
 
-_Versão atual: 20240620_
+_Versão atual: 20240626_
