@@ -18,6 +18,7 @@ import sqlite3
 class sap:
   def __init__(self, instancia) -> None:
     dotenv.load_dotenv('sap.conf')
+    self.NOTUSE = str(os.environ.get("NOTUSE")).split(',')
     self.SETOR = os.environ.get("SETOR")
     if(self.SETOR == None): raise Exception("A variavel SETOR no arquivo `sap.config` nao esta definida!")
     self.REGIAO = os.environ.get("REGIAO")
@@ -1212,6 +1213,53 @@ class sap:
     self.session.FindById("wnd[1]/usr/btnBUTTON_1").Press()
     self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
     return "Solicitado envio do codigo de barras!"
+  def ZATC45(self, instalacao:int, parceiro:int, documentos:list=[]) -> None:
+    self.session.StartTransaction(Transaction="ZATC45")
+    self.session.FindById("wnd[0]/usr/radP2VIA").Select()
+    self.session.findById("wnd[0]/usr/ctxtPPARTNER").text = parceiro
+    self.session.findById("wnd[0]/usr/ctxtPANLAGE").text = instalacao
+    self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
+    statusBar = self.session.FindById("wnd[0]/sbar").text
+    if(statusBar != '' and statusBar != 'Nenhum débito foi encontrado!'): raise Exception(statusBar)
+    linhas = float(str(self.session.FindById("wnd[0]/usr/txtZATCE_MENGE_BETRW-MENGE").text).replace(',','.'))
+    if(linhas != len(documentos)):
+      raise Exception("A quantidade de faturas nao bate com o ZARC140!")
+    indices = []
+    for apontador in range(int(linhas)):
+      documento = self.session.FindById(f"wnd[0]/usr/tblSAPLZCRM_METODOSTC_FATURAS/txtIT_SAIDA-ZIMPRES[8,{apontador}]").text
+      if(documento in documentos): indices.append(apontador)
+    if(len(indices) != len(documentos)):
+      raise Exception("A quantidade de faturas nao bate com o ZARC140!")
+    self.session.FindById("wnd[0]/usr/rad2VIA").Select()
+    for i in range(len(indices)):
+      if(i > 0):
+        self.session.FindById(f"wnd[0]/usr/tblSAPLZCRM_METODOSTC_FATURAS/chkIT_SAIDA-SELFAT[3,{indices[i - 1]}]").selected = False
+      self.session.FindById(f"wnd[0]/usr/tblSAPLZCRM_METODOSTC_FATURAS/chkIT_SAIDA-SELFAT[3,{indices[i]}]").selected = True
+      self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
+      justificativa = self.session.FindById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[4,0]", False)
+      if(justificativa != None):
+        justificativa.Select()
+        self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
+      if(self.session.FindById("wnd[1]", False) != None):
+        self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
+    statusBar = self.session.FindById("wnd[0]/sbar").text
+    if(statusBar != ''): raise Exception(statusBar)
+  def fatura_ZATC45(self, arg) -> str:
+    shutil.rmtree(self.CURRENT_FOLDER)
+    os.makedirs(self.CURRENT_FOLDER)
+    debitos = []
+    instalacao = self.instalacao(arg)
+    parceiro = int(self.session.findById("wnd[0]/usr/txtEANLD-PARTNER").text)
+    self.debito(instalacao)
+    linhas = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").RowCount
+    for linha in range(linhas):
+      documento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(linha,"ZIMPRES")
+      if(str(documento).isdigit()):
+        debitos.append(documento)
+    if(len(debitos) == 0): raise Exception("Cliente nao possui faturas vencidas!")
+    if(len(debitos) > 6): raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
+    self.ZATC45(instalacao, parceiro, debitos)
+    return self.monitorar(len(debitos))
 if __name__ == "__main__":
   # Validação dos argumentos da linha de comando:
   # 1. Será possível realizar a tarefa se no mínimo
@@ -1272,7 +1320,9 @@ if __name__ == "__main__":
         else:
           print(robo.leiturista(argumento, True, False))
     elif ((aplicacao == "debito") or (aplicacao == "fatura")):
-      if(have_authorization):
+      if("ZATC73" in robo.NOTUSE):
+        print(robo.fatura_ZATC45(argumento))
+      elif(have_authorization):
         print(robo.fatura(argumento))
       else:
         print(robo.fatura_novo(argumento))
