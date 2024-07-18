@@ -708,8 +708,9 @@ class sap:
     return True
   def monitorar(self, qnt) -> str:
     while(len(os.listdir(self.CURRENT_FOLDER)) < qnt):
-      time.sleep(3)
-    return "\n".join(os.listdir(self.CURRENT_FOLDER))
+      time.sleep(5)
+    time.sleep(15)
+    return str(qnt) + '\n' + "\n".join(os.listdir(self.CURRENT_FOLDER))
   def info_medidor(self, medidor_serial = "", medidor_codigo = "") -> str:
     texto_retorno = []
     informar_instalacao = medidor_serial != ""
