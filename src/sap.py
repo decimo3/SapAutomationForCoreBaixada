@@ -1261,6 +1261,74 @@ class sap:
     if(len(debitos) > 6): raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
     self.ZATC45(instalacao, parceiro, debitos)
     return self.monitorar(len(debitos))
+  def ZSVC168(self, instalacoes) -> str:
+    dataframe = {
+      "Nota": [],
+      "Inst": [],
+      "Data": [],
+      "Hora": [],
+      "Stay": [],
+      "Poste": [],
+      "Trafo": [],
+      "Serie": [],
+      "Ramal": [],
+      "Fases": [],
+      "Lance": [],
+      "Local": [],
+      "Vaos": [],
+      "Lado": []
+    }
+    self.session.StartTransaction(Transaction="ZSVC168")
+    self.session.FindById("wnd[0]/usr/btn%_S_INSTAL_%_APP_%-VALU_PUSH").Press()
+    tabela = "wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE"
+    for i in range(len(instalacoes)):
+      self.session.FindById(f"wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = instalacoes[i]
+      self.session.FindById(f"wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE").verticalScrollbar.position = i + 1
+    self.session.FindById("wnd[1]/tbar[0]/btn[8]").Press()
+    self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
+    tabela = self.session.FindById("wnd[0]/usr/cntlALV/shellcont/shell")
+    rows = tabela.rowCount
+    if(rows == 0): raise Exception("Nao foram encontrados dados do Croqui Digital")
+    for i in range(rows):
+      dataframe["Nota"].append(tabela.getCellValue(i, "QMNUM"))
+      dataframe["Inst"].append(tabela.getCellValue(i, "INSTALACAO"))
+      dataframe["Local"].append(tabela.getCellValue(i, "LOCAL_CONSUMO"))
+      dataframe["Data"].append(tabela.getCellValue(i, "DT_REGISTRO"))
+      dataframe["Hora"].append(tabela.getCellValue(i, "HORA_REGISTRO"))
+      dataframe["Stay"].append(tabela.getCellValue(i, "PING_COOR"))
+      dataframe["Poste"].append(tabela.getCellValue(i, "RAMAL_COOR"))
+      dataframe["Trafo"].append(tabela.getCellValue(i, "TRAFO_COOR"))
+      dataframe["Serie"].append(tabela.getCellValue(i, "NUM_TRAFO"))
+      dataframe["Ramal"].append(tabela.getCellValue(i, "ESPECIFICACAO_RAMAL"))
+      dataframe["Fases"].append(tabela.getCellValue(i, "TIPO_FASE"))
+      dataframe["Lance"].append(tabela.getCellValue(i, "TAM_RAMAL"))
+      dataframe["Vaos"].append(tabela.getCellValue(i, "NUM_VAO"))
+      dataframe["Lado"].append(tabela.getCellValue(i, "LADO_REDE"))
+    return pandas.DataFrame(dataframe).to_csv(index=False)
+  def zona(self, arg) -> str:
+    instalacao = self.instalacao(arg)
+    leiturista = self.leiturista(instalacao)
+    dataframe = pandas.read_csv(io.StringIO(leiturista))
+    instalacoes = dataframe["Instalacao"].values
+    return self.ZSVC168(instalacoes)
+  def get_dataframe_from_table(self, xpath) -> str:
+    data = {}
+    cols = 0
+    rows = 0
+    tabela = self.session.FindById(xpath)
+    if(tabela.type == 'GuiShell'):
+      if(tabela.subType == 'GridView'):
+        cols = tabela.columnCount
+        rows = tabela.rowCount
+        pass
+    return ""
+  def try_catch(self, prefixo) -> None:
+    for i in range(0, 50):
+      transacao = prefixo + str(i)
+      self.session.StartTransaction(Transaction=transacao)
+      barra = self.session.FindById("wnd[0]/sbar").text
+      print(f"{transacao} : {barra}")
+      time.sleep(1)
 if __name__ == "__main__":
   # Validação dos argumentos da linha de comando:
   # 1. Será possível realizar a tarefa se no mínimo
@@ -1358,6 +1426,8 @@ if __name__ == "__main__":
     elif(aplicacao == "codbarra"):
       if(telefone == None): raise Exception("Nao foi informado telefone")
       print(robo.codbarra(argumento, telefone))
+    elif(aplicacao == "zona"):
+      print(robo.zona(argumento))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
     robo.retorno()
