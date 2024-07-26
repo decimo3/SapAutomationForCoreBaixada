@@ -1,5 +1,6 @@
 *COMUNICADO DE ATUALIZAÇÃO DO CHATBOT*
 
-Correções no sistema de monitoramento dos ofensores do IDG via OFS.
+Adicionada aplicação `FUGA` que enviará a lista de instalações para o mesmo número de rua com os devidos débitos;
+Corrigida verificação de números de rua com letra. Antes para a instalação que estivesse no número 300, só coletaria informação das instalações no exato mesmo número (300), agora serão incluídas as instalações com letras na mesma consulta, se houver (ex.: 330A, 300B, 300EF);
 
-_Versão atual: 20240626_
+_Versão atual: 20240726_
