@@ -452,129 +452,160 @@ class sap:
       historico["Status"].append(self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell").getCellValue(apontador,"ZZ_ST_USUARIO"))
       apontador = apontador + 1
     return pandas.DataFrame(historico).to_csv(index=False)
-  def agrupamento(self, nota, have_authorization: bool) -> str:
+  def agrupamento(self, nota, have_authorization: bool = True, debitos: bool = False) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ES32")
     self.session.FindById("wnd[0]/usr/ctxtEANLD-ANLAGE").text = instalacao
     self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
-    consumo = self.session.FindById("wnd[0]/usr/ctxtEANLD-VSTELLE").text
-    self.session.StartTransaction(Transaction="ES61")
-    self.session.findById("wnd[0]/usr/ctxtEVBSD-VSTELLE").text = consumo
-    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
-    ligacao = self.session.FindById("wnd[0]/usr/ctxtEVBSD-HAUS").text
-    self.session.StartTransaction(Transaction="ES57")
-    self.session.FindById("wnd[0]/usr/ctxtEHAUD-HAUS").text = ligacao
-    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
-    logradouro = self.session.findById("wnd[0]/usr/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:0301/txtADDR1_DATA-NAME_CO").text
+    if("ES61" in self.NOTUSE):
+      self.session.FindById("wnd[0]/usr/ctxtEANLD-VSTELLE").setFocus()
+      self.session.FindById("wnd[0]").SendVKey(2)
+    else:
+      consumo = self.session.FindById("wnd[0]/usr/ctxtEANLD-VSTELLE").text
+      self.session.StartTransaction(Transaction="ES61")
+      self.session.findById("wnd[0]/usr/ctxtEVBSD-VSTELLE").text = consumo
+      self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    if("ES57" in self.NOTUSE):
+      self.session.FindById("wnd[0]/usr/ctxtEVBSD-HAUS").setFocus()
+      self.session.FindById("wnd[0]").SendVKey(2)
+    else:
+      ligacao = self.session.FindById("wnd[0]/usr/ctxtEVBSD-HAUS").text
+      self.session.StartTransaction(Transaction="ES57")
+      self.session.FindById("wnd[0]/usr/ctxtEHAUD-HAUS").text = ligacao
+      self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    # Gets street number and verify if is a valid number
     numero = self.session.findById("wnd[0]/usr/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:0301/txtADDR1_DATA-HOUSE_NUM1").text
+    match_number = re.search("[0-9]+", numero)
+    if not (match_number):
+      raise Exception("Instalacao sem numero de rua! O agrupamento nao pode ser analisado automaticamente.")
+    numero_sem_letra = int(match_number.group())
     if (numero == "1SN" or numero == "SN"):
-      raise Exception("O agrupamento nao pode ser analisado automaticamente")
-    numero_sem_letra = re.search("[0-9]{1,5}", numero)
+      raise Exception("Instalacao sem numero de rua! O agrupamento nao pode ser analisado automaticamente.")
     if(numero_sem_letra == None):
-      raise Exception("O agrupamento nao pode ser analisado automaticamente")
-    self.session.StartTransaction(Transaction="ZMED95")
-    self.session.FindById("wnd[0]/usr/ctxtADRSTREET-STRT_CODE").text = logradouro
-    self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+      raise Exception("Instalacao sem numero de rua! O agrupamento nao pode ser analisado automaticamente.")
+    # Gets 'logradouro' and go to 'logradouro' aplication details
+    logradouro = self.session.findById("wnd[0]/usr/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:0301/txtADDR1_DATA-NAME_CO").text
+    if("ZMED95" in self.NOTUSE):
+      self.session.findById("wnd[0]/usr/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:0301/txtADDR1_DATA-NAME_CO").setFocus()
+      self.session.FindById("wnd[0]").SendVKey(2)
+    else:
+      self.session.StartTransaction(Transaction="ZMED95")
+      self.session.FindById("wnd[0]/usr/ctxtADRSTREET-STRT_CODE").text = logradouro
+      self.session.FindById("wnd[0]/tbar[0]/btn[0]").Press()
+    # Go to list of street numbers aplication 
     self.session.FindById("wnd[0]/tbar[1]/btn[9]").Press()
     linhas = self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").RowCount
-    # Determinar tamanho máximo do grid
+    tamanho_maximo = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").rows.length
     apontador = 0
-    tamanho_maximo = 0
-    while(True):
-      try:
-        self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,{apontador}]")
-        apontador = apontador + 1
-        continue
-      except:
-        tamanho_maximo = apontador - 1
-        break
-    apontador = 0
+    dataframe = {
+      "Cor": [],
+      "Endereco": [],
+      "Instalacao": [],
+      "Medidor": [],
+      "Cliente": [],
+      "Status": [],
+      "Tipo": [],
+      "Montante": [],
+      "Observacao": [],
+    }
+    # Colecting information about clients in the same street number that client street number
     while (apontador < linhas):
-      num10 = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,{tamanho_maximo}]").text
-      num10_sem_letra = re.search("[0-9]{1,5}", num10)
-      if ((num10_sem_letra != None) and (int(num10_sem_letra.group()) < int(numero_sem_letra.group()))):
+      num10_com_letra = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,{tamanho_maximo - 1}]").text
+      match = re.search("[0-9]+", num10_com_letra)
+      if(match == None):
+        apontador = apontador + 1
+        self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
+        continue
+      num10_sem_letra = int(match.group())
+      if (num10_sem_letra < numero_sem_letra):
         apontador = apontador + tamanho_maximo
         self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
         continue
-      num = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,0]").text
-      if num == numero:
+      num_atual_texto = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,0]").text
+      match = re.search("[0-9]+", num_atual_texto)
+      if(match == None):
+        apontador = apontador + 1
+        self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
+        continue
+      num_atual = int(match.group())
+      if(num_atual > numero_sem_letra): break
+      if(num_atual == numero_sem_letra):
         quantidade = int(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-QTD_INSTAL[1,0]").text)
-        if(quantidade > 12):
-          raise Exception(f"Agrupamento possui instalacoes demais ({quantidade})")
         self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
         self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").GetAbsoluteRow(apontador).selected = True
         self.session.FindById("wnd[0]/usr/btn%#AUTOTEXT005").Press()
-        break
+        for i in range(1, quantidade + 1):
+          complemento = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-COMPLS[0,0]").text
+          dataframe["Endereco"].append(f"{num_atual_texto} {complemento}")
+          dataframe["Instalacao"].append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-ANLAGE[1,0]").text)
+          dataframe["Cliente"].append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-NOME[2,0]").text)
+          dataframe["Tipo"].append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-CLASSE[3,0]").text)
+          self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX").verticalScrollbar.position = i
       apontador = apontador + 1
       self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
-    # TODO - Convert string concatenation to dataframe
-    enderecos = []
-    instalacoes = []
-    nomeCliente = []
-    tipoinstal = []
-    statusInstalacao = []
-    textoDescricao = []
-    destaques = []
-    agrupamentoString = "Cor,End.,Instalacao,Nome cliente,Tipo cliente,Observacao\n"
-    # Coleta das informacões do agrupamento
-    apontador = 0
-    ultima_instalacao = 0
-    while (True):
-      if(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-ANLAGE[1,0]").text == ultima_instalacao):
-        break
-      enderecos.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-COMPLS[0,0]").text)
-      instalacoes.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-ANLAGE[1,0]").text)
-      nomeCliente.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-NOME[2,0]").text)
-      tipoinstal.append(self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-CLASSE[3,0]").text)
-      ultima_instalacao = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX/txtTI_INSTALX-ANLAGE[1,0]").text
-      apontador = apontador + 1
-      self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_INSTALX").verticalScrollbar.position = apontador
-    if(apontador == 1):
-      raise Exception("Instalacao unica para o numero no sistema")
-    if(apontador > 12 and self.instancia == 0):
-      raise Exception(f"Agrupamento possui instalacoes demais ({apontador})")
+    # Checking if number of clients is excessive
+    quantidade = len(dataframe['Instalacao'])
+    tolerancia = 12 if debitos == False else 24
+    if(quantidade > tolerancia):
+      raise Exception(f"Agrupamento possui instalacoes demais ({quantidade})")
     apontador = 0
     # Coleta da situacao das instalacões
-    while (apontador < len(instalacoes)):
-      self.instalacao(instalacoes[apontador])
-      statusInstalacao.append(self.session.findById("wnd[0]/usr/txtEANLD-DISCSTAT").text)
-      if(int(instalacoes[apontador]) == instalacao):
-        textoDescricao.append("Instalacao da nota")
-        destaques.append(self.DESTAQUE_VERMELHO)
+    for apontador in range(quantidade):
+      instalacao_corrente = dataframe["Instalacao"][apontador]
+      self.instalacao(instalacao_corrente)
+      dataframe["Status"].append(self.session.findById("wnd[0]/usr/txtEANLD-DISCSTAT").text)
+      if(debitos):
+        try:
+          csv_data = self.escrever(instalacao_corrente)
+          debitos_tabela = pandas.read_csv(io.StringIO(csv_data))
+          debitos_tabela['Valor'] = pandas.to_numeric(debitos_tabela['Valor'], 'coerce').astype(float)
+          dataframe["Montante"].append(debitos_tabela['Valor'].sum())
+        except:
+          dataframe["Montante"].append(0)
+        dataframe["Observacao"].append("")
+        dataframe["Cor"].append(self.DESTAQUE_AUSENTE)
+        apontador = apontador + 1
+        continue
+      if(instalacao_corrente == instalacao):
+        dataframe["Observacao"].append("Instalacao da nota")
+        dataframe["Cor"].append(self.DESTAQUE_VERMELHO)
         apontador = apontador + 1
         continue
       if(self.session.findById("wnd[0]/usr/txtEANLD-VERTRAG").text == ""):
-        textoDescricao.append("Sem contrato ativo")
-        destaques.append(self.DESTAQUE_VERMELHO)
+        dataframe["Observacao"].append("Sem contrato ativo")
+        dataframe["Cor"].append(self.DESTAQUE_VERMELHO)
         apontador = apontador + 1
         continue
-      if(statusInstalacao[apontador] == " Instalação complet.suspensa"):
-        textoDescricao.append("Suspensa no sistema")
-        destaques.append(self.DESTAQUE_VERMELHO)
+      if(dataframe["Status"][apontador] == " Instalação complet.suspensa"):
+        dataframe["Observacao"].append("Suspensa no sistema")
+        dataframe["Cor"].append(self.DESTAQUE_VERMELHO)
         apontador = apontador + 1
         continue
-      if(statusInstalacao[apontador] == "Supensao iniciada"):
-        textoDescricao.append("Tem ordem de corte")
-        destaques.append(self.DESTAQUE_VERMELHO)
+      if(dataframe["Status"][apontador] == "Supensao iniciada"):
+        dataframe["Observacao"].append("Tem ordem de corte")
+        dataframe["Cor"].append(self.DESTAQUE_VERMELHO)
         apontador = apontador + 1
         continue
-      if(have_authorization): temp = self.novo_analisar(instalacoes[apontador])
-      else: temp = self.passivas_novo(instalacoes[apontador])
+      if(have_authorization): temp = self.novo_analisar(instalacao_corrente)
+      else: temp = self.passivas_novo(instalacao_corrente)
       if(temp):
-        textoDescricao.append("Tem contas passivas")
-        destaques.append(self.DESTAQUE_VERMELHO)
+        dataframe["Observacao"].append("Tem contas passivas")
+        dataframe["Cor"].append(self.DESTAQUE_VERMELHO)
         apontador = apontador + 1
         continue
       # caso nao encontre nenhum impedimento
-      textoDescricao.append("Cliente nao passivel")
-      destaques.append(self.DESTAQUE_VERDEJANTE)
+      dataframe["Observacao"].append("Cliente nao passivel")
+      dataframe["Cor"].append(self.DESTAQUE_VERDEJANTE)
       apontador = apontador + 1
     apontador = 0
     # Preparacao da string final
-    while (apontador < len(instalacoes)):
-      agrupamentoString = f"{agrupamentoString}{destaques[apontador]},{enderecos[apontador]},{instalacoes[apontador]},{nomeCliente[apontador]},{tipoinstal[apontador]},{textoDescricao[apontador]}\n"
-      apontador = apontador + 1
-    return agrupamentoString
+    del dataframe["Medidor"]
+    if not (debitos):
+      del dataframe["Montante"]
+    else:
+      del dataframe["Observacao"]
+    dataframe = pandas.DataFrame(dataframe)
+    return dataframe.to_csv(index=False)
   def coordenadas(self, nota) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ES32")
@@ -1428,6 +1459,8 @@ if __name__ == "__main__":
       print(robo.codbarra(argumento, telefone))
     elif(aplicacao == "zona"):
       print(robo.zona(argumento))
+    elif(aplicacao == "fuga"):
+      print(robo.agrupamento(nota=argumento, have_authorization=True, debitos=True))
     else:
       raise Exception("Nao entendi o comando, verifique se esto correto!")
     robo.retorno()
