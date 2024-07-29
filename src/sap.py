@@ -558,6 +558,7 @@ class sap:
         try:
           csv_data = self.escrever(instalacao_corrente)
           debitos_tabela = pandas.read_csv(io.StringIO(csv_data))
+          debitos_tabela = debitos_tabela[debitos_tabela['Cor'] == self.DESTAQUE_VERMELHO]
           debitos_tabela['Valor'] = pandas.to_numeric(debitos_tabela['Valor'], 'coerce').astype(float)
           dataframe["Montante"].append(debitos_tabela['Valor'].sum())
         except:
