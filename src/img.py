@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # coding: utf8
-import os
+import base64
 import sys
 from wand.image import Image 
 from wand.drawing import Drawing 
@@ -44,37 +44,41 @@ ALTURA_TOTAL_IMAGEM = (QUANTIDADE_LINHAS_RELATORIO * ALTURA_CARACTERE) + ALTURA_
 
 nRow = 0
 nCol = 0
-
-with Drawing() as draw:
-  with Image(width = LARGURA_TOTAL_IMAGEM, height = ALTURA_TOTAL_IMAGEM, background = Color(CORES[0])) as img:
-    draw.font_family = 'Consolas'
-    draw.font = 'Consolas'
-    draw.font_size = ALTURA_CARACTERE # 15x15 cada letra
-    while(nRow < QUANTIDADE_LINHAS_RELATORIO):
-      if(linhas[nRow] == ""):
+try:
+  with Drawing() as draw:
+    with Image(width = LARGURA_TOTAL_IMAGEM, height = ALTURA_TOTAL_IMAGEM, background = Color(CORES[0])) as img:
+      draw.font_family = 'Consolas'
+      draw.font = 'Consolas'
+      draw.font_size = ALTURA_CARACTERE # 15x15 cada letra
+      while(nRow < QUANTIDADE_LINHAS_RELATORIO):
+        if(linhas[nRow] == ""):
+          nRow = nRow + 1
+          continue
+        colunas = linhas[nRow].split(SEPARADOR_ENTRE_COLUNAS)
+        while(nCol < len(colunas)):
+          if(nCol == 0):
+            try:
+              cor = int(colunas[nCol])
+              if(cor > 0):
+                draw.fill_color = Color(CORES[int(colunas[nCol])])
+                draw.rectangle(left = 0, top = (nRow * ALTURA_CARACTERE) + 1, right = LARGURA_TOTAL_IMAGEM, bottom = (nRow * ALTURA_CARACTERE) + ALTURA_CARACTERE + 1)
+                draw.fill_color = Color(CORES[1])
+            except:
+              pass
+            finally:
+              nCol = nCol + 1
+              continue
+          col = " " if (colunas[nCol] == None or colunas[nCol] == "") else colunas[nCol]
+          draw.text(x = cursor, y = ((nRow + 1) * ALTURA_CARACTERE), body = col)
+          cursor = cursor + (TAMANHO_COLUNAS_RELATORIO[nCol] * LARGURA_CARACTERE)
+          nCol = nCol + 1
+        nCol = 0
+        cursor = LARGURA_CARACTERE
         nRow = nRow + 1
-        continue
-      colunas = linhas[nRow].split(SEPARADOR_ENTRE_COLUNAS)
-      while(nCol < len(colunas)):
-        if(nCol == 0):
-          try:
-            cor = int(colunas[nCol])
-            if(cor > 0):
-              draw.fill_color = Color(CORES[int(colunas[nCol])])
-              draw.rectangle(left = 0, top = (nRow * ALTURA_CARACTERE) + 1, right = LARGURA_TOTAL_IMAGEM, bottom = (nRow * ALTURA_CARACTERE) + ALTURA_CARACTERE + 1)
-              draw.fill_color = Color(CORES[1])
-          except:
-            pass
-          finally:
-            nCol = nCol + 1
-            continue
-        col = " " if (colunas[nCol] == None or colunas[nCol] == "") else colunas[nCol]
-        draw.text(x = cursor, y = ((nRow + 1) * ALTURA_CARACTERE), body = col)
-        cursor = cursor + (TAMANHO_COLUNAS_RELATORIO[nCol] * LARGURA_CARACTERE)
-        nCol = nCol + 1
-      nCol = 0
-      cursor = LARGURA_CARACTERE
-      nRow = nRow + 1
-    draw(img)
-    savefilename = os.getcwd() + "\\tmp\\temporario.png"
-    img.save(filename = savefilename)
+      img_bytes = img.make_blob(format='png')
+      if img_bytes == None:
+        raise Exception("500: Image cannot be generated")
+      img_base64 = base64.b64encode(img_bytes).decode('utf-8')
+      print(img_base64)
+except Exception as erro:
+  print("500: Image cannot be generated")
