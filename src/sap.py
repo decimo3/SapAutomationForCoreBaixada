@@ -382,7 +382,7 @@ class sap:
     if(len(debitos) == 0):
       raise Exception("404: Cliente nao possui faturas vencidas!")
     self.imprimir(debitos)
-    return self.monitorar(len(debitos))
+    return str(len(debitos))
   def instalacao(self, arg) -> int:
     try:
       arg = int(arg)
