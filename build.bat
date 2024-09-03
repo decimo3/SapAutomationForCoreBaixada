@@ -28,4 +28,7 @@ cd ..
 cd .\SapAutomationForWeb
 dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained true --output ..\tmp\
 cd ..
+cd .\loc_zone_finder
+dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained true --output ..\tmp\
+cd ..
 cd .\SapAutomationForCoreBaixada
