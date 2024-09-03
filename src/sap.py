@@ -1466,8 +1466,8 @@ if __name__ == "__main__":
     robo.retorno()
   except Exception as erro:
     if not(isinstance(erro.args[0], str)):
-      print("500: " + erro.args[0])
+      print("500: " + str(erro.args[0]))
     if(re.match("^[0-9]{3}", erro.args[0]) == None):
-      print("500: " + erro.args[0])
+      print("500: " + str(erro.args[0]))
     else:
       print(erro.args[0])
