@@ -1,6 +1,5 @@
 *COMUNICADO DE ATUALIZAÇÃO DO CHATBOT*
 
-Adicionada aplicação `FUGA` que enviará a lista de instalações para o mesmo número de rua com os devidos débitos;
-Corrigida verificação de números de rua com letra. Antes para a instalação que estivesse no número 300, só coletaria informação das instalações no exato mesmo número (300), agora serão incluídas as instalações com letras na mesma consulta, se houver (ex.: 330A, 300B, 300EF);
+Atualizado subsistema de Monitoramento de Ofensores do IDG pelo OFS (blackmouth), realizando a desvinculação do sistema Chatbot, o envio para o Telegram será efetuado diretamente pelo _blackmouth_.
 
-_Versão atual: 20240726_
+_Versão atual: 20240805_
