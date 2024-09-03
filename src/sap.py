@@ -742,11 +742,6 @@ class sap:
       prazo_mais_15_dias = vencimento + datetime.timedelta(days=15)
       if (datetime.date.today() > prazo_mais_15_dias): return False
     return True
-  def monitorar(self, qnt) -> str:
-    while(len(os.listdir(self.CURRENT_FOLDER)) < qnt):
-      time.sleep(5)
-    time.sleep(15)
-    return str(qnt) + '\n' + "\n".join(os.listdir(self.CURRENT_FOLDER))
   def info_medidor(self, medidor_serial = "", medidor_codigo = "") -> str:
     texto_retorno = []
     informar_instalacao = medidor_serial != ""
@@ -859,7 +854,7 @@ class sap:
     if(len(passiveis) > 5 and self.instancia == 0):
       raise Exception(f"429: Cliente possui muitas faturas ({len(passiveis)}) passivas")
     self.imprimir(passiveis)
-    return self.monitorar(len(passiveis))
+    return str(len(passiveis))
   def sanitizar(self, arg) -> str:
     arg = str.replace(arg, ' ', '')
     arg = str.replace(arg, '.', '')
@@ -969,7 +964,7 @@ class sap:
     debitos = self.escrever_novo(arg, True)
     if(len(debitos) > 6): raise Exception(f"429: Cliente possui muitas faturas ({len(debitos)}) pendentes")
     self.imprimir(debitos)
-    return self.monitorar(len(debitos))
+    return str(len(debitos))
   def passivas_novo(self, arg) -> bool:
     debitos = self.escrever_novo(arg, False, True)
     return (len(debitos) > 0)
@@ -1296,7 +1291,7 @@ class sap:
     if(len(debitos) == 0): raise Exception("404: Cliente nao possui faturas vencidas!")
     if(len(debitos) > 6): raise Exception(f"429: Cliente possui muitas faturas ({len(debitos)}) pendentes")
     self.ZATC45(instalacao, parceiro, debitos)
-    return self.monitorar(len(debitos))
+    return str(len(debitos))
   def ZSVC168(self, instalacoes) -> str:
     dataframe = {
       "Nota": [],
