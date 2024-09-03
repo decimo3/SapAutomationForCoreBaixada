@@ -68,8 +68,8 @@ class sap:
         raise Exception("ERRO: SAP FrontEnd connection is not available.")
     else:
       self.connection = self.SapGui.connections[0]
+    self.session = self.connection.Children(0)
     # Get session
-    self.session = self.connection.Children(self.instancia)
     if (self.session.info.user == ''):
       self.session.findById("wnd[0]/usr/txtRSYST-BNAME").text = os.environ.get("USUARIO")
       self.session.findById("wnd[0]/usr/pwdRSYST-BCODE").text = os.environ.get("PALAVRA")
@@ -78,7 +78,14 @@ class sap:
         if (self.session.findById("wnd[1]/usr/radMULTI_LOGON_OPT1", False) != None):
           self.session.findById("wnd[1]/usr/radMULTI_LOGON_OPT1").Select()
         self.session.findById("wnd[1]/tbar[0]/btn[0]").Press()
-    return (self.session.info.user != '')
+    # Create sessions
+    if(self.session.info.user != ''):
+      while(len(self.connection.sessions) < self.instancia):
+        time.sleep(2)
+        self.connection.Children(0).createSession()
+      self.session = self.connection.Children(self.instancia)
+      return True
+    else: return False
   def relatorio(self, dia=7, filtrar_dias=False) -> str:
       tipos_de_nota = []
       danos_filtrar = []
