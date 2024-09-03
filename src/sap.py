@@ -20,11 +20,11 @@ class sap:
     dotenv.load_dotenv('sap.conf')
     self.NOTUSE = str(os.environ.get("NOTUSE")).split(',')
     self.SETOR = os.environ.get("SETOR")
-    if(self.SETOR == None): raise Exception("A variavel SETOR no arquivo `sap.config` nao esta definida!")
+    if(self.SETOR == None): raise Exception("500: A variavel SETOR no arquivo `sap.config` nao esta definida!")
     self.REGIAO = os.environ.get("REGIAO")
-    if(self.REGIAO == None): raise Exception("A variavel REGIAO no arquivo `sap.config` nao esta definida!")
+    if(self.REGIAO == None): raise Exception("500: A variavel REGIAO no arquivo `sap.config` nao esta definida!")
     self.LAYOUT = os.environ.get("LAYOUT")
-    if(self.LAYOUT == None): raise Exception("A variavel LAYOUT no arquivo `sap.config` nao esta definida!")
+    if(self.LAYOUT == None): raise Exception("500: A variavel LAYOUT no arquivo `sap.config` nao esta definida!")
     self.ATIVIDADES = self.depara('setor_atividades', self.SETOR).split(',')
     if not (self.IfIsRunning('cscript.exe')):
       subprocess.Popen("cscript erroDialog.vbs", stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -59,13 +59,13 @@ class sap:
       time.sleep(3)
       self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
     if not type(self.SapGui) == win32com.client.CDispatch:
-        raise Exception("ERRO: SAP GUI Scripting API is not available.")
+        raise Exception("500: SAP GUI Scripting API is not available.")
     # Get connection
     if not (len(self.SapGui.connections) > 0):
       try:
         self.connection = self.SapGui.OpenConnection("#PCL", True)
       except:
-        raise Exception("ERRO: SAP FrontEnd connection is not available.")
+        raise Exception("500: SAP FrontEnd connection is not available.")
     else:
       self.connection = self.SapGui.connections[0]
     self.session = self.connection.Children(0)
@@ -90,9 +90,7 @@ class sap:
       tipos_de_nota = []
       danos_filtrar = []
       hoje = datetime.date.today()
-      agora = datetime.datetime.now()
       semana = hoje - datetime.timedelta(days=dia)
-      arquivo = self.CURRENT_FOLDER + '\\temporario.csv'
       janela = "wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/"
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
@@ -114,8 +112,8 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = self.LAYOUT
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       tabela = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell", False)
-      if(tabela == None): raise Exception("O relatorio de notas em aberto esto vazio!")
-      if(tabela.RowCount == 0): raise Exception("O relatorio de notas em aberto esto vazio!")
+      if(tabela == None): raise Exception("404: O relatorio de notas em aberto esto vazio!")
+      if(tabela.RowCount == 0): raise Exception("404: O relatorio de notas em aberto esto vazio!")
       dataframe = {
         "Cor": [],
         "Nota": [],
@@ -145,15 +143,15 @@ class sap:
         hoje = pandas.to_datetime(datetime.date.today())
         dataframe = dataframe[dataframe["Data"] <= hoje]
       quantidade_total = len(dataframe)
-      if(quantidade_total == 0): raise Exception("O relatorio de notas em aberto esto vazio!")
-      dataframe.to_csv(arquivo, index=False)
-      final_texto = " vencendo hoje!" if filtrar_dias else "."
-      return f"Relatorio gerado as {agora.strftime('%d/%m/%Y %H:%M:%S')}.\nHa {quantidade_total} notas no relatorio{final_texto}"
+      if(quantidade_total == 0): raise Exception("404: O relatorio de notas em aberto esto vazio!")
+      csv = dataframe.to_csv(index=False, sep=';')
+      if not (isinstance(csv, str)):
+        raise Exception("500: O relatorio nao pode ser convertido em CSV!")
+      return csv
   def bandeirada(self, dia=45, filtrar_dias=True) -> str:
       hoje = datetime.date.today()
       agora = datetime.datetime.now()
       semana = hoje - datetime.timedelta(days=dia)
-      arquivo = self.CURRENT_FOLDER + '\\temporario.csv'
       self.session.StartTransaction(Transaction="ZSVC20")
       self.session.FindById("wnd[0]/usr/btn%_SO_QMART_%_APP_%-VALU_PUSH").Press()
       self.session.FindById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "BA"
@@ -181,8 +179,8 @@ class sap:
       self.session.FindById("wnd[0]/usr/ctxtP_LAYOUT").text = self.LAYOUT
       self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
       tabela = self.session.FindById("wnd[0]/usr/cntlCONTAINER_100/shellcont/shell", False)
-      if(tabela == None): raise Exception("O relatorio de notas em aberto esto vazio!")
-      if(tabela.RowCount == 0): raise Exception("O relatorio de notas em aberto esto vazio!")
+      if(tabela == None): raise Exception("404: O relatorio de notas em aberto esto vazio!")
+      if(tabela.RowCount == 0): raise Exception("404: O relatorio de notas em aberto esto vazio!")
       dataframe = {
         "Cor": [],
         "Nota": [],
@@ -212,10 +210,11 @@ class sap:
       if(filtrar_dias):
         dataframe = dataframe[dataframe["Encerramento"].isnull()]
       quantidade_total = len(dataframe)
-      if(quantidade_total == 0): raise Exception("O relatorio de notas em aberto esto vazio!")
-      dataframe.to_csv(arquivo, index=False)
-      final_texto = " ainda não bandeiradas" if filtrar_dias else "."
-      return f"Relatorio gerado as {agora.strftime('%d/%m/%Y %H:%M:%S')}.\nHa {quantidade_total} notas no relatorio{final_texto}"
+      if(quantidade_total == 0): raise Exception("404: O relatorio de notas em aberto esto vazio!")
+      csv = dataframe.to_csv(index=False, sep=';')
+      if not (isinstance(csv, str)):
+        raise Exception("500: O relatorio nao pode ser convertido em CSV!")
+      return csv
   def leiturista(self, nota, retry:bool=False, order_by_sequence:bool=False, interval:int=30) -> str:
       instalacao = self.instalacao(nota)
       self.session.StartTransaction(Transaction="ES32")
@@ -242,7 +241,7 @@ class sap:
         self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").setCurrentCell(0,"DEFAULT")
         self.session.FindById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").clickCurrentCell()
       except:
-        raise Exception("Nao ho relatorio de leitura para o periodo especificado!")
+        raise Exception("404: Nao ho relatorio de leitura para o periodo especificado!")
       if(retry or order_by_sequence):
         self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").selectColumn("ZZ_NUMSEQ")
         self.session.FindById("wnd[0]/tbar[1]/btn[28]").Press()
@@ -252,11 +251,11 @@ class sap:
       self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
       # statusBar = self.session.FindById("/app/con[0]/ses[{self.instancia}]/wnd[0]/sbar").text
       # if(statusBar == "Nenhuma ocorrência encontrada"):
-        # raise Exception("A instalacao nao foi encontrada no relatorio!")
+        # raise Exception("404: A instalacao nao foi encontrada no relatorio!")
       self.session.FindById("wnd[1]").Close()
       celula = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").currentCellRow
       if(celula == 0 and instalacao != int(self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").getCellValue(0,"ANLAGE"))):
-        raise Exception("A instalacao nao foi encontrada no relatorio!")
+        raise Exception("404: A instalacao nao foi encontrada no relatorio!")
       linhas = self.session.FindById("wnd[0]/usr/cntlGRID1/shellcont/shell").RowCount
       # se a linhaAtual e menor que 14, a primeiraVisivel e 0 e offset e igual a linha atual
       # se a linhaAtual e maior que linhasTotais - 14, entao primeiraVisivel e linhasTotais - 28 e offset e igual a
@@ -321,10 +320,10 @@ class sap:
   def escrever(self, nota) -> str:
     self.debito(nota)
     if(self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110", False) == None):
-      raise Exception("Instalação consultada não tem registro de faturas!")
+      raise Exception("404: Instalação consultada não tem registro de faturas!")
     self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110").Select()
     linhas = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").RowCount
-    if(linhas < 1): raise Exception("Cliente nao possui faturas pendentes!")
+    if(linhas < 1): raise Exception("404: Cliente nao possui faturas pendentes!")
     dataframe = {
       "Cor": [],
       "Mes ref": [],
@@ -358,8 +357,6 @@ class sap:
     # command = f"taskkill /F /FI \"IMAGENAME eq SAPLPD.exe\""
     # subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     self.session.StartTransaction(Transaction="ZATC73")
-    shutil.rmtree(self.CURRENT_FOLDER)
-    os.makedirs(self.CURRENT_FOLDER)
     self.session.FindById("wnd[0]/usr/chkP_LOCL").selected = True
     self.session.FindById("wnd[0]/usr/chkP_IMPLOC").selected = True
     apontador = 0
@@ -381,16 +378,16 @@ class sap:
       debitos.append(self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(apontador,"ZIMPRES"))
       apontador = apontador + 1
     if(len(debitos) > 6 and self.instancia == 0):
-      raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
+      raise Exception(f"429: Cliente possui muitas faturas ({len(debitos)}) pendentes")
     if(len(debitos) == 0):
-      raise Exception("Cliente nao possui faturas vencidas!")
+      raise Exception("404: Cliente nao possui faturas vencidas!")
     self.imprimir(debitos)
     return self.monitorar(len(debitos))
   def instalacao(self, arg) -> int:
     try:
       arg = int(arg)
     except:
-      raise Exception("Informacao nao e um numero valido!")
+      raise Exception("400: Informacao nao e um numero valido!")
     if (arg > 999999999):
       self.session.StartTransaction(Transaction="IW53")
       self.session.FindById("wnd[0]/usr/ctxtRIWO00-QMNUM").text = arg
@@ -398,7 +395,7 @@ class sap:
       try:
         self.session.FindById(r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09").Select()
       except:
-        raise Exception("A nota informada e invalida!")
+        raise Exception("400: A nota informada e invalida!")
       instalacao = self.session.FindById(r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB09/ssubSUB_GROUP_10:SAPLIQS0:7217/subSUBSCREEN_1:SAPLIQS0:7900/subUSER0001:SAPLXQQM:0102/ctxtVIQMEL-ZZINSTLN").text
       self.instalacao(instalacao)
       return instalacao
@@ -420,15 +417,15 @@ class sap:
         lista_informacoes = "####################\n"
         for equipamento in equipamentos:
           lista_informacoes = lista_informacoes + self.info_medidor(str(arg), str(equipamento)) + "\n####################\n"
-        raise Exception(f"*Ha mais de um equipamento com esse mesmo numero de serie! Verifique qual lhe atende e solicite pela instalacao!*\n\n{lista_informacoes}")
+        raise Exception(f"*409: Ha mais de um equipamento com esse mesmo numero de serie! Verifique qual lhe atende e solicite pela instalacao!*\n\n{lista_informacoes}")
       try:
         self.session.FindById(r'wnd[0]/usr/tabsTABSTRIP/tabpT\03/ssubSUB_DATA:SAPMIEQ0:0500/subISUSUB:SAPLE10R:1000/btnBUTTON_ISABL').Press()
         instalacao = self.session.findById("wnd[0]/usr/txtIEANL-ANLAGE").text
         self.instalacao(instalacao)
         return instalacao
       except:
-        raise Exception("O numero informado nao eh nota, instalacao ou medidor")
-    raise Exception("O numero informado nao eh nota, instalacao ou medidor")
+        raise Exception("400: O numero informado nao eh nota, instalacao ou medidor")
+    raise Exception("400: O numero informado nao eh nota, instalacao ou medidor")
   def historico(self, nota) -> str:
     instalacao = self.instalacao(nota)
     self.session.StartTransaction(Transaction="ZSVC20")
@@ -484,12 +481,12 @@ class sap:
     numero = self.session.findById("wnd[0]/usr/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:0301/txtADDR1_DATA-HOUSE_NUM1").text
     match_number = re.search("[0-9]+", numero)
     if not (match_number):
-      raise Exception("Instalacao sem numero de rua! O agrupamento nao pode ser analisado automaticamente.")
+      raise Exception("400: Instalacao sem numero de rua! O agrupamento nao pode ser analisado automaticamente.")
     numero_sem_letra = int(match_number.group())
     if (numero == "1SN" or numero == "SN"):
-      raise Exception("Instalacao sem numero de rua! O agrupamento nao pode ser analisado automaticamente.")
+      raise Exception("400: Instalacao sem numero de rua! O agrupamento nao pode ser analisado automaticamente.")
     if(numero_sem_letra == None):
-      raise Exception("Instalacao sem numero de rua! O agrupamento nao pode ser analisado automaticamente.")
+      raise Exception("400: Instalacao sem numero de rua! O agrupamento nao pode ser analisado automaticamente.")
     # Gets 'logradouro' and go to 'logradouro' aplication details
     logradouro = self.session.findById("wnd[0]/usr/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:0301/txtADDR1_DATA-NAME_CO").text
     if("ZMED95" in self.NOTUSE):
@@ -554,7 +551,7 @@ class sap:
     quantidade = len(dataframe['Instalacao'])
     tolerancia = 12 if debitos == False else 24
     if(quantidade > tolerancia):
-      raise Exception(f"Agrupamento possui instalacoes demais ({quantidade})")
+      raise Exception(f"429: Agrupamento possui instalacoes demais ({quantidade})")
     apontador = 0
     # Coleta da situacao das instalacões
     for apontador in range(quantidade):
@@ -631,14 +628,14 @@ class sap:
     if (len(coordenada) > 0):
       return re.sub(',', '.', coordenada)
     else:
-      raise Exception("A instalacao nao possui coordenada cadastrada!")
+      raise Exception("404: A instalacao nao possui coordenada cadastrada!")
   def telefone(self, arg) -> str:
     instalacao = self.instalacao(arg)
     parceiro = self.session.findById("wnd[0]/usr/txtEANLD-PARTNER").text
     cliente_nome = self.session.findById("wnd[0]/usr/txtEANLD-PARTTEXT").text
-    if(str(cliente_nome) == ""): raise Exception("Instalacao sem cliente! Sem telefone!")
-    if(str(cliente_nome).startswith("UNIDADE C/ CONSUMO")): raise Exception("Cliente ficticio! Sem telefone!")
-    if(str(cliente_nome).startswith("PARCEIRO DE NEGOCIO")): raise Exception("Cliente ficticio! Sem telefone!")
+    if(str(cliente_nome) == ""): raise Exception("404: Instalacao sem cliente! Sem telefone!")
+    if(str(cliente_nome).startswith("UNIDADE C/ CONSUMO")): raise Exception("404: Cliente ficticio! Sem telefone!")
+    if(str(cliente_nome).startswith("PARCEIRO DE NEGOCIO")): raise Exception("404: Cliente ficticio! Sem telefone!")
     phone_field_partial_string = self.parceiro(parceiro)
     telefone = []
     nome_cliente = self.session.FindById(phone_field_partial_string + "subSCREEN_1000_HEADER_AREA:SAPLBUPA_DIALOG_JOEL:1510/txtBUS_JOEL_MAIN-CHANGE_DESCRIPTION").text
@@ -676,7 +673,7 @@ class sap:
     except:
       pass
     if(len(telefone) == 0):
-      return nome_cliente + " NAO TEM NUMERO DE TELEFONE CADASTRADO!"
+      return "404: " + nome_cliente + " NAO TEM NUMERO DE TELEFONE CADASTRADO!"
     else:
       return nome_cliente + ' '.join(telefone)
   def consumo(self, nota) -> str:
@@ -687,7 +684,7 @@ class sap:
     try:
       self.session.FindById("wnd[0]/usr/subSUB1:SAPLZATC_INFO_CRM:0900/radXSCREEN-HEADER-RB_LEIT").Select()
     except:
-      raise Exception(f"A instalacao {instalacao} nao possui historico de consumo para o contrato atual.")
+      raise Exception(f"404: A instalacao {instalacao} nao possui historico de consumo para o contrato atual.")
     tabela = "wnd[0]/usr/cntlCONTROL/shellcont/shell"
     linhas = self.session.FindById(tabela).RowCount
     dataframe = {
@@ -757,11 +754,11 @@ class sap:
       txtCodMedidor = None
       self.session.FindById("wnd[0]/usr/btnEANLD-DEVSBUT").Press()
       if(self.session.FindById("wnd[1]", False) != None):
-        return "*INSTALACAO SEM MEDIDOR VINCULADO!*"
+        return "404: *INSTALACAO SEM MEDIDOR VINCULADO!*"
         dataRetirado = self.session.FindById("wnd[1]/usr/tblSAPLET03UTS_TC/txtPERIODS-BIS[1,0]").text
         self.session.FindById("wnd[1]").SendVKey(2)
       if(self.session.FindById("wnd[0]/usr/tblSAPLEG70TC_DEVRATE_C", False) == None):
-        return "*INSTALACAO SEM MEDIDOR VINCULADO!*"
+        return "404: *INSTALACAO SEM MEDIDOR VINCULADO!*"
       medidor_codigo = self.session.FindById("wnd[0]/usr/tblSAPLEG70TC_DEVRATE_C/ctxtREG70_D-MATNR[8,0]").text
       medidor_serial = self.session.FindById("wnd[0]/usr/tblSAPLEG70TC_DEVRATE_C/ctxtREG70_D-GERAET[0,0]").text
     txtCodMedidor = self.depara("material_codigo", medidor_codigo)
@@ -839,9 +836,9 @@ class sap:
     try:
       self.session.findById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF190").Select()
     except:
-      raise Exception("Nao ha faturas passiveis!")
+      raise Exception("404: Nao ha faturas passiveis!")
     linhas = self.session.FindById(r"wnd[0]/usr/tabsTAB_STRIP_100/tabpF190/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0190/cntlCONTAINER_190/shellcont/shell").RowCount
-    if(linhas == 0): raise Exception("Nao ha faturas passiveis!")
+    if(linhas == 0): raise Exception("404: Nao ha faturas passiveis!")
     while(apontador < linhas):
       fatura = self.session.findById(r"wnd[0]/usr/tabsTAB_STRIP_100/tabpF190/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0190/cntlCONTAINER_190/shellcont/shell").getCellValue(apontador, "ZIMPRES")
       status = self.session.findById(r"wnd[0]/usr/tabsTAB_STRIP_100/tabpF190/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0190/cntlCONTAINER_190/shellcont/shell").getCellValue(apontador, "STATUS")
@@ -860,7 +857,7 @@ class sap:
         passiveis.append(fatura)
       apontador = apontador + 1
     if(len(passiveis) > 5 and self.instancia == 0):
-      raise Exception(f"Cliente possui muitas faturas ({len(passiveis)}) passivas")
+      raise Exception(f"429: Cliente possui muitas faturas ({len(passiveis)}) passivas")
     self.imprimir(passiveis)
     return self.monitorar(len(passiveis))
   def sanitizar(self, arg) -> str:
@@ -881,7 +878,7 @@ class sap:
     # Check if you are still on the FPL9 transaction form screen
     if(self.session.findById("wnd[0]/usr/ctxtFKKL1-VTREF", False) != None):
       if(so_passivas == True): return []
-      raise Exception("Cliente nao possui faturas pendentes!")
+      raise Exception("404: Cliente nao possui faturas pendentes!")
     #[char, line]
     col = 1
     row = 0
@@ -970,7 +967,7 @@ class sap:
     return dt3.to_csv(index = False)
   def fatura_novo(self, arg) -> str:
     debitos = self.escrever_novo(arg, True)
-    if(len(debitos) > 6): raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
+    if(len(debitos) > 6): raise Exception(f"429: Cliente possui muitas faturas ({len(debitos)}) pendentes")
     self.imprimir(debitos)
     return self.monitorar(len(debitos))
   def passivas_novo(self, arg) -> bool:
@@ -979,9 +976,9 @@ class sap:
   def info_parceiro(self) -> str:
     parceiro = self.session.findById("wnd[0]/usr/txtEANLD-PARTNER").text
     nome_cliente = self.session.findById("wnd[0]/usr/txtEANLD-PARTTEXT").text
-    if(len(parceiro) == 0): return "*INSTALACAO SEM CLIENTE VINCULADO!*"
-    if(str(nome_cliente).startswith("UNIDADE C/ CONSUMO")): return "*INSTALACAO SEM CLIENTE VINCULADO!*"
-    if(str(nome_cliente).startswith("PARCEIRO DE NEGOCIO")): return "*INSTALACAO SEM CLIENTE VINCULADO!*"
+    if(len(parceiro) == 0): return "404: *INSTALACAO SEM CLIENTE VINCULADO!*"
+    if(str(nome_cliente).startswith("UNIDADE C/ CONSUMO")): return "404: *INSTALACAO SEM CLIENTE VINCULADO!*"
+    if(str(nome_cliente).startswith("PARCEIRO DE NEGOCIO")): return "404: *INSTALACAO SEM CLIENTE VINCULADO!*"
     nome_cliente = str(nome_cliente).split("/")[0]
     phone_field_partial_string = self.parceiro(parceiro)
     self.session.findById(phone_field_partial_string + "ssubSCREEN_1000_WORKAREA_AREA:SAPLBUPA_DIALOG_JOEL:1100/ssubSCREEN_1100_MAIN_AREA:SAPLBUPA_DIALOG_JOEL:1101/tabsGS_SCREEN_1100_TABSTRIP/tabpSCREEN_1100_TAB_04").Select()
@@ -1067,7 +1064,7 @@ class sap:
     self.session.sendCommand('/n')
   def inspecao(self, arg) -> str:
     instalacao = self.instalacao(arg)
-    retorno = f"A instalacao {instalacao} nao esta apta para abertura de nota de recuperacao devido "
+    retorno = f"401: A instalacao {instalacao} nao esta apta para abertura de nota de recuperacao devido "
     # Collecting installation information
     statusInstalacao = self.session.findById('wnd[0]/usr/txtEANLD-DISCSTAT').text
     if(statusInstalacao != ' Instalação não suspensa'): return retorno + "nao estar ativa!"
@@ -1228,17 +1225,17 @@ class sap:
     self.session.findById("wnd[0]/usr/ctxtPANLAGE").text = instalacao
     self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
     statusBar = self.session.FindById("wnd[0]/sbar").text
-    if(statusBar != ''): raise Exception(statusBar)
+    if(statusBar != ''): raise Exception(f"400: {statusBar}")
     self.session.FindById("wnd[0]/usr/radCOD_BARRAS").Select()
     linhas = int(self.session.FindById("wnd[0]/usr/txtZATCE_MENGE_BETRW-MENGE").text)
-    if(linhas > 10): raise Exception(f"Cliente possui muitas faturas ({linhas})")
+    if(linhas > 10): raise Exception(f"429: Cliente possui muitas faturas ({linhas})")
     for apontador in range(linhas):
       situacao = self.session.FindById(f"wnd[0]/usr/tblSAPLZCRM_METODOSTC_FATURAS/txtIT_SAIDA-STATUS[7,{apontador}]").text
       if(situacao != "A Vencer" and situacao != "Retida"):
         self.session.FindById(f"wnd[0]/usr/tblSAPLZCRM_METODOSTC_FATURAS/chkIT_SAIDA-SELFAT[3,{apontador}]").selected = True
     self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
     statusBar = self.session.FindById("wnd[0]/sbar").text
-    if(statusBar != ''): raise Exception(statusBar)
+    if(statusBar != ''): raise Exception(f"400: {statusBar}")
     self.session.FindById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[4,0]").Select()
     self.session.FindById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[4,0]").setFocus()
     self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
@@ -1260,16 +1257,16 @@ class sap:
     self.session.findById("wnd[0]/usr/ctxtPANLAGE").text = instalacao
     self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
     statusBar = self.session.FindById("wnd[0]/sbar").text
-    if(statusBar != '' and statusBar != 'Nenhum débito foi encontrado!'): raise Exception(statusBar)
+    if(statusBar != '' and statusBar != 'Nenhum débito foi encontrado!'): raise Exception(f"400: {statusBar}")
     linhas = float(str(self.session.FindById("wnd[0]/usr/txtZATCE_MENGE_BETRW-MENGE").text).replace(',','.'))
     if(linhas != len(documentos)):
-      raise Exception("A quantidade de faturas nao bate com o ZARC140!")
+      raise Exception("401: A quantidade de faturas nao bate com o ZARC140!")
     indices = []
     for apontador in range(int(linhas)):
       documento = self.session.FindById(f"wnd[0]/usr/tblSAPLZCRM_METODOSTC_FATURAS/txtIT_SAIDA-ZIMPRES[8,{apontador}]").text
       if(documento in documentos): indices.append(apontador)
     if(len(indices) != len(documentos)):
-      raise Exception("A quantidade de faturas nao bate com o ZARC140!")
+      raise Exception("401: A quantidade de faturas nao bate com o ZARC140!")
     self.session.FindById("wnd[0]/usr/rad2VIA").Select()
     for i in range(len(indices)):
       if(i > 0):
@@ -1283,7 +1280,7 @@ class sap:
       if(self.session.FindById("wnd[1]", False) != None):
         self.session.FindById("wnd[1]/tbar[0]/btn[0]").Press()
     statusBar = self.session.FindById("wnd[0]/sbar").text
-    if(statusBar != ''): raise Exception(statusBar)
+    if(statusBar != ''): raise Exception(f"400: {statusBar}")
   def fatura_ZATC45(self, arg) -> str:
     shutil.rmtree(self.CURRENT_FOLDER)
     os.makedirs(self.CURRENT_FOLDER)
@@ -1296,8 +1293,8 @@ class sap:
       documento = self.session.FindById("wnd[0]/usr/tabsTAB_STRIP_100/tabpF110/ssubSUB_100:SAPLZARC_DEBITOS_CCS_V2:0110/cntlCONTAINER_110/shellcont/shell").getCellValue(linha,"ZIMPRES")
       if(str(documento).isdigit()):
         debitos.append(documento)
-    if(len(debitos) == 0): raise Exception("Cliente nao possui faturas vencidas!")
-    if(len(debitos) > 6): raise Exception(f"Cliente possui muitas faturas ({len(debitos)}) pendentes")
+    if(len(debitos) == 0): raise Exception("404: Cliente nao possui faturas vencidas!")
+    if(len(debitos) > 6): raise Exception(f"429: Cliente possui muitas faturas ({len(debitos)}) pendentes")
     self.ZATC45(instalacao, parceiro, debitos)
     return self.monitorar(len(debitos))
   def ZSVC168(self, instalacoes) -> str:
@@ -1327,7 +1324,7 @@ class sap:
     self.session.FindById("wnd[0]/tbar[1]/btn[8]").Press()
     tabela = self.session.FindById("wnd[0]/usr/cntlALV/shellcont/shell")
     rows = tabela.rowCount
-    if(rows == 0): raise Exception("Nao foram encontrados dados do Croqui Digital")
+    if(rows == 0): raise Exception("404: Nao foram encontrados dados do Croqui Digital")
     for i in range(rows):
       dataframe["Nota"].append(tabela.getCellValue(i, "QMNUM"))
       dataframe["Inst"].append(tabela.getCellValue(i, "INSTALACAO"))
@@ -1382,14 +1379,14 @@ if __name__ == "__main__":
   #    4. Outros argumentos opcionais;
   # 3. Se houver somente 3 argumentos, então é uma consulta simples
   #    e o script é configurado automaticamente para usar a 0.
-  if(len(sys.argv) < 3): raise Exception("Falta argumentos necessarios!")
+  if(len(sys.argv) < 3): raise Exception("500: Falta argumentos necessarios!")
   aplicacao = sys.argv[1]
   argumento = int(sys.argv[2])
   if(len(sys.argv) == 3): instancia = 0
   else: instancia = int(sys.argv[3])
   # Attempts to connect to SAP FrontEnd on the specified instance
   try: robo = sap(instancia)
-  except: raise Exception("ERRO: Nao pode se conectar ao sistema SAP!")
+  except: raise Exception("500: Nao pode se conectar ao sistema SAP!")
   have_authorization = True
   telefone = None
   # If the number of arguments is greater than the minimum (4),
@@ -1403,7 +1400,7 @@ if __name__ == "__main__":
       elif ('--leste' == sys.argv[apontador]): robo.REGIAO = 'RL'
       elif (str(sys.argv[apontador]).startswith("--telefone")):
         telefone = str(sys.argv[apontador]).split('=')[1]
-      else: raise Exception("O argumento fornecido nao eh valido!")
+      else: raise Exception("500: O argumento fornecido nao eh valido!")
       apontador = apontador + 1
   if(telefone != None):
     telefone = re.search("[0-9]{11}$", telefone)
@@ -1414,7 +1411,7 @@ if __name__ == "__main__":
     if (aplicacao == "coordenada"):
       print(robo.coordenadas(argumento))
     elif ((aplicacao == "telefone") or (aplicacao == "contato")):
-      if(not have_authorization): raise Exception("Nao eh possivel consultar essas informacoes no modo restrito")
+      if(not have_authorization): raise Exception("401: Nao eh possivel consultar essas informacoes no modo restrito")
       print(robo.telefone(argumento))
     elif ((aplicacao == "leiturista") or (aplicacao == "roteiro")):
       try:
@@ -1448,7 +1445,7 @@ if __name__ == "__main__":
     elif (aplicacao == "bandeirada"):
       print(robo.bandeirada(argumento))
     elif((aplicacao == "informacao") or (aplicacao == "medidor")):
-      if(not have_authorization): raise Exception("Nao eh possivel consultar essas informacoes no modo restrito")
+      if(not have_authorization): raise Exception("401: Nao eh possivel consultar essas informacoes no modo restrito")
       else: print(robo.novo_informacao(argumento))
     elif(aplicacao == "instalacao"):
       print(robo.instalacao(argumento))
@@ -1463,15 +1460,19 @@ if __name__ == "__main__":
     elif(aplicacao == "ren360"):
       print(robo.procurar(argumento))
     elif(aplicacao == "codbarra"):
-      if(telefone == None): raise Exception("Nao foi informado telefone")
+      if(telefone == None): raise Exception("500: Nao foi informado telefone")
       print(robo.codbarra(argumento, telefone))
     elif(aplicacao == "zona"):
       print(robo.zona(argumento))
     elif(aplicacao == "fuga"):
       print(robo.agrupamento(nota=argumento, have_authorization=True, debitos=True))
     else:
-      raise Exception("Nao entendi o comando, verifique se esto correto!")
+      raise Exception("400: Nao entendi o comando, verifique se esto correto!")
     robo.retorno()
-  # Returns the error with an 'ERROR:' prefix on method failure
   except Exception as erro:
-    print(f"ERRO: {erro.args[0]}")
+    if not(isinstance(erro.args[0], str)):
+      print("500: " + erro.args[0])
+    if(re.match("^[0-9]{3}", erro.args[0]) == None):
+      print("500: " + erro.args[0])
+    else:
+      print(erro.args[0])
