@@ -75,6 +75,7 @@ try:
         nCol = 0
         cursor = LARGURA_CARACTERE
         nRow = nRow + 1
+      draw(img)
       img_bytes = img.make_blob(format='png')
       if img_bytes == None:
         raise Exception("500: Image cannot be generated")
