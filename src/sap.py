@@ -1374,100 +1374,103 @@ if __name__ == "__main__":
   #    4. Outros argumentos opcionais;
   # 3. Se houver somente 3 argumentos, então é uma consulta simples
   #    e o script é configurado automaticamente para usar a 0.
-  if(len(sys.argv) < 3): raise Exception("500: Falta argumentos necessarios!")
-  aplicacao = sys.argv[1]
-  argumento = int(sys.argv[2])
-  if(len(sys.argv) == 3): instancia = 0
-  else: instancia = int(sys.argv[3])
-  # Attempts to connect to SAP FrontEnd on the specified instance
-  try: robo = sap(instancia)
-  except: raise Exception("500: Nao pode se conectar ao sistema SAP!")
-  have_authorization = True
-  telefone = None
-  # If the number of arguments is greater than the minimum (4),
-  # then it checks the other arguments (now, only one optional argument is accepted).
-  if(len(sys.argv) > 4):
-    apontador = 4
-    while(apontador < len(sys.argv)):
-      if ('--sap-restrito' == sys.argv[apontador]): have_authorization = False
-      elif ('--baixada' == sys.argv[apontador]): robo.REGIAO = 'RB'
-      elif ('--oeste' == sys.argv[apontador]): robo.REGIAO = 'RO'
-      elif ('--leste' == sys.argv[apontador]): robo.REGIAO = 'RL'
-      elif (str(sys.argv[apontador]).startswith("--telefone")):
-        telefone = str(sys.argv[apontador]).split('=')[1]
-      else: raise Exception("500: O argumento fornecido nao eh valido!")
-      apontador = apontador + 1
-  if(telefone != None):
-    telefone = re.search("[0-9]{11}$", telefone)
-    if(telefone != None):
-      telefone = telefone.group()
-  # Attempts to execute the method requested in the first argument
   try:
-    if (aplicacao == "coordenada"):
-      print(robo.coordenadas(argumento))
-    elif ((aplicacao == "telefone") or (aplicacao == "contato")):
-      if(not have_authorization): raise Exception("401: Nao eh possivel consultar essas informacoes no modo restrito")
-      print(robo.telefone(argumento))
-    elif ((aplicacao == "leiturista") or (aplicacao == "roteiro")):
-      try:
-        if(aplicacao == "roteiro"):
-          print(robo.leiturista(argumento, False, True))
+    if(len(sys.argv) < 3): raise Exception("500: Falta argumentos necessarios!")
+    aplicacao = sys.argv[1]
+    argumento = int(sys.argv[2])
+    if(len(sys.argv) == 3): instancia = 0
+    else: instancia = int(sys.argv[3])
+    # Attempts to connect to SAP FrontEnd on the specified instance
+    try: robo = sap(instancia)
+    except: raise Exception("500: Nao pode se conectar ao sistema SAP!")
+    have_authorization = True
+    telefone = None
+    # If the number of arguments is greater than the minimum (4),
+    # then it checks the other arguments (now, only one optional argument is accepted).
+    if(len(sys.argv) > 4):
+      apontador = 4
+      while(apontador < len(sys.argv)):
+        if ('--sap-restrito' == sys.argv[apontador]): have_authorization = False
+        elif ('--baixada' == sys.argv[apontador]): robo.REGIAO = 'RB'
+        elif ('--oeste' == sys.argv[apontador]): robo.REGIAO = 'RO'
+        elif ('--leste' == sys.argv[apontador]): robo.REGIAO = 'RL'
+        elif (str(sys.argv[apontador]).startswith("--telefone")):
+          telefone = str(sys.argv[apontador]).split('=')[1]
+        else: raise Exception("500: O argumento fornecido nao eh valido!")
+        apontador = apontador + 1
+    if(telefone != None):
+      telefone = re.search("[0-9]{11}$", telefone)
+      if(telefone != None):
+        telefone = telefone.group()
+    # Attempts to execute the method requested in the first argument
+    try:
+      if (aplicacao == "coordenada"):
+        print(robo.coordenadas(argumento))
+      elif ((aplicacao == "telefone") or (aplicacao == "contato")):
+        if(not have_authorization): raise Exception("401: Nao eh possivel consultar essas informacoes no modo restrito")
+        print(robo.telefone(argumento))
+      elif ((aplicacao == "leiturista") or (aplicacao == "roteiro")):
+        try:
+          if(aplicacao == "roteiro"):
+            print(robo.leiturista(argumento, False, True))
+          else:
+            print(robo.leiturista(argumento, False, False))
+        except:
+          if(aplicacao == "roteiro"):
+            print(robo.leiturista(argumento, True, True))
+          else:
+            print(robo.leiturista(argumento, True, False))
+      elif ((aplicacao == "debito") or (aplicacao == "fatura")):
+        if("ZATC73" in robo.NOTUSE):
+          print(robo.fatura_ZATC45(argumento))
+        elif(have_authorization):
+          print(robo.fatura(argumento))
         else:
-          print(robo.leiturista(argumento, False, False))
-      except:
-        if(aplicacao == "roteiro"):
-          print(robo.leiturista(argumento, True, True))
+          print(robo.fatura_novo(argumento))
+      elif (aplicacao == "relatorio"):
+        print(robo.relatorio(argumento))
+      elif ((aplicacao == "historico") or (aplicacao == "historico")):
+        print(robo.historico(argumento))
+      elif (aplicacao == "agrupamento"):
+          print(robo.agrupamento(argumento, have_authorization))
+      elif (aplicacao == "pendente"):
+        if(have_authorization):
+          print(robo.escrever(argumento))
         else:
-          print(robo.leiturista(argumento, True, False))
-    elif ((aplicacao == "debito") or (aplicacao == "fatura")):
-      if("ZATC73" in robo.NOTUSE):
-        print(robo.fatura_ZATC45(argumento))
-      elif(have_authorization):
-        print(robo.fatura(argumento))
+          print(robo.escrever_novo(argumento))
+      elif (aplicacao == "bandeirada"):
+        print(robo.bandeirada(argumento))
+      elif((aplicacao == "informacao") or (aplicacao == "medidor")):
+        if(not have_authorization): raise Exception("401: Nao eh possivel consultar essas informacoes no modo restrito")
+        else: print(robo.novo_informacao(argumento))
+      elif(aplicacao == "instalacao"):
+        print(robo.instalacao(argumento))
+      elif(aplicacao == "cruzamento"):
+        print(robo.cruzamento(argumento))
+      elif((aplicacao == "consumo") or (aplicacao == "leitura")):
+        print(robo.consumo(argumento))
+      elif(aplicacao == "abertura"):
+        print(robo.inspecao(argumento))
+      elif(aplicacao == "vencimento"):
+        print(robo.relatorio(argumento, True))
+      elif(aplicacao == "ren360"):
+        print(robo.procurar(argumento))
+      elif(aplicacao == "codbarra"):
+        if(telefone == None): raise Exception("500: Nao foi informado telefone")
+        print(robo.codbarra(argumento, telefone))
+      elif(aplicacao == "zona"):
+        print(robo.zona(argumento))
+      elif(aplicacao == "fuga"):
+        print(robo.agrupamento(nota=argumento, have_authorization=True, debitos=True))
       else:
-        print(robo.fatura_novo(argumento))
-    elif (aplicacao == "relatorio"):
-      print(robo.relatorio(argumento))
-    elif ((aplicacao == "historico") or (aplicacao == "historico")):
-      print(robo.historico(argumento))
-    elif (aplicacao == "agrupamento"):
-        print(robo.agrupamento(argumento, have_authorization))
-    elif (aplicacao == "pendente"):
-      if(have_authorization):
-        print(robo.escrever(argumento))
+        raise Exception("400: Nao entendi o comando, verifique se esto correto!")
+      robo.retorno()
+    except Exception as erro:
+      if not(isinstance(erro, str)):
+        print("500: " + str(erro.args[0]))
+      elif(re.match("^[0-9]{3}", erro.args[0]) == None):
+        print("500: " + str(erro.args[0]))
       else:
-        print(robo.escrever_novo(argumento))
-    elif (aplicacao == "bandeirada"):
-      print(robo.bandeirada(argumento))
-    elif((aplicacao == "informacao") or (aplicacao == "medidor")):
-      if(not have_authorization): raise Exception("401: Nao eh possivel consultar essas informacoes no modo restrito")
-      else: print(robo.novo_informacao(argumento))
-    elif(aplicacao == "instalacao"):
-      print(robo.instalacao(argumento))
-    elif(aplicacao == "cruzamento"):
-      print(robo.cruzamento(argumento))
-    elif((aplicacao == "consumo") or (aplicacao == "leitura")):
-      print(robo.consumo(argumento))
-    elif(aplicacao == "abertura"):
-      print(robo.inspecao(argumento))
-    elif(aplicacao == "vencimento"):
-      print(robo.relatorio(argumento, True))
-    elif(aplicacao == "ren360"):
-      print(robo.procurar(argumento))
-    elif(aplicacao == "codbarra"):
-      if(telefone == None): raise Exception("500: Nao foi informado telefone")
-      print(robo.codbarra(argumento, telefone))
-    elif(aplicacao == "zona"):
-      print(robo.zona(argumento))
-    elif(aplicacao == "fuga"):
-      print(robo.agrupamento(nota=argumento, have_authorization=True, debitos=True))
-    else:
-      raise Exception("400: Nao entendi o comando, verifique se esto correto!")
-    robo.retorno()
+        print(erro.args[0])
   except Exception as erro:
-    if not(isinstance(erro.args[0], str)):
-      print("500: " + str(erro.args[0]))
-    if(re.match("^[0-9]{3}", erro.args[0]) == None):
-      print("500: " + str(erro.args[0]))
-    else:
-      print(erro.args[0])
+    print(erro.args[0])
