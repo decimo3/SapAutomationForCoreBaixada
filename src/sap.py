@@ -28,7 +28,8 @@ class sap:
     self.ATIVIDADES = self.depara('setor_atividades', self.SETOR).split(',')
     if not (self.IfIsRunning('cscript.exe')):
       subprocess.Popen("cscript erroDialog.vbs", stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    self.CURRENT_FOLDER = os.getcwd() + "\\tmp\\"
+    self.CURRENT_FOLDER = os.environ.get("FOLDER")
+    if(self.CURRENT_FOLDER == None): raise Exception("500: A variavel FOLDER no arquivo `sap.config` nao esta definida!")
     if (not(os.path.exists(self.CURRENT_FOLDER))):
       os.makedirs(self.CURRENT_FOLDER)
     self.DESTAQUE_AMARELO = 3
@@ -1278,8 +1279,6 @@ class sap:
     statusBar = self.session.FindById("wnd[0]/sbar").text
     if(statusBar != ''): raise Exception(f"400: {statusBar}")
   def fatura_ZATC45(self, arg) -> str:
-    shutil.rmtree(self.CURRENT_FOLDER)
-    os.makedirs(self.CURRENT_FOLDER)
     debitos = []
     instalacao = self.instalacao(arg)
     parceiro = int(self.session.findById("wnd[0]/usr/txtEANLD-PARTNER").text)
