@@ -80,9 +80,10 @@ class sap:
         self.session.findById("wnd[1]/tbar[0]/btn[0]").Press()
     # Create sessions
     if(self.session.info.user != ''):
-      while(len(self.connection.sessions) < self.instancia):
+      while(len(self.connection.sessions) <= self.instancia):
         time.sleep(2)
         self.connection.Children(0).createSession()
+      time.sleep(2)
       self.session = self.connection.Children(self.instancia)
       return True
     else: return False
