@@ -26,26 +26,12 @@ class sap:
     self.LAYOUT = os.environ.get("LAYOUT")
     if(self.LAYOUT == None): raise Exception("500: A variavel LAYOUT no arquivo `sap.config` nao esta definida!")
     self.ATIVIDADES = self.depara('setor_atividades', self.SETOR).split(',')
-    if not (self.IfIsRunning('cscript.exe')):
-      subprocess.Popen("cscript erroDialog.vbs", stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     self.DESTAQUE_AMARELO = 3
     self.DESTAQUE_VERMELHO = 2
     self.DESTAQUE_VERDEJANTE = 4
     self.DESTAQUE_AUSENTE = 0
     self.instancia = instancia
     self.inicializar()
-  def IfIsRunning(self, arg: str) -> bool:
-    # Define the command to list processes
-    command = f"tasklist /FI \"IMAGENAME eq {arg}\""
-    # Execute the command and capture its output
-    output = subprocess.check_output(command, shell=True)
-    # Decode the output to string and split it by lines
-    processes = output.decode(encoding='ISO-8859-1').split('\n')
-    # Iterate over the processes and find the one you want to kill
-    for line in processes:
-      if arg in line:
-        return True
-    return False
   def inicializar(self) -> bool:
     # Get scripting
     try:
