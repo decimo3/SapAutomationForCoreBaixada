@@ -1,5 +1,11 @@
 *COMUNICADO DE ATUALIZAÇÃO DO CHATBOT*
 
-Atualizado subsistema de Monitoramento de Ofensores do IDG pelo OFS (blackmouth), realizando a desvinculação do sistema Chatbot, o envio para o Telegram será efetuado diretamente pelo _blackmouth_.
+O chatbot 2.0 chegou e agora ele está muito mais rápido!
 
-_Versão atual: 20240805_
+1. Adicionado sistema de atendimento assíncrono, atendendo *4 usuarios* ao mesmo tempo;
+2. Adicionado sistema para pesquisar `zona` transformadora mais próximas (somente oeste);
+3. Corrigido sistema de envio de `comunicados`, que não estava entregando para todos;
+4. Aumentado o tempo de tolerância para resposta do sistema SAP para solicitação `fatura`;
+5. Removida aplicação `acesso` devido a não utilização de todas as consultas respondidas;
+
+_Versão atual: 20240911_
