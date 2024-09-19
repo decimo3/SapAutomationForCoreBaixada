@@ -64,9 +64,9 @@ class sap:
     # Create sessions
     if(self.session.info.user != ''):
       while(len(self.connection.sessions) <= self.instancia):
-        time.sleep(2)
+        time.sleep(5)
         self.connection.Children(0).createSession()
-      time.sleep(2)
+      time.sleep(5)
       self.session = self.connection.Children(self.instancia)
       return True
     else: return False
