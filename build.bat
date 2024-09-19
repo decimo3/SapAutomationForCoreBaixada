@@ -18,7 +18,7 @@ copy .\SapAutomationForCoreBaixada\src\fileDialog.vbs tmp
 for /f "tokens=2 delims==" %%a in ('wmic os get localdatetime /value') do set datetime=%%a
 set "datestamp=%datetime:~0,4%%datetime:~4,2%%datetime:~6,2%"
 echo %datestamp% > .\TelegramBotForFieldTeamHelper\version
-dotnet publish .\TelegramBotForFieldTeamHelper\telbot.csproj
+dotnet publish .\TelegramBotForFieldTeamHelper\bot.csproj
 dotnet publish .\monitoring-fieldteam\src\ofs.csproj
 dotnet publish .\SapAutomationForWeb\prl.csproj
 dotnet publish .\loc_zone_finder\gps.csproj
