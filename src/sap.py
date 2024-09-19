@@ -30,7 +30,7 @@ class sap:
     self.DESTAQUE_VERMELHO = 2
     self.DESTAQUE_VERDEJANTE = 4
     self.DESTAQUE_AUSENTE = 0
-    self.instancia = instancia
+    self.instancia = instancia - 1
     self.inicializar()
   def inicializar(self) -> bool:
     # Get scripting
