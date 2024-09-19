@@ -62,14 +62,14 @@ class sap:
           self.session.findById("wnd[1]/usr/radMULTI_LOGON_OPT1").Select()
         self.session.findById("wnd[1]/tbar[0]/btn[0]").Press()
     # Create sessions
-    if(self.session.info.user != ''):
-      while(len(self.connection.sessions) <= self.instancia):
-        time.sleep(5)
-        self.connection.Children(0).createSession()
+    if(self.session.info.user == ''):
+      raise Exception("500: SAP GUI Scripting API is not available.")
+    while(len(self.connection.sessions) < (self.instancia + 1)):
+      self.connection.Children(0).createSession()
       time.sleep(5)
-      self.session = self.connection.Children(self.instancia)
-      return True
-    else: return False
+    time.sleep(5)
+    self.session = self.connection.Children(self.instancia)
+    return True
   def relatorio(self, dia=7, filtrar_dias=False) -> str:
       tipos_de_nota = []
       danos_filtrar = []
