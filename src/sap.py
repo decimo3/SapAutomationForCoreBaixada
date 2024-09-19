@@ -500,11 +500,7 @@ class sap:
     while (apontador < linhas):
       num10_com_letra = self.session.FindById(f"wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX/txtTI_NUMSX-NUMERO[0,{tamanho_maximo - 1}]").text
       match = re.search("[0-9]+", num10_com_letra)
-      if(match == None):
-        apontador = apontador + 1
-        self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
-        continue
-      num10_sem_letra = int(match.group())
+      num10_sem_letra = int(match.group()) if (match != None) else 999999
       if (num10_sem_letra < numero_sem_letra):
         apontador = apontador + tamanho_maximo
         self.session.FindById("wnd[0]/usr/tblSAPLZMED_ENDERECOSTC_NUMSX").verticalScrollbar.position = apontador
