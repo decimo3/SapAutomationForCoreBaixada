@@ -7,17 +7,40 @@ import sys
 import time
 import datetime
 import re
-import shutil
 import subprocess
 import win32com.client
 import pandas
 import dotenv
 import sqlite3
+import logging
+from logging.handlers import RotatingFileHandler
 #endregion
 
 class sap:
   def __init__(self, instancia) -> None:
-    dotenv.load_dotenv('sap.conf')
+    environment = "--em-desenvolvimento" in sys.argv
+    if environment:
+      self.BASE_FOLDER = os.path.expandvars("%USERPROFILE%\\MestreRuan\\")
+    else:
+      if getattr(sys, 'frozen', False):
+        # The application is frozen (PyInstaller bundled)
+        self.BASE_FOLDER = os.path.dirname(sys.executable)
+      else:
+        # Running in normal Python mode
+        self.BASE_FOLDER = os.path.dirname(os.path.abspath(__file__))
+    logfilename = os.path.join(self.BASE_FOLDER, f"logfile_{instancia}.log")
+    logging.basicConfig(
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        level=logging.DEBUG,
+        handlers=[
+          RotatingFileHandler(logfilename, maxBytes=4000, backupCount=5),
+          logging.StreamHandler()
+        ] 
+    )
+    self.logger = logging.getLogger(__name__)
+    self.LOCKFILE = os.path.join(self.BASE_FOLDER, 'sap.lock')
+    CONF_FILE = os.path.join(self.BASE_FOLDER, 'sap.conf')
+    dotenv.load_dotenv(CONF_FILE)
     self.NOTUSE = str(os.environ.get("NOTUSE")).split(',')
     self.SETOR = os.environ.get("SETOR")
     if(self.SETOR == None): raise Exception("500: A variavel SETOR no arquivo `sap.config` nao esta definida!")
@@ -31,45 +54,93 @@ class sap:
     self.DESTAQUE_VERDEJANTE = 4
     self.DESTAQUE_AUSENTE = 0
     self.instancia = instancia - 1
-    self.inicializar()
-  def inicializar(self) -> bool:
-    # Get scripting
-    try:
-      self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
-    except:
-      saplogon = "C:\\Program Files (x86)\\SAP\\FrontEnd\\SAPgui\\saplogon.exe"
-      subprocess.Popen(saplogon, start_new_session=True)
-      time.sleep(3)
-      self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
-    if not type(self.SapGui) == win32com.client.CDispatch:
-        raise Exception("500: SAP GUI Scripting API is not available.")
-    # Get connection
-    if not (len(self.SapGui.connections) > 0):
+  def create_lock(self) -> None:
+    if not os.path.exists(self.LOCKFILE):
+      with open(self.LOCKFILE, 'w') as file:
+        pass
+  def delete_lock(self) -> None:
+    if(os.path.exists(self.LOCKFILE)):
+      os.remove(self.LOCKFILE)
+  def check_lock(self) -> bool:
+    return os.path.exists(self.LOCKFILE)
+  def health_check(self, desire_instances: int = 5) -> None:
+    self.logger.debug("BASE_FOLDER: " + self.BASE_FOLDER)
+    """ Check, create and recreate SAP instances """
+    TIME_WAIT = 5
+    INTERVAL_CHECK = 10
+    self.create_lock()
+    self.logger.info("Starting instance checker...")
+    while(True):
       try:
-        self.connection = self.SapGui.OpenConnection("#PCL", True)
+        # Get scripting
+        try:
+          self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
+        except:
+          self.create_lock()
+          self.logger.warning("Cannot able to attach 'ScriptingEngine'. Starting SAP...")
+          saplogon = "C:\\Program Files (x86)\\SAP\\FrontEnd\\SAPgui\\saplogon.exe"
+          subprocess.Popen(saplogon, start_new_session=True)
+          time.sleep(TIME_WAIT)
+          self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
+        if not type(self.SapGui) == win32com.client.CDispatch:
+          self.create_lock()
+          self.logger.error("Cannot able to attach 'ScriptingEngine', even after start SAP Frontend.")
+          raise Exception("500: SAP GUI Scripting API is not available.")
+        # Get connection
+        if not (len(self.SapGui.connections) > 0):
+          self.create_lock()
+          self.logger.warning("Connection is not open. trying open...")
+          try:
+            self.connection = self.SapGui.OpenConnection("#PCL", True)
+          except:
+            self.create_lock()
+            self.logger.error("Cannot able to open connection with SAP server.")
+            raise Exception("500: SAP FrontEnd connection is not available.")
+        else:
+          self.connection = self.SapGui.connections[0]
+        self.session = self.connection.Children(0)
+        # Check and get authentication
+        if (self.session.info.user == ''):
+          self.create_lock()
+          self.logger.warning("User is not authenticated yet. Authenticating...")
+          self.session.findById("wnd[0]/usr/txtRSYST-BNAME").text = os.environ.get("USUARIO")
+          self.session.findById("wnd[0]/usr/pwdRSYST-BCODE").text = os.environ.get("PALAVRA")
+          self.session.findById("wnd[0]/tbar[0]/btn[0]").Press()
+          if (self.session.findById("wnd[1]", False) != None):
+            if (self.session.findById("wnd[1]/usr/radMULTI_LOGON_OPT1", False) != None):
+              self.session.findById("wnd[1]/usr/radMULTI_LOGON_OPT1").Select()
+            self.session.findById("wnd[1]/tbar[0]/btn[0]").Press()
+        # re-check authentication
+        if(self.session.info.user == ''):
+          self.create_lock()
+          self.logger.error("User cannot be authenticated.")
+          raise Exception("500: User cannot be authenticated!")
+        # Create sessions
+        number_of_sessions = len(self.connection.sessions)
+        if(number_of_sessions < desire_instances):
+          self.create_lock()
+          self.logger.warning("Less instances that desire, creating new ones...")
+          for i in range(desire_instances - number_of_sessions):
+            self.connection.Children(0).createSession()
+            time.sleep(TIME_WAIT)
+        # Re-check number of sessions
+        number_of_sessions = len(self.connection.sessions)
+        if(number_of_sessions > desire_instances):
+          self.create_lock()
+          self.logger.warning("More instances that desire, closing excess...")
+          for i in range(number_of_sessions, desire_instances, -1):
+            self.connection.closeSession(self.connection.sessions[i - 1].Id)
+        # Unlock instances
+        self.delete_lock()
+        self.logger.info("SAP Frontend is ready to receive requests.")
+        time.sleep(INTERVAL_CHECK)
       except:
-        raise Exception("500: SAP FrontEnd connection is not available.")
-    else:
-      self.connection = self.SapGui.connections[0]
-    self.session = self.connection.Children(0)
-    # Get session
-    if (self.session.info.user == ''):
-      self.session.findById("wnd[0]/usr/txtRSYST-BNAME").text = os.environ.get("USUARIO")
-      self.session.findById("wnd[0]/usr/pwdRSYST-BCODE").text = os.environ.get("PALAVRA")
-      self.session.findById("wnd[0]/tbar[0]/btn[0]").Press()
-      if (self.session.findById("wnd[1]", False) != None):
-        if (self.session.findById("wnd[1]/usr/radMULTI_LOGON_OPT1", False) != None):
-          self.session.findById("wnd[1]/usr/radMULTI_LOGON_OPT1").Select()
-        self.session.findById("wnd[1]/tbar[0]/btn[0]").Press()
-    # Create sessions
-    if(self.session.info.user == ''):
-      raise Exception("500: SAP GUI Scripting API is not available.")
-    while(len(self.connection.sessions) < (self.instancia + 1)):
-      self.connection.Children(0).createSession()
-      time.sleep(5)
-    time.sleep(5)
+        pass
+  def inicializar(self) -> None:
+    while(self.check_lock()): time.sleep(1)
+    self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
+    self.connection = self.SapGui.connections[0]
     self.session = self.connection.Children(self.instancia)
-    return True
   def relatorio(self, dia=7, filtrar_dias=False) -> str:
       tipos_de_nota = []
       danos_filtrar = []
@@ -1029,7 +1100,8 @@ class sap:
     return pandas.DataFrame(dataframe).to_csv(index=False, sep=',')
   def depara(self, tipo: str, de: str) -> str:
     try:
-      connection = sqlite3.connect('sap.db')
+      filename = os.path.join(self.BASE_FOLDER, 'sap.db')
+      connection = sqlite3.connect(filename)
       cursor = connection.execute(f"SELECT para FROM depara WHERE tipo = '{tipo}' AND de = '{de}'")
       result = cursor.fetchone()
       return result[0] if result else "Codigo desconhecido!"
@@ -1361,6 +1433,8 @@ if __name__ == "__main__":
     # Attempts to connect to SAP FrontEnd on the specified instance
     try: robo = sap(instancia)
     except: raise Exception("500: Nao pode se conectar ao sistema SAP!")
+    if(argumento == 'instancia'):
+      robo.create_lock()
     have_authorization = True
     telefone = None
     # If the number of arguments is greater than the minimum (4),
@@ -1374,6 +1448,7 @@ if __name__ == "__main__":
         elif ('--leste' == sys.argv[apontador]): robo.REGIAO = 'RL'
         elif (str(sys.argv[apontador]).startswith("--telefone")):
           telefone = str(sys.argv[apontador]).split('=')[1]
+        elif ('--em-desenvolvimento'): pass
         else: raise Exception("500: O argumento fornecido nao eh valido!")
         apontador = apontador + 1
     if(telefone != None):
@@ -1382,6 +1457,11 @@ if __name__ == "__main__":
         telefone = telefone.group()
     # Attempts to execute the method requested in the first argument
     try:
+      if(aplicacao == "instancia"):
+        robo.health_check(argumento)
+        sys.exit()
+      else:
+        robo.inicializar()
       if (aplicacao == "coordenada"):
         print(robo.coordenadas(argumento))
       elif ((aplicacao == "telefone") or (aplicacao == "contato")):
