@@ -1484,6 +1484,10 @@ if __name__ == "__main__":
           else:
             print(robo.leiturista(argumento, True, False))
       elif ((aplicacao == "debito") or (aplicacao == "fatura")):
+        # Recreate lockfile to force to check number of instances
+        # If instance numbers is greater that 5, it will be fail
+        robo.create_lock()
+        robo.inicializar()
         if("ZATC73" in robo.NOTUSE):
           print(robo.fatura_ZATC45(argumento))
         elif(have_authorization):
