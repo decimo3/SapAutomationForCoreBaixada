@@ -33,7 +33,7 @@ class sap:
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         level=logging.DEBUG,
         handlers=[
-          RotatingFileHandler(logfilename, maxBytes=4000, backupCount=5),
+          RotatingFileHandler(logfilename, maxBytes=10000000, backupCount=5),
           logging.StreamHandler()
         ] 
     )
