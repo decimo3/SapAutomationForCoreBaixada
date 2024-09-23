@@ -64,13 +64,15 @@ class sap:
   def check_lock(self) -> bool:
     return os.path.exists(self.LOCKFILE)
   def health_check(self, desire_instances: int = 5) -> None:
-    self.logger.debug("BASE_FOLDER: " + self.BASE_FOLDER)
     """ Check, create and recreate SAP instances """
     TIME_WAIT = 5
     INTERVAL_CHECK = 10
     self.create_lock()
     self.logger.info("Starting instance checker...")
     while(True):
+      if not self.check_lock():
+        time.sleep(INTERVAL_CHECK)
+        continue
       try:
         # Get scripting
         try:
@@ -133,14 +135,17 @@ class sap:
         # Unlock instances
         self.delete_lock()
         self.logger.info("SAP Frontend is ready to receive requests.")
-        time.sleep(INTERVAL_CHECK)
       except:
         pass
   def inicializar(self) -> None:
-    while(self.check_lock()): time.sleep(1)
-    self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
-    self.connection = self.SapGui.connections[0]
-    self.session = self.connection.Children(self.instancia)
+    try:
+      while(self.check_lock()): time.sleep(1)
+      self.SapGui = win32com.client.GetObject("SAPGUI").GetScriptingEngine
+      self.connection = self.SapGui.connections[0]
+      self.session = self.connection.Children(self.instancia)
+    except:
+      self.create_lock()
+      self.inicializar()
   def relatorio(self, dia=7, filtrar_dias=False) -> str:
       tipos_de_nota = []
       danos_filtrar = []
