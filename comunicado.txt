@@ -1,11 +1,11 @@
 *COMUNICADO DE ATUALIZAÇÃO DO CHATBOT*
 
-O chatbot 2.0 chegou e agora ele está muito mais rápido!
+Adicionado sistema para gerenciamento de instâncias do SAP Frontend:
 
-1. Adicionado sistema de atendimento assíncrono, atendendo *4 usuarios* ao mesmo tempo;
-2. Adicionado sistema para pesquisar `zona` transformadora mais próximas (somente oeste);
-3. Corrigido sistema de envio de `comunicados`, que não estava entregando para todos;
-4. Aumentado o tempo de tolerância para resposta do sistema SAP para solicitação `fatura`;
-5. Removida aplicação `acesso` devido a não utilização de todas as consultas respondidas;
+O novo sistema gerenciará as instâncias do SAP evitando os conflitos entre as instâncias do bot, que estavam travando o SAP devido as demasiadas tentativas de login concorrentes.
 
-_Versão atual: 20240911_
+Agora a instância aguardará que o SAP seja aberto para proseguir com a solicitação, evitando perda de solicitações por falta de conexão com o SAP.
+
+Esse sistema será auditável através de um arquivo de registro do gerenciamento, informando os tempos de indisponibilidade do SAP e as conexões bem sucedidas.
+
+_Versão atual: 20240923_
