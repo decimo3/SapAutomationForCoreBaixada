@@ -541,12 +541,12 @@ class sap:
     numero = self.session.findById("wnd[0]/usr/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:0301/txtADDR1_DATA-HOUSE_NUM1").text
     match_number = re.search("[0-9]+", numero)
     if not (match_number):
-      raise Exception("400: Instalacao sem numero de rua! O agrupamento nao pode ser analisado automaticamente.")
+      raise Exception("422: Instalacao sem numero de rua! O agrupamento nao pode ser analisado automaticamente.")
     numero_sem_letra = int(match_number.group())
     if (numero == "1SN" or numero == "SN"):
-      raise Exception("400: Instalacao sem numero de rua! O agrupamento nao pode ser analisado automaticamente.")
+      raise Exception("422: Instalacao sem numero de rua! O agrupamento nao pode ser analisado automaticamente.")
     if(numero_sem_letra == None):
-      raise Exception("400: Instalacao sem numero de rua! O agrupamento nao pode ser analisado automaticamente.")
+      raise Exception("422: Instalacao sem numero de rua! O agrupamento nao pode ser analisado automaticamente.")
     # Gets 'logradouro' and go to 'logradouro' aplication details
     logradouro = self.session.findById("wnd[0]/usr/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:0301/txtADDR1_DATA-NAME_CO").text
     if("ZMED95" in self.NOTUSE):
