@@ -1533,11 +1533,11 @@ if __name__ == "__main__":
         raise Exception("400: Nao entendi o comando, verifique se esto correto!")
       robo.retorno()
     except Exception as erro:
-      if not(isinstance(erro, str)):
-        print("500: " + str(erro.args[0]))
+      if not isinstance(erro.args[0], str):
+        print("500: Um erro inesperado aconteceu.")
       elif(re.match("^[0-9]{3}", erro.args[0]) == None):
         print("500: " + str(erro.args[0]))
       else:
         print(erro.args[0])
   except Exception as erro:
-    print(erro.args[0])
+    print(erro)
