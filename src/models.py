@@ -52,3 +52,10 @@ class LogradouroInfo():
     else:
       self.numero_int = int(match.group())
 
+class ParceiroInfo():
+  ''' class to hold information about client '''
+  parceiro: int
+  nome_cliente: str
+  documento_tipo: str
+  documento_numero: str
+  telefones: list[str]
