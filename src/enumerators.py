@@ -43,3 +43,7 @@ class ZMED95_FLAGS(Enum):
   SKIPT_ENTER = 1
   CHECK_PASIVE = 2
   CHECK_VALUES = 3
+
+class BP_FLAGS(Enum):
+  GET_PHONES = 0
+  GET_DOCS = 1
