@@ -17,19 +17,20 @@ from constants import (
   LONG_TIME_WAIT,
   LOCKFILE,
   STRINGPATH,
-  BASE_FOLDER
+  BASE_FOLDER,
 )
 from exceptions import (
   SomethingGoesWrong,
   UnavailableSap,
   ArgumentException,
-  InformationNotFound
+  InformationNotFound,
 )
 from models import (
   InstalacaoInfo,
   LigacaoInfo,
   LogradouroInfo,
-  ServicoInfo
+  ServicoInfo,
+  ParceiroInfo,
 )
 from enumerators import (
   DESTAQUES,
@@ -40,6 +41,28 @@ from enumerators import (
   ES61_FLAGS,
   ES57_FLAGS,
   ZMED95_FLAGS,
+  BP_FLAGS,
+)
+__ALL__ = (
+  'check_lock',
+  'create_lock',
+  'delete_lock',
+  'attach_session',
+  'HOME_PAGE',
+  'SEND_ENTER',
+  'CHECK_STATUS',
+  'GETBY_XY', # get element by col and row numbers
+  'ZATC73', # print by invoice document number
+  'ZSVC20', # get services report
+  'IW53', # get information about service
+  'ES32', # get information about instalation
+  'ZATC45', # print invoice when ZATC73 unavaliable
+  'ZMED89', # get reading report
+  'ZARC140', # get invoice report
+  'ES61', # get information about ligacao
+  'ES57', # get information about street
+  'ZMED95', # get information about logradouro
+  'FPL9' # get invoice report then ZARC140 unavaliable
 )
 #endregion
 
@@ -161,11 +184,15 @@ class SapBot:
   def SEND_ENTER(self) -> None:
     ''' Function to send 'Enter' key '''
     self.session.FindById("wnd[0]").SendVKey(2)
-  def CHECK_STATUSBAR(self) -> None:
+  def CHECK_STATUS(self) -> None:
     ''' Function to check errors message on status bar '''
     status_bar = self.session.findById(STRINGPATH['STATUS_BAR_MESSAGE']).text
     if status_bar != '':
       raise ArgumentException(status_bar)
+  def GETBY_XY(self, id_template: str, col: int, row: int):
+    ''' function to get element replace col and row from array id '''
+    id_string = id_template.replace('¿', str(col)).replace('?', str(row))
+    return self.session.FindById(id_string, False)
   def ZATC73(
       self,
       documentos: list[int]
@@ -579,18 +606,20 @@ class SapBot:
     MAX_ROW = 32
     MAX_COL = 99
     hasLines = True
-    indices_colunas = [0,0,0,0,0,0]
     firstLine = False
+    indices = [0,0,0,0,0,0]
+    colunas = ['#', 'Referencia', 'Impressao', 'Vencimento', 'Valores', 'Observacao']
+    dataframe = {key: [] for key in colunas}
     while hasLines:
       # Aponta para a linha atual ou para a última caso o índice da linha ultrapasse o máximo
       linha = MAX_ROW if row >= MAX_ROW else row
       # Rola a barra vertical caso o índice da linha tenha ultrapassado o máximo
       if row >= MAX_ROW:
-        self.session.FindById("wnd[0]/usr").verticalScrollbar.position = row - MAX_ROW
+        self.session.FindById(STRINGPATH['GLOBAL_USER_AREA']).verticalScrollbar.position = row - MAX_ROW
       # Obtém o valor do label na coluna 1 da linha atual
-      primeiro_caractere = self.session.FindById(f"wnd[0]/usr/lbl[1,{linha}]", False)
-      # Verifica se a coluna VENCIMENTO não está vazia, se estiver, encerra a leitura dos labels
-      if indices_colunas[2] > 0 and primeiro_caractere is None:
+      primeiro_caractere = self.GETBY_XY(STRINGPATH['FPL9_LABEL_CANVAS'], 1, linha)
+      # Verifica se a coleta já foi iniciada e se o label está vazio, se sim, encerra a coleta
+      if indices[2] > 0 and primeiro_caractere is None:
         if firstLine is False:
           firstLine = True
           row += 1
@@ -601,23 +630,128 @@ class SapBot:
       if primeiro_caractere is None:
         row += 1
         continue
-      # iteração sobre todos os caracteres da linha para puxar as informações
-      while (col < MAX_COL and indices_colunas[5] == 0):
+      # iteração sobre todos os caracteres da linha para coletar os índices dos labels
+      while (col < MAX_COL and indices[5] == 0):
         # Obtém o valor do label na coluna atual da linha atual
-        label = self.session.FindById(f"wnd[0]/usr/lbl[{col},{linha}]", False)
+        label = self.GETBY_XY(STRINGPATH['FPL9_LABEL_CANVAS'], col, linha)
         # Verifica se a coordenada do objeto retorna um objeto, se não pula para a próxima coluna
         if label is None:
           col += 1
           continue
         if label.text == "Sts":
-          indices_colunas[1] = col
+          indices[1] = col
         if label.text == "Mês Refer":
-          indices_colunas[2] = col
+          indices[2] = col
         if label.text == "Doc. Faturam":
-          indices_colunas[3] = col
+          indices[3] = col
         if label.text == "Vencimento":
-          indices_colunas[4] = col
+          indices[4] = col
         if label.text == "Valor":
-          indices_colunas[5] = col
+          indices[5] = col
         col += 1
+      if indices[2] > 0 and firstLine == True:
+        
+        status_icon_name = self.GETBY_XY(STRINGPATH['FPL9_LABEL_CANVAS'], indices[1], linha).iconName
+        if status_icon_name == "S_TL_R":
+          dataframe["#"].append(DESTAQUES.VERMELHO)
+          dataframe["Observacao"].append("Fat. vencida")
+        if status_icon_name == "S_TL_Y":
+          dataframe["#"].append(DESTAQUES.VERDE)
+          dataframe["Observacao"].append("Fat. no prazo")
+        if status_icon_name == "S_TL_G":
+          dataframe["#"].append(DESTAQUES.VERDE)
+          dataframe["Observacao"].append("Fat. no prazo")
+        if not status_icon_name in {"S_TL_R", "S_TL_Y", "S_TL_G"}:
+          dataframe["#"].append(DESTAQUES.AUSENTE)
+          dataframe["Observacao"].append("")
+        dataframe["Referencia"].append(self.GETBY_XY(STRINGPATH['FPL9_LABEL_CANVAS'], indices[2], linha).text)
+        dataframe["Impressao"].append(self.GETBY_XY(STRINGPATH['FPL9_LABEL_CANVAS'], indices[3], linha).text)
+        vence = datetime.datetime.strptime(self.GETBY_XY(STRINGPATH['FPL9_LABEL_CANVAS'], indices[4], linha).text ,"%d.%m.%Y")
+        dataframe["Vencimento"].append(vence)
+        valor = float(str.replace(self.GETBY_XY(STRINGPATH['FPL9_LABEL_CANVAS'], indices[5], linha).text, ',', '.'))
+        dataframe["Valores"].append(valor)
+      row += 1
+      col = 1
+    dataframe1 = pandas.DataFrame(dataframe)
+    # agrupa os valores por documento de impressão
+    dataframe2 = dataframe1.groupby('Impressao')['Valores'].sum().reset_index()
+    # remove as duplicatas para ter somente um documento de impressão por linha
+    dataframe1.drop_duplicates(subset="Impressao", inplace=True)
+    # mescla o dataframe com a soma dos valores com o dataframe com as informações
+    dataframe3 = dataframe1.merge(dataframe2, on="Impressao")
+    # remove a coluna antiga com o valor errado
+    del dataframe3['valores_x']
+    dataframe3 = dataframe3.rename(columns={'valores_y': 'valores'})
+    dataframe3['Impressao'].replace('', pandas.NA, inplace=True)
+    dataframe3 = dataframe3.dropna(subset=['Impressao'])
+    return dataframe3
+  def BP(
+    self,
+    instalacao: InstalacaoInfo,
+    flag: BP_FLAGS = BP_FLAGS.GET_PHONES
+  ) -> ParceiroInfo:
+    parceiro = ParceiroInfo()
+    parceiro.parceiro = instalacao.parceiro
+    parceiro.nome_cliente = instalacao.nome_cliente
+    self.session.StartTransaction(Transaction="BP")
+    self.session.FindById(STRINGPATH['BP_CLOSE_SIDE_PANEL']).Press()
+    self.session.FindById(STRINGPATH['BP_PN_OPEN_POPUP']).Press()
+    self.session.findById(STRINGPATH['BP_PN_POPUP_INPUT']).text = parceiro.parceiro
+    self.session.findById(STRINGPATH['POPUP_ENTER_BUTTON']).Press()
+    self.session.FindById(STRINGPATH['BP_DADOS_GERAIS_BUTTON']).Press()
+    self.session.findById(STRINGPATH['BP_TIPO_PN_SELECT']).key = "MKK"
+    if not self.session.findById(STRINGPATH['POPUP'], False) is None:
+      self.session.findById(STRINGPATH['BP_DENY_WRITE_PN_BUTTON']).Press()
+    if flag is BP_FLAGS.GET_DOCS:
+      self.session.findById(STRINGPATH['BP_DOCS_CPF_TAB']).Select()
+      parceiro.documento_tipo = self.session.findById(STRINGPATH['BP_DOCS_TIPO_TEXT']).text
+      parceiro.documento_numero = self.session.findById(STRINGPATH['BP_DOCS_CPF_TEXT']).text
+    if flag is BP_FLAGS.GET_PHONES:
+      self.session.findById(STRINGPATH['BP_PHONE_TAB']).Select()
+      for lista in {'BP_PHONE_LIST1', 'BP_PHONE_LIST2', 'BP_PHONE_LIST3'}:
+        self.session.FindById(STRINGPATH[lista]).Press()
+        for i in range(4):
+          parceiro.telefones.append(self.GETBY_XY('BP_PHONE_TEXT', 2, i))
+      parceiro.telefones = list(dict.fromkeys(parceiro.telefones))
+      ESPACO_VAZIO = "______________________________"
+      if ESPACO_VAZIO in parceiro.telefones:
+        parceiro.telefones.remove(ESPACO_VAZIO)
+      if not parceiro.telefones:
+        raise InformationNotFound(f'Cliente {parceiro.nome_cliente} não tem telefone cadastrado!')
+    return parceiro
+  def ZATC66(
+    self,
+    instalacao: InstalacaoInfo
+    ) -> pandas.DataFrame:
+    self.session.FindById(STRINGPATH['ZATC66_INSTALACAO_INPUT']).text = instalacao.instalacao
+    self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
+    status = self.CHECK_STATUS()
+    if status:
+      raise InformationNotFound(status)
+    self.session.FindById(STRINGPATH['ZATC66_LEITURA_RADIO']).Select()
+    tabela = self.session.FindById(STRINGPATH['ZATC66_TABELA_RESULT'])
+    nome_colunas = [
+      '#',
+      'Mes ref.',
+      'Data leit.',
+      'Medidor',
+      'Leitura',
+      'Consumo',
+      'Registrador',
+      'Tipo de leitura',
+      'Motivo da leitura',
+      'Nota do leiturista'
+    ]
+    dataframe = {key: [] for key in nome_colunas}
+    for i in range(tabela.RowCount):
+      dataframe['#'].append(DESTAQUES.AUSENTE)
+      dataframe["Mes ref."].append(tabela.getCellValue(i, "MES_ANO"))
+      dataframe["Data leit."].append(tabela.getCellValue(i, "ADATSOLL"))
+      dataframe["Medidor"].append(int(tabela.getCellValue(i, "GERNR")))
 
+"""
+TODO
+Transaction="IQ03"
+Transaction="ZATC66"
+Transaction="ZSVC168" #! Not used! Can be trashed!
+"""
