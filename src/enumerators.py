@@ -47,3 +47,7 @@ class ZMED95_FLAGS(Enum):
 class BP_FLAGS(Enum):
   GET_PHONES = 0
   GET_DOCS = 1
+
+class IQ03_FLAGS(Enum):
+  ONLY_INST = 0
+  READ_REPORT = 1
