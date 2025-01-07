@@ -11,6 +11,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 import win32com.client
 import pandas
+from helpers import depara
 from constants import (
   DESIRE_INSTANCES,
   SHORT_TIME_WAIT,
@@ -31,6 +32,7 @@ from models import (
   LogradouroInfo,
   ServicoInfo,
   ParceiroInfo,
+  MedidorInfo,
 )
 from enumerators import (
   DESTAQUES,
@@ -42,6 +44,7 @@ from enumerators import (
   ES57_FLAGS,
   ZMED95_FLAGS,
   BP_FLAGS,
+  IQ03_FLAGS,
 )
 __ALL__ = (
   'check_lock',
@@ -62,7 +65,11 @@ __ALL__ = (
   'ES61', # get information about ligacao
   'ES57', # get information about street
   'ZMED95', # get information about logradouro
-  'FPL9' # get invoice report then ZARC140 unavaliable
+  'FPL9', # get invoice report then ZARC140 unavaliable
+  'BP', # get information about costumer
+  'ZATC66', # get consume report
+  'IQ03', # get information about meter 
+  'ZSVC168', # get zone report
 )
 #endregion
 
@@ -184,11 +191,9 @@ class SapBot:
   def SEND_ENTER(self) -> None:
     ''' Function to send 'Enter' key '''
     self.session.FindById("wnd[0]").SendVKey(2)
-  def CHECK_STATUS(self) -> None:
+  def CHECK_STATUS(self) -> str: # TODO - pass a clear check to this function
     ''' Function to check errors message on status bar '''
-    status_bar = self.session.findById(STRINGPATH['STATUS_BAR_MESSAGE']).text
-    if status_bar != '':
-      raise ArgumentException(status_bar)
+    return self.session.findById(STRINGPATH['STATUS_BAR_MESSAGE']).text
   def GETBY_XY(self, id_template: str, col: int, row: int):
     ''' function to get element replace col and row from array id '''
     id_string = id_template.replace('¿', str(col)).replace('?', str(row))
@@ -690,6 +695,7 @@ class SapBot:
     instalacao: InstalacaoInfo,
     flag: BP_FLAGS = BP_FLAGS.GET_PHONES
   ) -> ParceiroInfo:
+    ''' Function to get information about costumer'''
     parceiro = ParceiroInfo()
     parceiro.parceiro = instalacao.parceiro
     parceiro.nome_cliente = instalacao.nome_cliente
@@ -723,6 +729,8 @@ class SapBot:
     self,
     instalacao: InstalacaoInfo
     ) -> pandas.DataFrame:
+    ''' Function to get information about consumption '''
+    self.session.StartTransaction(Transaction="ZATC66")
     self.session.FindById(STRINGPATH['ZATC66_INSTALACAO_INPUT']).text = instalacao.instalacao
     self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
     status = self.CHECK_STATUS()
@@ -743,15 +751,109 @@ class SapBot:
       'Nota do leiturista'
     ]
     dataframe = {key: [] for key in nome_colunas}
+    temporario_code = None
+    temporario_texto = None
     for i in range(tabela.RowCount):
       dataframe['#'].append(DESTAQUES.AUSENTE)
       dataframe["Mes ref."].append(tabela.getCellValue(i, "MES_ANO"))
       dataframe["Data leit."].append(tabela.getCellValue(i, "ADATSOLL"))
       dataframe["Medidor"].append(int(tabela.getCellValue(i, "GERNR")))
-
-"""
-TODO
-Transaction="IQ03"
-Transaction="ZATC66"
-Transaction="ZSVC168" #! Not used! Can be trashed!
-"""
+      temporario_code = int(str(tabela.getCellValue(i, "LEIT_FATURADA")).replace(',', '.'))
+      dataframe["Leitura"].append(temporario_code)
+      dataframe["Consumo"].append(0)
+      # Código do registrador e texto breve descritivo
+      temporario_code = tabela.getCellValue(i, "ZWNUMMER")
+      if temporario_code != "":
+        temporario_code = "0" + str(temporario_code) if len(temporario_code) == 1 else temporario_code
+        temporario_texto = depara("medidor_registrador", temporario_code)
+        dataframe["Registrador"].append(f"{temporario_code} - {temporario_texto}")
+      else:
+        dataframe["Registrador"].append("00 - Sem codigo do registrador")
+      temporario_code = temporario_texto = None #! clear values of variables
+      # Código do leiturista e texto breve descritivo
+      temporario_code = tabela.getCellValue(i, "OCORRENCIA")
+      if temporario_code != '':
+        temporario_texto = depara("leitura_codigo", temporario_code)
+        dataframe["Nota do leiturista"].append(f"{temporario_code} - {temporario_texto}")
+      else:
+        dataframe["Nota do leiturista"].append("")
+      temporario_code = temporario_texto = None #! clear values of variables
+      # Código do tipo de leitura e texto breve descritivo
+      temporario_code = tabela.getCellValue(i, "TIPO_LEITURA")
+      if temporario_code != '':
+        temporario_texto = depara("leitura_tipo", temporario_code)
+        dataframe["Tipo de leitura"].append(f"{temporario_code} - {temporario_texto}")
+      else:
+        dataframe["Tipo de leitura"].append("")
+      temporario_code = temporario_texto = None #! clear values of variables
+      # Código do motivo da leitura e texto breve descritivo
+      temporario_code = tabela.getCellValue(i, "MOTIVO_LEITURA")
+      if temporario_code != '':
+        temporario_texto = depara("leitura_motivo", temporario_code)
+        dataframe["Motivo da leitura"].append(f"{temporario_code} - {temporario_texto}")
+      else:
+        dataframe["Motivo da leitura"].append("00 - Sem motivo para leitura")
+      temporario_code = temporario_texto = None #! clear values of variables
+    dataframe = pandas.DataFrame(dataframe)
+    leitura_anterior = dataframe["Leitura"].shift(-1)
+    dataframe["Consumo"] = dataframe["Leitura"] - leitura_anterior
+    return dataframe
+  def IQ03(
+    self,
+    material: int,
+    serial: int,
+    flag: IQ03_FLAGS = IQ03_FLAGS.ONLY_INST
+    ) -> list[MedidorInfo]:
+    self.session.StartTransaction(Transaction="IQ03")
+    self.session.FindById(STRINGPATH['IQ03_MATERIAL_INPUT']).text = material
+    self.session.FindById(STRINGPATH['IQ03_SERIAL_INPUT']).text = serial
+    self.session.FindById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
+    self.CHECK_STATUS()
+    varios_table = self.session.FindById(STRINGPATH['IQ03_VARIOUS_TABLE'], False)
+    if not varios_table is None:
+      equipamentos = []
+      for i in range(varios_table.RowCount):
+        equipamentos.append(int(varios_table.getCellValue(i, "MATNR")))
+      medidores_info = []
+      for i, equipamento in enumerate(equipamentos):
+        medidores_info.extend(self.IQ03(equipamento, serial))
+      return medidores_info
+    medidor = MedidorInfo()
+    medidor.serial = serial
+    medidor.material = material
+    medidor.texto_material = depara("material_codigo", str(medidor.material)) or ""
+    medidor.code_montagem = self.session.FindById(STRINGPATH['IQ03_MONTAGEM_CODE']).text
+    medidor.code_status = self.session.FindById(STRINGPATH['IQ03_STATUS_CODE']).text
+    medidor.texto_montagem = f"{medidor.code_montagem}  -  {depara('medidor_montagem', medidor.code_montagem)}"
+    medidor.texto_status = f"{medidor.code_status}  -  {depara('medidor_status', medidor.code_status)}"
+    # Get the instalation attached to meter
+    self.session.FindById(STRINGPATH['IQ03_INSTALATION_BUTTON']).Press()
+    status = self.CHECK_STATUS()
+    if status: # TODO - Verificar sem lançar exceção
+      medidor.observacao = status
+      return [medidor]
+    medidor.instalacao = int(self.session.findById(STRINGPATH['IQ03_INSTALATION_VALUE']).text)
+    if flag is IQ03_FLAGS.ONLY_INST:
+      return [medidor]
+    leituras = self.session.FindById(STRINGPATH['IQ03_LEITURAS_TABLE'], False)
+    if leituras is None:
+      medidor.observacao = "Equipamento sem historico de leituras!"
+      return [medidor]
+    dataframe = {key: [] for key in ['Data', 'Codigo', 'Descricao']}
+    limite = 12 if leituras.RowCount > 12 else leituras.RowCount
+    for i in range(limite):
+      data = leituras.getCellValue(i, "ADATSOLL")
+      status = leituras.getCellValue(i, "ABLHINW")
+      if status == '':
+        continue
+      dataframe['Data'].append(data)
+      dataframe['Codigo'].append(status)
+      texto = depara('leitura_codigo', status)
+      dataframe['Descricao'].append(texto)
+    medidor.leituras = pandas.DataFrame(dataframe)
+    if len(medidor.leituras) > 0:
+      medidor.observacao = f"*Codigos de leitura nas ultimas {limite} leituras:*"
+    else:
+      medidor.observacao = f"*Sem codigos de leitura nas ultimas {limite} leituras!*"
+    return [medidor]
+#! TODO - Transaction ZSVC168 (Not used! Can be trashed!)
