@@ -1,6 +1,7 @@
 ''' Module to hold classes used on SapWrapper module '''
 import re
 import datetime
+import pandas
 
 class InstalacaoInfo():
   ''' Class to hold information about instalation '''
@@ -59,3 +60,16 @@ class ParceiroInfo():
   documento_tipo: str
   documento_numero: str
   telefones: list[str]
+
+class MedidorInfo():
+  ''' class to hold information about meter '''
+  instalacao: int
+  serial: int
+  material: int
+  texto_material: str
+  code_montagem: str
+  code_status: str
+  texto_montagem: str
+  texto_status: str
+  observacao: str
+  leituras: pandas.DataFrame
