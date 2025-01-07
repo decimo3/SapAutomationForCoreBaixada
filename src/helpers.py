@@ -4,6 +4,7 @@
 #region imports
 import os
 import sqlite3
+from constants import BASE_FOLDER
 #endregion
 def arquivo_configuracao(filepath: str, separador: str = '=') -> dict[str, str]:
   ''' Function to retrieve configurations from file '''
@@ -17,10 +18,10 @@ def arquivo_configuracao(filepath: str, separador: str = '=') -> dict[str, str]:
         continue
       dicionario[argumentos[0]] = argumentos[1]
   return dicionario
-def depara(self, tipo: str, de: str) -> str | None:
+def depara(tipo: str, de: str) -> str | None:
   ''' Function wraper to get value from database '''
   try:
-    filename = os.path.join(self.BASE_FOLDER, 'sap.db')
+    filename = os.path.join(BASE_FOLDER, 'sap.db')
     connection = sqlite3.connect(filename)
     sql_instruction = f'SELECT para FROM depara WHERE tipo = \'{tipo}\' AND de = \'{de}\''
     cursor = connection.execute(sql_instruction)
