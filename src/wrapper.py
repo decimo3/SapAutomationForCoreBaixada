@@ -191,9 +191,21 @@ class SapBot:
   def SEND_ENTER(self) -> None:
     ''' Function to send 'Enter' key '''
     self.session.FindById("wnd[0]").SendVKey(2)
-  def CHECK_STATUS(self) -> str: # TODO - pass a clear check to this function
+  def CHECK_STATUSBAR(self) -> str: # TODO - pass a clear check to this function
     ''' Function to check errors message on status bar '''
-    return self.session.findById(STRINGPATH['STATUS_BAR_MESSAGE']).text
+    statusbar = self.session.findById(STRINGPATH['STATUS_BAR_MESSAGE'])
+    '''
+    Property 'messageType':
+    
+    S - Sucess
+    W - Warn
+    E - Error
+    A - Abort
+    I - Info
+    '''
+    if statusbar.messageType == 'E':
+      raise InformationNotFound(statusbar.text)
+    return statusbar.text
   def GETBY_XY(self, id_template: str, col: int, row: int):
     ''' function to get element replace col and row from array id '''
     id_string = id_template.replace('¿', str(col)).replace('?', str(row))
