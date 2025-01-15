@@ -291,9 +291,7 @@ class SapBot:
     self.session.StartTransaction(Transaction="IW53")
     self.session.FindById(STRINGPATH['IW53_SERVICE_INPUT']).text = nota
     self.session.FindById(STRINGPATH['IW53_ENTER_BUTTON']).Press() # TODO - Verificar se não pode ser trocado por GLOBAL_ENTER_BUTTON
-    status = self.session.FindById(STRINGPATH['STATUS_BAR_MESSAGE']).text
-    if status != '':
-      raise ArgumentException('A nota informada nao eh valida!')
+    self.CHECK_STATUSBAR()
     if flag == IW53_FLAGS.GET_INST:
       self.session.FindById(STRINGPATH['IW53_INSTALLATION_TAB']).Select()
       servico.instalacao = self.session.FindById(STRINGPATH['IW53_INSTALLATION_TEXT']).text
@@ -307,9 +305,7 @@ class SapBot:
     self.session.StartTransaction(Transaction="ES32")
     self.session.FindById(STRINGPATH['ES32_INSTALLATION_INPUT']).text = instalacao
     self.session.FindById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
-    status_bar = self.session.FindById(STRINGPATH['STATUS_BAR_MESSAGE']).text
-    if status_bar != '':
-      raise ArgumentException('A instalacao informada nao eh valida!')
+    self.CHECK_STATUSBAR()
     data = InstalacaoInfo()
     data.instalacao = instalacao
     data.status = self.session.findById(STRINGPATH['ES32_STATUS_TEXT']).text
@@ -350,9 +346,7 @@ class SapBot:
     self.session.findById(STRINGPATH['ZATC45_PARCEIRO_INPUT']).text = instalacao.parceiro
     self.session.findById(STRINGPATH['ZATC45_INSTALLATION_INPUT']).text = instalacao.instalacao
     self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
-    status_bar = self.session.FindById(STRINGPATH['STATUS_BAR_MESSAGE']).text
-    if status_bar == 'Nenhum débito foi encontrado!':
-      raise InformationNotFound(status_bar)
+    self.CHECK_STATUSBAR()
     tabela = self.session.FindById(STRINGPATH['ZATC45_RESULT_TABLE'])
     # Verificando se as faturas solicitadas estão na tabela
     indices = []
@@ -372,9 +366,7 @@ class SapBot:
       if self.session.FindById(STRINGPATH['POPUP'], False) is not None:
         self.session.FindById(STRINGPATH['POPUP_ENTER_BUTTON']).Press()
       self.session.FindById(STRINGPATH['ZATC45_PRINT_CHECK'].replace('?', i)).selected = False
-      status_bar = self.session.FindById(STRINGPATH['STATUS_BAR_MESSAGE']).text
-      if status_bar != '':
-        raise InformationNotFound(status_bar)
+      self.CHECK_STATUSBAR()
   def ZMED89(
       self,
       instalacao: InstalacaoInfo,
@@ -402,9 +394,7 @@ class SapBot:
     self.session.FindById(STRINGPATH['ZMED89_UNIDADE_INPUT']).text = instalacao.unidade
     self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
     # Check if has error
-    status_bar = self.session.FindById(STRINGPATH['STATUS_BAR_MESSAGE']).text
-    if status_bar != '':
-      raise InformationNotFound(status_bar)
+    self.CHECK_STATUSBAR()
     # Select first layout
     self.session.FindById(STRINGPATH['ZMED89_LAYOUT_BUTTON']).Press()
     self.session.FindById(STRINGPATH['ZMED89_LAYOUT_TABLE']).setCurrentCell(0,'DEFAULT')
@@ -613,9 +603,7 @@ class SapBot:
     self.session.findById(STRINGPATH['FPL9_CONTRATO_INPUT']).text = instalacao.contrato
     self.session.findById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
     self.session.findById(STRINGPATH['FPL9_UNKNOW_BUTTON']).Press() # TODO - Search for button need
-    status_bar = self.session.findById(STRINGPATH['STATUS_BAR_MESSAGE']).text
-    if status_bar != '':
-      raise ArgumentException(status_bar)
+    self.CHECK_STATUSBAR()
     # Prepare variables to
     #wnd[0]/usr/lbl[char, line]
     col = 1
@@ -745,9 +733,7 @@ class SapBot:
     self.session.StartTransaction(Transaction="ZATC66")
     self.session.FindById(STRINGPATH['ZATC66_INSTALACAO_INPUT']).text = instalacao.instalacao
     self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
-    status = self.CHECK_STATUS()
-    if status:
-      raise InformationNotFound(status)
+    self.CHECK_STATUSBAR()
     self.session.FindById(STRINGPATH['ZATC66_LEITURA_RADIO']).Select()
     tabela = self.session.FindById(STRINGPATH['ZATC66_TABELA_RESULT'])
     nome_colunas = [
@@ -820,7 +806,7 @@ class SapBot:
     self.session.FindById(STRINGPATH['IQ03_MATERIAL_INPUT']).text = material
     self.session.FindById(STRINGPATH['IQ03_SERIAL_INPUT']).text = serial
     self.session.FindById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
-    self.CHECK_STATUS()
+    self.CHECK_STATUSBAR()
     varios_table = self.session.FindById(STRINGPATH['IQ03_VARIOUS_TABLE'], False)
     if not varios_table is None:
       equipamentos = []
@@ -840,7 +826,7 @@ class SapBot:
     medidor.texto_status = f"{medidor.code_status}  -  {depara('medidor_status', medidor.code_status)}"
     # Get the instalation attached to meter
     self.session.FindById(STRINGPATH['IQ03_INSTALATION_BUTTON']).Press()
-    status = self.CHECK_STATUS()
+    status = self.CHECK_STATUSBAR()
     if status: # TODO - Verificar sem lançar exceção
       medidor.observacao = status
       return [medidor]
