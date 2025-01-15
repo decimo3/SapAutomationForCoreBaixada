@@ -68,8 +68,7 @@ __ALL__ = (
   'FPL9', # get invoice report then ZARC140 unavaliable
   'BP', # get information about costumer
   'ZATC66', # get consume report
-  'IQ03', # get information about meter 
-  'ZSVC168', # get zone report
+  'IQ03', # get information about meter
 )
 #endregion
 
@@ -854,4 +853,3 @@ class SapBot:
     else:
       medidor.observacao = f"*Sem codigos de leitura nas ultimas {limite} leituras!*"
     return [medidor]
-#! TODO - Transaction ZSVC168 (Not used! Can be trashed!)
