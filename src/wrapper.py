@@ -86,20 +86,19 @@ class SapBot:
     ''' Remove LOCKFILE if it is not exist '''
     if self.check_lock():
       os.remove(LOCKFILE)
-  def attach_session(self) -> None:
-    ''' Function to check, create and attach to SAPGUI scripting engine '''
-    if self.instancia > 0:
-      try:
-        while self.check_lock():
-          time.sleep(1)
-        self.sap_gui = win32com.client.GetObject('SAPGUI').GetScriptingEngine
-        self.connection = self.sap_gui.connections[0]
-        self.session = self.connection.Children(self.instancia)
-      except:
-        self.create_lock()
-        self.attach_session()
-      return
-    self.create_lock()
+  def attach_session(self, instancia: int) -> None:
+    ''' Function attach session in SAPGUI scripting engine '''
+    try:
+      while self.check_lock():
+        time.sleep(1)
+      self.sap_gui = win32com.client.GetObject('SAPGUI').GetScriptingEngine
+      self.connection = self.sap_gui.connections[0]
+      self.session = self.connection.Children(instancia)
+    except:
+      self.create_lock()
+      self.attach_session(instancia)
+  def create_session(self) -> None:
+    ''' Function create session in SAPGUI scripting engine '''
     self.logger.info('Starting instance checker...')
     while True:
       if not self.check_lock():
