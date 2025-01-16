@@ -30,9 +30,9 @@ if __name__ == '__main__':
       raise ArgumentException('Falta argumentos necessarios!')
     aplicacao = sys.argv[1]
     argumento = int(sys.argv[2])
-    instancia_argument = int(sys.argv[3])
+    instancia_argumento = int(sys.argv[3])
     # Attempts to connect to SAP FrontEnd on the specified instance
-    robo = SapBot(instancia_argument)
+    robo = SapBot(instancia_argumento)
     # Attempts to execute the method requested in the first argument
     if aplicacao == 'vencimento':
       if argumento > 90:
