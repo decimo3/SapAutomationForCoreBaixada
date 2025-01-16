@@ -34,6 +34,12 @@ if __name__ == '__main__':
     # Attempts to connect to SAP FrontEnd on the specified instance
     robo = SapBot(instancia_argumento)
     # Attempts to execute the method requested in the first argument
+    if aplicacao == 'instancia':
+      if instancia_argumento != 0:
+        raise ArgumentException('A instancia para essa aplicacao dever ser zero!')
+      robo.create_session()
+      sys.exit()
+    robo.attach_session(instancia_argumento)
     if aplicacao == 'vencimento':
       if argumento > 90:
         raise ArgumentException('O numero de dias eh superior ao permitido!')

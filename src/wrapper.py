@@ -182,7 +182,6 @@ class SapBot:
         ]
     )
     self.logger = logging.getLogger(__name__)
-    self.attach_session()
   def HOME_PAGE(self) -> None:
     ''' Function to return to home page '''
     self.session.sendCommand('/n')
