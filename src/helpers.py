@@ -13,6 +13,7 @@ def arquivo_configuracao(filepath: str, separador: str = '=') -> dict[str, str]:
   dicionario = {}
   with open(filepath, 'r', encoding='utf-8') as file:
     for line in file:
+      line = line.strip()
       argumentos = line.split(separador)
       if len(argumentos) != 2:
         continue
@@ -29,3 +30,5 @@ def depara(tipo: str, de: str) -> str | None:
     return result[0] if result else 'Codigo desconhecido!'
   except ValueError:
     return None
+
+STRINGPATH = arquivo_configuracao(os.path.join(BASE_FOLDER, 'sap.path'))

@@ -3,7 +3,6 @@
 import os
 import sys
 import dotenv
-from helpers import arquivo_configuracao
 #endregion
 
 SEPARADOR = ';'
@@ -21,5 +20,3 @@ dotenv.load_dotenv(os.path.join(BASE_FOLDER, 'sap.conf'))
 LOCKFILE = os.path.join(BASE_FOLDER, 'sap.lock')
 
 NOTUSE = str(os.environ.get('NOTUSE')).split(',')
-
-STRINGPATH = arquivo_configuracao(os.path.join(BASE_FOLDER, 'sap.path'))
