@@ -173,7 +173,6 @@ class SapBot:
       except Exception as erro:
         self.logger.error(erro.args[0])
   def __init__(self, instancia: int) -> None:
-    self.instancia = instancia
     ''' Define instance number and config logger '''
     logfilename = os.path.join(BASE_FOLDER, f'logfile_{instancia}.log')
     logging.basicConfig(
