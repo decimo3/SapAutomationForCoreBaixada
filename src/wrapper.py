@@ -4,6 +4,7 @@
 #region imports
 import re
 import os
+import sys
 import time
 import datetime
 import subprocess
@@ -178,7 +179,7 @@ class SapBot:
         level=logging.DEBUG,
         handlers=[
           RotatingFileHandler(logfilename, maxBytes=10000000, backupCount=5),
-          logging.StreamHandler()
+          logging.StreamHandler(sys.stdout) #! Remove to do not display log messages
         ]
     )
     self.logger = logging.getLogger(__name__)
