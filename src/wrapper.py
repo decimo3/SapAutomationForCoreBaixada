@@ -287,7 +287,8 @@ class SapBot:
       tabela.firstVisibleRow = i
       dataframe['#'].append(DESTAQUES.AUSENTE)
     dataframe = pandas.DataFrame(dataframe)
-    dataframe = dataframe[['#', 'Nota', 'Instalacao', 'Tipo', 'Dano', 'Data', 'Hora', 'Status', 'Fim avaria']]
+    reordered_columns = ['#'] + [col for col in dataframe.columns if col != '#']
+    dataframe = dataframe[reordered_columns]
     return dataframe
   def IW53(
     self,
@@ -486,8 +487,8 @@ class SapBot:
         dataframe["#"].append(DESTAQUES.AUSENTE)
         dataframe['Observacao'].append('Consultar')
       dataframe = pandas.DataFrame(dataframe)
-      # TODO - Reorder columns to put '#' at first and 'observacao' at end
-      # df = df[['#', 'Observacao']]
+      reordered_columns = ['#'] + [col for col in dataframe.columns if col != '#']
+      dataframe = dataframe[reordered_columns]
       return dataframe
     if flag == ZARC140_FLAGS.GET_RENOTICE:
       if self.session.FindById(STRINGPATH['ZARC140_RENOTICE_TAB'], False) is None:
@@ -522,8 +523,8 @@ class SapBot:
         dataframe['#'].append(DESTAQUES.VERDE)
         dataframe['Observacao'].append('Sem reaviso')
       dataframe = pandas.DataFrame(dataframe)
-      # TODO - Reorder columns to put '#' at first and 'observacao' at end
-      # df = df[['#', 'Observacao']]
+      reordered_columns = ['#'] + [col for col in dataframe.columns if col != '#']
+      dataframe = dataframe[reordered_columns]
       return dataframe
     raise SomethingGoesWrong('Flag argument value is unknow!')
   def ES61(
