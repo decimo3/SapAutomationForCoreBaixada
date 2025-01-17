@@ -340,9 +340,10 @@ class SapBot:
         self.session.FindById(STRINGPATH['POPUP_ENTER_BUTTON']).Press()
         return data
       for i in range(self.session.findById(STRINGPATH['ES32_EQUIPAMENTO_TABLE']).RowCount):
-        codigo = self.session.findById(STRINGPATH['ES32_MEDIDOR_CODIGO'].replace('?',str(i))).text
-        serial = self.session.findById(STRINGPATH['ES32_MEDIDOR_SERIAL'].replace('?',str(i))).text
-        data.equipamento.append({'codigo': codigo, 'serial': serial})
+        medidor = MedidorInfo()
+        medidor.material = self.session.findById(STRINGPATH['ES32_MEDIDOR_CODIGO'].replace('?',str(i))).text
+        medidor.serial = self.session.findById(STRINGPATH['ES32_MEDIDOR_SERIAL'].replace('?',str(i))).text
+        data.equipamento.append(medidor)
     return data
   def ZATC45(
       self,
