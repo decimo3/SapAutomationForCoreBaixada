@@ -278,6 +278,7 @@ class SapBot:
       raise InformationNotFound('O relatorio de notas em aberto esto vazio!')
     # Coleta as informações da tabela de acordo com as colunas esperadas
     dataframe = {key: [] for key in colluns_names}
+    dataframe['#'] = []
     for i in range(tabela.RowCount):
       for j, column in enumerate(colluns):
         dataframe[colluns_names[j]].append(tabela.getCellValue(i, column))
@@ -420,6 +421,7 @@ class SapBot:
     # Get informations to collect report
     linhas = self.session.FindById(STRINGPATH['ZMED89_RESULT_TABLE']).RowCount
     dataframe = {key: [] for key in collumns_names}
+    dataframe['#'] = []
     quantidade = int(quantidade / 2)
     min_row = 0 if celula <= quantidade else celula - quantidade
     max_row = linhas if linhas <= celula + quantidade else celula + quantidade
@@ -459,6 +461,8 @@ class SapBot:
       collumns = ['BILLING_PERIOD', 'FAEDN', 'ZIMPRES', 'TOTAL_AMNT', 'TIP_FATURA', 'STATUS']
       collumns_names = ['Mes ref', 'Vencimento', 'Documento', 'Valor', 'Tipo', 'Status']
       dataframe = {key: [] for key in collumns_names}
+      dataframe['#'] = []
+      dataframe['Observacao'] = []
       for i in range(1, linhas + 1):
         for j, collumn in enumerate(collumns):
           dataframe[collumns_names[j]].append(tabela.getCellValue(i, collumn))
@@ -491,6 +495,8 @@ class SapBot:
       collumns = ['STATUS', 'DT_MAX_CRT', 'DT_MIN_CRT']
       collumns_names = ['Status', 'Data min', 'Data max']
       dataframe = {key: [] for key in collumns_names}
+      dataframe['#'] = []
+      dataframe['Observacao'] = []
       for i in range(1, linhas + 1):
         for j, collumn in enumerate(collumns):
           dataframe[collumns_names[j]].append(tabela.getCellValue(i, collumn))
