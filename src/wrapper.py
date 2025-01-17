@@ -20,6 +20,8 @@ from constants import (
   BASE_FOLDER,
 )
 from exceptions import (
+  WrapperBaseException,
+  TooMannyRequests,
   SomethingGoesWrong,
   UnavailableSap,
   ArgumentException,
@@ -166,8 +168,10 @@ class SapBot:
         # Unlock instances
         self.delete_lock()
         self.logger.info('SAP Frontend is ready to receive requests.')
-      except:
-        pass
+      except WrapperBaseException as erro:
+        self.logger.error(erro.message)
+      except Exception as erro:
+        self.logger.error(erro.args[0])
   def __init__(self, instancia: int) -> None:
     self.instancia = instancia
     ''' Define instance number and config logger '''
