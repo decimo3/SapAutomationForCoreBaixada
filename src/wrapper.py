@@ -269,6 +269,7 @@ class SapBot:
     self.session.FindById(STRINGPATH['ZSVC20_REGIONAL_TEXT']).text = regional
     self.session.FindById(STRINGPATH['ZSVC20_LAYOUT_TEXT']).text = layout
     self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
+    self.CHECK_STATUSBAR()
     # Verifica se há resultados no relatório
     tabela = self.session.FindById(STRINGPATH['ZSVC20_RESULT_TABLE'], False)
     if tabela is None:
@@ -308,7 +309,7 @@ class SapBot:
     self.session.StartTransaction(Transaction="ES32")
     self.session.FindById(STRINGPATH['ES32_INSTALLATION_INPUT']).text = instalacao
     self.session.FindById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
-    self.CHECK_STATUSBAR()
+    self.CHECK_STATUSBAR(check_false_sucess_text='não existe')
     data = InstalacaoInfo()
     data.instalacao = instalacao
     data.status = self.session.findById(STRINGPATH['ES32_STATUS_TEXT']).text
