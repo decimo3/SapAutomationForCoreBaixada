@@ -3,6 +3,27 @@ import re
 import datetime
 import pandas
 
+class MedidorInfo():
+  ''' class to hold information about meter '''
+  instalacao: int
+  serial: int
+  material: int
+  texto_material: str
+  code_montagem: str
+  code_status: str
+  texto_montagem: str
+  texto_status: str
+  observacao: str
+  leituras: pandas.DataFrame
+  def __str__(self) -> str:
+    texto = f'*Instalacao:* {self.instalacao}'
+    texto += f'*Serial:* {self.serial}\n'
+    texto += f'*Material:* {self.texto_material}\n'
+    texto += f'*Status:* {self.texto_status}\n'
+    texto += f'*Montagem:* {self.texto_montagem}\n'
+    texto += f'*Observacao:* {self.observacao}' if self.observacao else ''
+    return texto
+
 class InstalacaoInfo():
   ''' Class to hold information about instalation '''
   instalacao: int
@@ -16,7 +37,7 @@ class InstalacaoInfo():
   unidade: str
   vigencia_inicio: datetime.datetime
   vigencia_final: datetime.datetime
-  equipamento: list[dict]
+  equipamento: list[MedidorInfo]
   centro: int
 
 class ServicoInfo():
@@ -60,16 +81,3 @@ class ParceiroInfo():
   documento_tipo: str
   documento_numero: str
   telefones: list[str]
-
-class MedidorInfo():
-  ''' class to hold information about meter '''
-  instalacao: int
-  serial: int
-  material: int
-  texto_material: str
-  code_montagem: str
-  code_status: str
-  texto_montagem: str
-  texto_status: str
-  observacao: str
-  leituras: pandas.DataFrame
