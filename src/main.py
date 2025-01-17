@@ -114,32 +114,45 @@ if __name__ == '__main__':
       print(relatorio.to_csv(index=False,sep=SEPARADOR))
     elif aplicacao == 'pendente':
       instalacao_info = robo.ES32(argumento, ES32_FLAGS.ONLY_INST)
+      # Getting the pending invoice report
       if 'ZARC140' not in NOTUSE:
         relatorio = robo.ZARC140(
           instalacao = instalacao_info,
           flag = ZARC140_FLAGS.GET_PENDING
         )
+      elif 'FPL9' not in NOTUSE:
+        relatorio = robo.FPL9(
+          instalacao = instalacao_info
+        )
       else:
-        pass # TODO - Get invoices throught FPL9
+        raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
       print(relatorio.to_csv(index=False,sep=SEPARADOR))
     elif aplicacao in {'fatura', 'debito'}:
       instalacao_info = robo.ES32(argumento, ES32_FLAGS.ONLY_INST)
+      # Getting the pending invoice report
       if 'ZARC140' not in NOTUSE:
         relatorio = robo.ZARC140(
           instalacao = instalacao_info,
           flag = ZARC140_FLAGS.GET_PENDING
         )
+      elif 'FPL9' not in NOTUSE:
+        relatorio = robo.FPL9(
+          instalacao = instalacao_info
+        )
       else:
-        pass # TODO - Get invoices throught FPL9
+        raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
+      # Printing pending invoices
       if 'ZATC73' not in NOTUSE:
         robo.ZATC73(
           documentos = relatorio['documentos'].to_list()
         )
-      else:
+      elif 'ZATC45' not in NOTUSE:
         robo.ZATC45(
           instalacao = instalacao_info,
           documentos = relatorio['documentos'].to_list()
         )
+      else:
+        raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
       print(relatorio.shape[0])
     else:
       raise ArgumentException('Nao entendi o comando, verifique se esto correto!')
