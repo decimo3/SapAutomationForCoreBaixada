@@ -19,6 +19,7 @@ from constants import (
   LOCKFILE,
   BASE_FOLDER,
 )
+from helpers import depara, STRINGPATH
 from exceptions import (
   WrapperBaseException,
   TooMannyRequests,
