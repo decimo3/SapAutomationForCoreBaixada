@@ -319,7 +319,7 @@ class SapBot:
     data.consumo = self.session.FindById(STRINGPATH['ES32_CONSUMO_TEXT']).text
     data.contrato = self.session.FindById(STRINGPATH['ES32_CONTRATO_TEXT']).text
     data.parceiro = self.session.findById(STRINGPATH['ES32_PARCEIRO_TEXT']).text
-    data.unidade = self.session.FindById(STRINGPATH['ES32_CURRENT_UNIDADE']).text
+    data.unidade = self.session.FindById(STRINGPATH['ES32_UNIDADE_TEXT']).text
     data.endereco = self.session.FindById(STRINGPATH['ES32_NOME_ENDERECO_TEXT']).text
     data.nome_cliente = self.session.findById(STRINGPATH['ES32_NOMECLIENTE_TEXT']).text
     if flag == ES32_FLAGS.ENTER_CONSUMO:
@@ -327,9 +327,9 @@ class SapBot:
       self.SEND_ENTER()
       return data
     if flag == ES32_FLAGS.GET_CENTER:
-      self.session.FindById(STRINGPATH['ES32_CURRENT_UNIDADE']).setFocus()
+      self.session.FindById(STRINGPATH['ES32_UNIDADE_TEXT']).setFocus()
       self.SEND_ENTER()
-      data.centro = self.session.findById(STRINGPATH['ES32_CURRENT_CENTRO']).text
+      data.centro = self.session.findById(STRINGPATH['ES32_CENTRO_TEXT']).text
       return data
     if flag == ES32_FLAGS.GET_METER:
       self.session.FindById(STRINGPATH['ES32_MEDIDOR_BUTTON']).Press()
