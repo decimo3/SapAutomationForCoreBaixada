@@ -19,7 +19,7 @@ def arquivo_configuracao(filepath: str, separador: str = '=') -> dict[str, str]:
         continue
       dicionario[argumentos[0]] = argumentos[1]
   return dicionario
-def depara(tipo: str, de: str) -> str | None:
+def depara(tipo: str, de: str) -> str:
   ''' Function wraper to get value from database '''
   try:
     filename = os.path.join(BASE_FOLDER, 'sap.db')
@@ -29,6 +29,6 @@ def depara(tipo: str, de: str) -> str | None:
     result = cursor.fetchone()
     return result[0] if result else 'Codigo desconhecido!'
   except ValueError:
-    return None
+    return ''
 
 STRINGPATH = arquivo_configuracao(os.path.join(BASE_FOLDER, 'sap.path'))
