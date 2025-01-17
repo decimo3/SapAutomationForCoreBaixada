@@ -174,7 +174,10 @@ class SapBot:
         self.logger.error(erro.args[0])
   def __init__(self, instancia: int) -> None:
     ''' Define instance number and config logger '''
-    logfilename = os.path.join(BASE_FOLDER, f'logfile_{instancia}.log')
+    caminho_logs = os.path.join(BASE_FOLDER, 'log')
+    if not os.path.exists(caminho_logs):
+      os.mkdir(caminho_logs)
+    logfilename = os.path.join(caminho_logs, f'logfile_{instancia}.log')
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         level=logging.DEBUG,
