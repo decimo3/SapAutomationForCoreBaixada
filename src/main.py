@@ -15,7 +15,8 @@ from exceptions import (
   UnavailableSap,
   ArgumentException,
   InformationNotFound,
-  TooMannyRequests
+  TooMannyRequests,
+  WrapperBaseException
 )
 from enumerators import (
   ES32_FLAGS,
@@ -153,5 +154,7 @@ if __name__ == '__main__':
     print(f'500: {erro.message}')
   except SomethingGoesWrong as erro:
     print(f'500: {erro.message}')
-  except:
-    print('500: Something goes wrong!')
+  except WrapperBaseException as erro:
+    print(f'500: {erro.message}')
+  except Exception as erro:
+    print(f'500: Something goes wrong! {erro.args[0]}')
