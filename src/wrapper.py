@@ -12,13 +12,11 @@ import logging
 from logging.handlers import RotatingFileHandler
 import win32com.client
 import pandas
-from helpers import depara
 from constants import (
   DESIRE_INSTANCES,
   SHORT_TIME_WAIT,
   LONG_TIME_WAIT,
   LOCKFILE,
-  STRINGPATH,
   BASE_FOLDER,
 )
 from exceptions import (
