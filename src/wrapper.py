@@ -283,8 +283,10 @@ class SapBot:
       for j, column in enumerate(colluns):
         dataframe[colluns_names[j]].append(tabela.getCellValue(i, column))
       tabela.firstVisibleRow = i
-      dataframe['#'].append(str(DESTAQUES.AUSENTE))
-    return pandas.DataFrame(dataframe)
+      dataframe['#'].append(DESTAQUES.AUSENTE)
+    dataframe = pandas.DataFrame(dataframe)
+    dataframe = dataframe[['#', 'Nota', 'Instalacao', 'Tipo', 'Dano', 'Data', 'Hora', 'Status', 'Fim avaria']]
+    return dataframe
   def IW53(
     self,
     nota: int,
@@ -433,8 +435,8 @@ class SapBot:
       destaque = DESTAQUES.AMARELO if i == celula else DESTAQUES.AUSENTE
       dataframe['#'].append(destaque)
     dataframe = pandas.DataFrame(dataframe)
-    # TODO - Reorder columns to put '#' at first
-    # df = df[['#', 'Observacao']]
+    reordered_columns = ['#'] + [col for col in dataframe.columns if col != '#']
+    dataframe = dataframe[reordered_columns]
     return dataframe
   def ZARC140(
     self,
