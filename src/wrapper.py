@@ -707,9 +707,9 @@ class SapBot:
     # mescla o dataframe com a soma dos valores com o dataframe com as informações
     dataframe3 = dataframe1.merge(dataframe2, on="Impressao")
     # remove a coluna antiga com o valor errado
-    del dataframe3['valores_x']
-    dataframe3 = dataframe3.rename(columns={'valores_y': 'valores'})
-    dataframe3['Impressao'].replace('', pandas.NA, inplace=True)
+    del dataframe3['Valores_x']
+    dataframe3 = dataframe3.rename(columns={'Valores_y': 'valores'})
+    dataframe3['Impressao'] = dataframe3['Impressao'].replace('', pandas.NA)
     dataframe3 = dataframe3.dropna(subset=['Impressao'])
     return dataframe3
   def BP(
