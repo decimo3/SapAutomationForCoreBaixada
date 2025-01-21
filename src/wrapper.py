@@ -531,17 +531,22 @@ class SapBot:
   def ES61(
     self,
     instalacao: InstalacaoInfo,
-    flag: ES61_FLAGS = ES61_FLAGS.ENTER_ENTER
+    flags: list[ES61_FLAGS] = [ES61_FLAGS.ENTER_ENTER]
     ) -> LigacaoInfo:
     ''' Function to get information about objeto de ligacao '''
     ligacao = LigacaoInfo()
-    if not flag in {ES61_FLAGS.SKIPT_ENTER, ES61_FLAGS.SKIPT_ENTER_LIGACAO_ENTER}:
+    if not ES61_FLAGS.SKIPT_ENTER in flags:
       self.session.StartTransaction(Transaction="ES61")
       self.session.findById(STRINGPATH['ES61_CONSUMO_INPUT']).text = instalacao.consumo
       self.session.FindById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
     ligacao.ligacao = int(self.session.FindById(STRINGPATH['ES61_LIGACAO_TEXT']).text)
-    # TODO - Colect the rest of information
-    if flag in {ES61_FLAGS.ENTER_LIGACAO ,ES61_FLAGS.SKIPT_ENTER_LIGACAO_ENTER}:
+    if ES61_FLAGS.GET_COORD in flags:
+      self.session.FindById(STRINGPATH['ES61_COORDENADAS_TAB']).Select()
+      coordenadas = str(self.session.FindById(STRINGPATH['ES61_COORDENADAS_TEXT']).text)
+      if not coordenadas:
+        raise InformationNotFound('A instalacao nao possui coordenada cadastrada!')
+      ligacao.coordenadas = re.sub(',', '.', coordenadas)
+    if ES61_FLAGS.ENTER_LIGACAO in flags:
       self.session.FindById(STRINGPATH['ES61_LIGACAO_TEXT']).setFocus()
       self.SEND_ENTER()
     return ligacao
