@@ -455,6 +455,7 @@ class SapBot:
     self.session.FindById(STRINGPATH['ZARC140_INSTALACAO_INPUT']).text = instalacao.instalacao
     self.session.FindById(STRINGPATH['ZARC140_REAVISOS_CHECK']).Selected = True
     self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
+    self.CHECK_STATUSBAR()
     if flag == ZARC140_FLAGS.GET_PENDING:
       # Check if has pending invoices
       if self.session.FindById(STRINGPATH['ZARC140_PENDENTES_TAB'], False) is None:
