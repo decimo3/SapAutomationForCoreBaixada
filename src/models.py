@@ -55,6 +55,7 @@ class ServicoInfo():
 class LigacaoInfo():
   ''' Class to hold information about linker object '''
   ligacao: int
+  coordenadas: str
 
 class LogradouroInfo():
   ''' Class to hold information about street '''
