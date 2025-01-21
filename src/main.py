@@ -20,6 +20,7 @@ from exceptions import (
 )
 from enumerators import (
   ES32_FLAGS,
+  ES61_FLAGS,
   ZMED89_FLAGS,
   ZARC140_FLAGS,
 )
@@ -154,6 +155,15 @@ if __name__ == '__main__':
       else:
         raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
       print(relatorio.shape[0])
+    elif aplicacao == 'coordenada':
+      if 'ES61' in NOTUSE:
+        instalacao_info = robo.ES32(argumento, ES32_FLAGS.ENTER_CONSUMO)
+      else:
+        instalacao_info = robo.ES32(argumento, ES32_FLAGS.ONLY_INST)
+      if 'ES61' in NOTUSE:
+        print(robo.ES61(instalacao_info, [ES61_FLAGS.SKIPT_ENTER, ES61_FLAGS.GET_COORD]).coordenadas)
+      else:
+        print(robo.ES61(instalacao_info, [ES61_FLAGS.ENTER_ENTER, ES61_FLAGS.GET_COORD]).coordenadas)
     else:
       raise ArgumentException('Nao entendi o comando, verifique se esto correto!')
     robo.HOME_PAGE()
