@@ -2,7 +2,7 @@ __pycache__
 node_modules
 .whatsapp
 *.db
-.venv
+venv
 build
 dist
 .env
@@ -11,3 +11,4 @@ dist
 *.spec
 *.csv
 mock
+*.log
