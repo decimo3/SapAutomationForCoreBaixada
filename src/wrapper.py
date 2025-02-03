@@ -306,6 +306,9 @@ class SapBot:
     if IW53_FLAGS.GET_INST in flags:
       self.session.FindById(STRINGPATH['IW53_INSTALLATION_TAB']).Select()
       servico.instalacao = self.session.FindById(STRINGPATH['IW53_INSTALLATION_TEXT']).text
+    if IW53_FLAGS.GET_INFO in flags:
+      # TODO - COLETAR O RESTO DAS INFORMAÇÔES DO SERVICO
+      pass
     return servico
   def ES32(
     self,
