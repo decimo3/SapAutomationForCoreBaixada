@@ -4,7 +4,6 @@
 #region imports
 import sys
 import datetime
-# import pandas
 from wrapper import SapBot
 from constants import (
   SEPARADOR,
