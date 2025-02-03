@@ -294,7 +294,7 @@ class SapBot:
   def IW53(
     self,
     nota: int,
-    flag: IW53_FLAGS = IW53_FLAGS.GET_INST
+    flags: list[IW53_FLAGS] = [IW53_FLAGS.GET_INST]
     ) -> ServicoInfo:
     ''' Function to get information about service '''
     servico = ServicoInfo()
@@ -303,14 +303,14 @@ class SapBot:
     self.session.FindById(STRINGPATH['IW53_SERVICE_INPUT']).text = nota
     self.session.FindById(STRINGPATH['IW53_ENTER_BUTTON']).Press() # TODO - Verificar se não pode ser trocado por GLOBAL_ENTER_BUTTON
     self.CHECK_STATUSBAR()
-    if flag == IW53_FLAGS.GET_INST:
+    if IW53_FLAGS.GET_INST in flags:
       self.session.FindById(STRINGPATH['IW53_INSTALLATION_TAB']).Select()
       servico.instalacao = self.session.FindById(STRINGPATH['IW53_INSTALLATION_TEXT']).text
     return servico
   def ES32(
     self,
     instalacao: int,
-    flag: ES32_FLAGS = ES32_FLAGS.ONLY_INST
+    flags: list[ES32_FLAGS] = [ES32_FLAGS.ONLY_INST]
     ) -> InstalacaoInfo:
     ''' Function to get information about installation '''
     self.session.StartTransaction(Transaction="ES32")
@@ -327,16 +327,16 @@ class SapBot:
     data.unidade = self.session.FindById(STRINGPATH['ES32_UNIDADE_TEXT']).text
     data.endereco = self.session.FindById(STRINGPATH['ES32_NOME_ENDERECO_TEXT']).text
     data.nome_cliente = self.session.findById(STRINGPATH['ES32_NOMECLIENTE_TEXT']).text
-    if flag == ES32_FLAGS.ENTER_CONSUMO:
+    if ES32_FLAGS.ENTER_CONSUMO in flags:
       self.session.FindById(STRINGPATH['ES32_CONSUMO_TEXT']).setFocus()
       self.SEND_ENTER()
       return data
-    if flag == ES32_FLAGS.GET_CENTER:
+    if ES32_FLAGS.GET_CENTER in flags:
       self.session.FindById(STRINGPATH['ES32_UNIDADE_TEXT']).setFocus()
       self.SEND_ENTER()
       data.centro = self.session.findById(STRINGPATH['ES32_CENTRO_TEXT']).text
       return data
-    if flag == ES32_FLAGS.GET_METER:
+    if ES32_FLAGS.GET_METER in flags:
       self.session.FindById(STRINGPATH['ES32_MEDIDOR_BUTTON']).Press()
       if self.session.FindById(STRINGPATH['POPUP'], False) is not None:
         self.session.FindById(STRINGPATH['POPUP_ENTER_BUTTON']).Press()
@@ -823,7 +823,7 @@ class SapBot:
     self,
     serial: int,
     material: int = 0,
-    flag: IQ03_FLAGS = IQ03_FLAGS.ONLY_INST
+    flags: list[IQ03_FLAGS] = [IQ03_FLAGS.ONLY_INST]
     ) -> list[MedidorInfo]:
     self.session.StartTransaction(Transaction="IQ03")
     self.session.FindById(STRINGPATH['IQ03_MATERIAL_INPUT']).text = material if material > 0 else ""
@@ -854,7 +854,7 @@ class SapBot:
       medidor.observacao = status
       return [medidor]
     medidor.instalacao = int(self.session.findById(STRINGPATH['IQ03_INSTALATION_VALUE']).text)
-    if flag is IQ03_FLAGS.ONLY_INST:
+    if IQ03_FLAGS.ONLY_INST in flags:
       return [medidor]
     leituras = self.session.FindById(STRINGPATH['IQ03_LEITURAS_TABLE'], False)
     if leituras is None:
