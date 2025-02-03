@@ -16,6 +16,7 @@ class ES32_FLAGS(IntEnum):
 
 class IW53_FLAGS(IntEnum):
   GET_INST = 0
+  GET_INFO = 1
 
 class ZMED89_FLAGS(IntEnum):
   TIME_ORDER = 0
