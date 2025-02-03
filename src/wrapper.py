@@ -821,12 +821,12 @@ class SapBot:
     return dataframe
   def IQ03(
     self,
-    material: int,
     serial: int,
+    material: int = 0,
     flag: IQ03_FLAGS = IQ03_FLAGS.ONLY_INST
     ) -> list[MedidorInfo]:
     self.session.StartTransaction(Transaction="IQ03")
-    self.session.FindById(STRINGPATH['IQ03_MATERIAL_INPUT']).text = material
+    self.session.FindById(STRINGPATH['IQ03_MATERIAL_INPUT']).text = material if material > 0 else ""
     self.session.FindById(STRINGPATH['IQ03_SERIAL_INPUT']).text = serial
     self.session.FindById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
     self.CHECK_STATUSBAR()
