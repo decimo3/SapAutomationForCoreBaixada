@@ -150,7 +150,7 @@ if __name__ == '__main__':
         max_data = datetime.date.today(),
         statuses = ['ENVI', 'LIBE', 'TABL'],
         danos_filtro = [],
-        regional = 'RB',
+        regional = 'RO',
         layout = '/VENCIMENTOS',
         colluns = ['QMNUM', 'ZZINSTLN', 'QMART', 'FECOD', 'LTRMN', 'LTRUR', 'ZZ_ST_USUARIO', 'QMDAB'],
         colluns_names = ['Nota', 'Instalacao', 'Tipo', 'Dano', 'Data', 'Hora', 'Status', 'Fim avaria']
@@ -168,7 +168,7 @@ if __name__ == '__main__':
         max_data = datetime.date.today(),
         danos_filtro = ['OSTA', 'OSJD', 'OSFT', 'OSAT', 'OSAR', 'OATI'],
         statuses = ['ANAL', 'POSB', 'PCOM', 'NEXE', 'EXEC'],
-        regional = 'RB',
+        regional = 'RO',
         layout = '/VENCIMENTOS',
         colluns = ['QMNUM', 'ZZINSTLN', 'QMART', 'FECOD', 'LTRMN', 'LTRUR', 'ZZ_ST_USUARIO', 'QMDAB'],
         colluns_names = ['Nota', 'Instalacao', 'Tipo', 'Dano', 'Data', 'Hora', 'Status', 'Fim avaria']
