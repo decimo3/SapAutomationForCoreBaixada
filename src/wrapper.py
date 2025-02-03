@@ -276,9 +276,9 @@ class SapBot:
     # Verifica se há resultados no relatório
     tabela = self.session.FindById(STRINGPATH['ZSVC20_RESULT_TABLE'], False)
     if tabela is None:
-      raise InformationNotFound('O relatorio de notas em aberto esto vazio!')
+      raise InformationNotFound('O relatorio de notas esta vazio!')
     if tabela.RowCount == 0:
-      raise InformationNotFound('O relatorio de notas em aberto esto vazio!')
+      raise InformationNotFound('O relatorio de notas esta vazio!')
     # Coleta as informações da tabela de acordo com as colunas esperadas
     dataframe = {key: [] for key in colluns_names}
     dataframe['#'] = []
