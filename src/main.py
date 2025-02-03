@@ -20,10 +20,107 @@ from exceptions import (
 from enumerators import (
   ES32_FLAGS,
   ES61_FLAGS,
+  IQ03_FLAGS,
   ZMED89_FLAGS,
   ZARC140_FLAGS,
+  IW53_FLAGS,
+)
+from models import (
+  InstalacaoInfo,
+  MedidorInfo,
+  ServicoInfo,
 )
 #endregion
+
+def obter_servico_por_servico(robo: SapBot, numero_servico: int, flags: list[IW53_FLAGS]) -> ServicoInfo:
+  ''' Obtém informações do serviço a partir do número do servico. '''
+  servico = robo.IW53(numero_servico, flags)
+  return servico
+
+def obter_medidor_por_medidor(robo: SapBot, numero_serial: int, numero_material: int, flags: list[IQ03_FLAGS]) -> MedidorInfo:
+  ''' Obtém informações do medidor a partir do número do medidor. '''
+  medidor = robo.IQ03(numero_serial, numero_material, flags)
+  return medidor[0]
+
+def obter_instalacao_por_instalacao(robo: SapBot, numero_instalacao: int, flags: list[ES32_FLAGS]) -> InstalacaoInfo:
+  ''' Obtem informações da instalação a partir do número da instalacao. '''
+  return robo.ES32(numero_instalacao, flags)
+
+def obter_medidor_por_servico(robo: SapBot, numero_servico: int, flags: list[IQ03_FLAGS]) -> MedidorInfo:
+  ''' Obtém informações do medidor a partir do número de serviço. '''
+  servico = obter_servico_por_servico(robo, numero_servico, [IW53_FLAGS.GET_INST])
+  instalacao = obter_instalacao_por_instalacao(robo, servico.instalacao, [ES32_FLAGS.GET_METER])
+  if len(instalacao.equipamento) > 1:
+    raise TooMannyRequests("Instalação possui mais de um equipamento!")
+  return obter_medidor_por_medidor(
+    robo,
+    instalacao.equipamento[0].serial,
+    instalacao.equipamento[0].material,
+    [IQ03_FLAGS.READ_REPORT])
+
+def obter_medidor_por_instalacao(robo: SapBot, numero_instalacao: int, flags: list[IQ03_FLAGS]) -> MedidorInfo:
+  ''' Obtém informações do medidor a partir do número de instalação. '''
+  instalacao = obter_instalacao_por_instalacao(robo, numero_instalacao, [ES32_FLAGS.GET_METER])
+  if len(instalacao.equipamento) > 1:
+    raise TooMannyRequests("Instalação possui mais de um equipamento!")
+  return obter_medidor_por_medidor(robo, instalacao.equipamento[0].serial, instalacao.equipamento[0].material, flags)
+
+def obter_servico_por_instalacao(robo: SapBot, numero_instalacao: int, flags: list[IW53_FLAGS]) -> ServicoInfo:
+  ''' Obtém informações do servico a partir do número da instalacao '''
+  instalacao = obter_instalacao_por_instalacao(robo, numero_instalacao, [ES32_FLAGS.ONLY_INST])
+  data_inicio = datetime.date.today() - datetime.timedelta(days=90)
+  relatorio = robo.ZSVC20(
+    instalacao = instalacao,
+    tipos_notas = [],
+    min_data = data_inicio,
+    max_data = datetime.date.today(),
+    statuses = [],
+    danos_filtro = [],
+    regional = '',
+    layout = '/VENCIMENTOS',
+    colluns = ['QMNUM', 'ZZINSTLN', 'QMART', 'FECOD', 'LTRMN', 'LTRUR', 'ZZ_ST_USUARIO', 'QMDAB'],
+    colluns_names = ['Nota', 'Instalacao', 'Tipo', 'Dano', 'Data', 'Hora', 'Status', 'Fim avaria']
+    )
+  return obter_servico_por_servico(robo, relatorio.at[0, 'Nota'], flags)
+
+def obter_servico_por_medidor(robo: SapBot, numero_medidor: int, flags: list[IW53_FLAGS]) -> ServicoInfo:
+  ''' Obtém informações do servico a partir do número de medidor. '''
+  medidor = obter_medidor_por_medidor(robo, numero_medidor, 0, [IQ03_FLAGS.ONLY_INST])
+  return obter_servico_por_instalacao(robo, medidor.instalacao, flags)
+
+def obter_instalacao_por_servico(robo: SapBot, numero_servico: int, flags: list[ES32_FLAGS]) -> InstalacaoInfo:
+  ''' Obtém informações do servico a partir do número de serviço. '''
+  servico = obter_servico_por_servico(robo, numero_servico, [IW53_FLAGS.GET_INST])
+  return obter_instalacao_por_instalacao(robo, servico.instalacao, flags)
+
+def obter_instalacao_por_medidor(robo: SapBot, numero_medidor: int, flags: list[ES32_FLAGS]) -> InstalacaoInfo:
+  ''' Obtém informações do servico a partir do número do medidor. '''
+  medidor = obter_medidor_por_medidor(robo, numero_medidor, 0, [IQ03_FLAGS.ONLY_INST])
+  return obter_instalacao_por_instalacao(robo, medidor.instalacao, flags)
+
+def obter_instalacao(robo: SapBot, argumento: int, flags: list[ES32_FLAGS]) -> InstalacaoInfo:
+  if argumento > 999999999:
+    return obter_instalacao_por_servico(robo, argumento, flags)
+  elif argumento < 99999999:
+    return obter_instalacao_por_medidor(robo, argumento, flags)
+  else:
+    return obter_instalacao_por_instalacao(robo, argumento, flags)
+
+def obter_medidor(robo: SapBot, argumento: int, flags: list[IQ03_FLAGS]) -> MedidorInfo:
+  if argumento > 999999999:
+    return obter_medidor_por_servico(robo, argumento, flags)
+  elif argumento < 99999999:
+    return obter_medidor_por_medidor(robo, argumento, 0, flags)
+  else:
+    return obter_medidor_por_instalacao(robo, argumento, flags)
+
+def obter_servico(robo: SapBot, argumento: int, flags: list[IW53_FLAGS]) -> ServicoInfo:
+  if argumento > 999999999:
+    return obter_servico_por_servico(robo, argumento, flags)
+  elif argumento < 99999999:
+    return obter_servico_por_medidor(robo, argumento, flags)
+  else:
+    return obter_servico_por_instalacao(robo, argumento, flags)
 
 if __name__ == '__main__':
   try:
