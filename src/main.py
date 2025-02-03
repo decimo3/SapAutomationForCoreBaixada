@@ -174,8 +174,14 @@ if __name__ == '__main__':
         colluns_names = ['Nota', 'Instalacao', 'Tipo', 'Dano', 'Data', 'Hora', 'Status', 'Fim avaria']
       )
       print(relatorio.to_csv(index=False,sep=SEPARADOR))
+    elif aplicacao == 'medidor':
+      medidor = obter_medidor(robo, argumento, [IQ03_FLAGS.READ_REPORT])
+      print(medidor)
+    elif aplicacao == 'servico':
+      servico = obter_servico(robo, argumento, [IW53_FLAGS.GET_INFO])
+      print(servico)
     elif aplicacao == 'historico':
-      instalacao_info = robo.ES32(argumento, ES32_FLAGS.ONLY_INST)
+      instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
       relatorio = robo.ZSVC20(
         instalacao = instalacao_info,
         tipos_notas = [''],
@@ -190,7 +196,7 @@ if __name__ == '__main__':
       )
       print(relatorio.to_csv(index=False,sep=SEPARADOR))
     elif aplicacao == 'leiturista':
-      instalacao_info = robo.ES32(argumento, ES32_FLAGS.GET_CENTER)
+      instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.GET_CENTER])
       relatorio = robo.ZMED89(
         instalacao = instalacao_info,
         quantidade = 30,
@@ -200,7 +206,7 @@ if __name__ == '__main__':
       )
       print(relatorio.to_csv(index=False,sep=SEPARADOR))
     elif aplicacao == 'roteiro':
-      instalacao_info = robo.ES32(argumento, ES32_FLAGS.GET_CENTER)
+      instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.GET_CENTER])
       relatorio = robo.ZMED89(
         instalacao = instalacao_info,
         quantidade = 30,
@@ -210,7 +216,7 @@ if __name__ == '__main__':
       )
       print(relatorio.to_csv(index=False,sep=SEPARADOR))
     elif aplicacao == 'pendente':
-      instalacao_info = robo.ES32(argumento, ES32_FLAGS.ONLY_INST)
+      instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
       # Getting the pending invoice report
       if 'ZARC140' not in NOTUSE:
         relatorio = robo.ZARC140(
@@ -225,7 +231,7 @@ if __name__ == '__main__':
         raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
       print(relatorio.to_csv(index=False,sep=SEPARADOR))
     elif aplicacao in {'fatura', 'debito'}:
-      instalacao_info = robo.ES32(argumento, ES32_FLAGS.ONLY_INST)
+      instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
       # Getting the pending invoice report
       if 'ZARC140' not in NOTUSE:
         relatorio = robo.ZARC140(
@@ -253,9 +259,9 @@ if __name__ == '__main__':
       print(relatorio.shape[0])
     elif aplicacao == 'coordenada':
       if 'ES61' in NOTUSE:
-        instalacao_info = robo.ES32(argumento, ES32_FLAGS.ENTER_CONSUMO)
+        instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ENTER_CONSUMO])
       else:
-        instalacao_info = robo.ES32(argumento, ES32_FLAGS.ONLY_INST)
+        instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
       if 'ES61' in NOTUSE:
         print(robo.ES61(instalacao_info, [ES61_FLAGS.SKIPT_ENTER, ES61_FLAGS.GET_COORD]).coordenadas)
       else:
