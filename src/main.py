@@ -4,6 +4,7 @@
 #region imports
 import sys
 import datetime
+import pandas
 from wrapper import SapBot
 from constants import (
   SEPARADOR,
@@ -122,6 +123,21 @@ def obter_servico(robo: SapBot, argumento: int, flags: list[IW53_FLAGS]) -> Serv
   else:
     return obter_servico_por_instalacao(robo, argumento, flags)
 
+def obter_pendente(robo: SapBot, argumento: int) -> pandas.DataFrame:
+  instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
+  # Getting the pending invoice report
+  if 'ZARC140' not in NOTUSE:
+    return robo.ZARC140(
+      instalacao = instalacao_info,
+      flag = ZARC140_FLAGS.GET_PENDING
+    )
+  elif 'FPL9' not in NOTUSE:
+    return robo.FPL9(
+      instalacao = instalacao_info
+    )
+  else:
+    raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
+
 if __name__ == '__main__':
   try:
     if len(sys.argv) < 4:
@@ -216,34 +232,11 @@ if __name__ == '__main__':
       )
       print(relatorio.to_csv(index=False,sep=SEPARADOR))
     elif aplicacao == 'pendente':
-      instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
-      # Getting the pending invoice report
-      if 'ZARC140' not in NOTUSE:
-        relatorio = robo.ZARC140(
-          instalacao = instalacao_info,
-          flag = ZARC140_FLAGS.GET_PENDING
-        )
-      elif 'FPL9' not in NOTUSE:
-        relatorio = robo.FPL9(
-          instalacao = instalacao_info
-        )
-      else:
-        raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
+      relatorio = obter_pendente(robo, argumento)
       print(relatorio.to_csv(index=False,sep=SEPARADOR))
     elif aplicacao in {'fatura', 'debito'}:
-      instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
       # Getting the pending invoice report
-      if 'ZARC140' not in NOTUSE:
-        relatorio = robo.ZARC140(
-          instalacao = instalacao_info,
-          flag = ZARC140_FLAGS.GET_PENDING
-        )
-      elif 'FPL9' not in NOTUSE:
-        relatorio = robo.FPL9(
-          instalacao = instalacao_info
-        )
-      else:
-        raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
+      relatorio = obter_pendente(robo, argumento)
       # Printing pending invoices
       if 'ZATC73' not in NOTUSE:
         robo.ZATC73(
