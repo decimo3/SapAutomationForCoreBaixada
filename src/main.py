@@ -247,12 +247,12 @@ if __name__ == '__main__':
       # Printing pending invoices
       if 'ZATC73' not in NOTUSE:
         robo.ZATC73(
-          documentos = relatorio['documentos'].to_list()
+          documentos = relatorio['Documento'].to_list()
         )
       elif 'ZATC45' not in NOTUSE:
         robo.ZATC45(
           instalacao = instalacao_info,
-          documentos = relatorio['documentos'].to_list()
+          documentos = relatorio['Documento'].to_list()
         )
       else:
         raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
