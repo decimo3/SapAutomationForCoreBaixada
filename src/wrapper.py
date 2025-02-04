@@ -876,7 +876,7 @@ class SapBot:
       dataframe['Descricao'].append(texto)
     medidor.leituras = pandas.DataFrame(dataframe)
     if len(medidor.leituras) > 0:
-      medidor.observacao = f"*Codigos de leitura nas ultimas {limite} leituras:*"
+      medidor.observacao = f"Codigos de leitura nas ultimas {limite} leituras:"
     else:
-      medidor.observacao = f"*Sem codigos de leitura nas ultimas {limite} leituras!*"
+      medidor.observacao = f"Sem codigos de leitura nas ultimas {limite} leituras!"
     return [medidor]
