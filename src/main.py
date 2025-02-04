@@ -257,15 +257,12 @@ if __name__ == '__main__':
       else:
         raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
       print(relatorio.shape[0])
-    elif aplicacao == 'coordenada':
-      if 'ES61' in NOTUSE:
-        instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ENTER_CONSUMO])
-      else:
-        instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
-      if 'ES61' in NOTUSE:
-        print(robo.ES61(instalacao_info, [ES61_FLAGS.SKIPT_ENTER, ES61_FLAGS.GET_COORD]).coordenadas)
-      else:
-        print(robo.ES61(instalacao_info, [ES61_FLAGS.ENTER_ENTER, ES61_FLAGS.GET_COORD]).coordenadas)
+    elif aplicacao in {'coordenada', 'localizacao'}:
+      flag = [ES32_FLAGS.ENTER_CONSUMO] if 'ES61' in NOTUSE else [ES32_FLAGS.ONLY_INST]
+      instalacao_info = obter_instalacao(robo, argumento, flag)
+      flag = [ES61_FLAGS.GET_COORD]
+      flag.extend([ES61_FLAGS.SKIPT_ENTER]) if 'ES61' in NOTUSE else flag.extend([ES61_FLAGS.ENTER_ENTER])
+      print(robo.ES61(instalacao_info, flag).coordenadas)
     else:
       raise ArgumentException('Nao entendi o comando, verifique se esto correto!')
     robo.HOME_PAGE()
