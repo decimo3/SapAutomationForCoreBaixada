@@ -345,11 +345,18 @@ class SapBot:
       if self.session.FindById(STRINGPATH['POPUP'], False) is not None:
         self.session.FindById(STRINGPATH['POPUP_ENTER_BUTTON']).Press()
         return data
+      ESPACO_VAZIO = '__________________'
       for i in range(self.session.findById(STRINGPATH['ES32_EQUIPAMENTO_TABLE']).RowCount):
+        material = self.session.findById(STRINGPATH['ES32_EQUIPAMENTO_CODIGO'].replace('?',str(i))).text
+        serial = self.session.findById(STRINGPATH['ES32_EQUIPAMENTO_SERIAL'].replace('?',str(i))).text
+        if material == ESPACO_VAZIO:
+          break
         medidor = MedidorInfo()
-        medidor.material = self.session.findById(STRINGPATH['ES32_MEDIDOR_CODIGO'].replace('?',str(i))).text
-        medidor.serial = self.session.findById(STRINGPATH['ES32_MEDIDOR_SERIAL'].replace('?',str(i))).text
+        medidor.serial = int(serial)
+        medidor.material = int(material)
+        medidor.texto_material = material + ' - ' + depara('material_codigo', material)
         data.equipamento.append(medidor)
+      data.equipamento = [eq for eq in data.equipamento if eq.serial != ESPACO_VAZIO]
     return data
   def ZATC45(
       self,
