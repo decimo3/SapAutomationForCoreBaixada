@@ -474,18 +474,18 @@ class SapBot:
       dataframe = {key: [] for key in collumns_names}
       dataframe['#'] = []
       dataframe['Observacao'] = []
-      for i in range(1, linhas + 1):
+      for i in range(1, linhas):
         for j, collumn in enumerate(collumns):
           dataframe[collumns_names[j]].append(tabela.getCellValue(i, collumn))
-        if dataframe['Status'][i] == '@5B@':
+        if dataframe['Status'][i-1] == '@5B@':
           dataframe['#'].append(DESTAQUES.VERDE)
           dataframe['Observacao'].append('Fat. no prazo')
           continue
-        if dataframe['Status'][i] == '@5C@':
+        if dataframe['Status'][i-1] == '@5C@':
           dataframe['#'].append(DESTAQUES.VERMELHO)
           dataframe['Observacao'].append('Fat. vencida')
           continue
-        if dataframe['Status'][i] == '@06@':
+        if dataframe['Status'][i-1] == '@06@':
           dataframe['#'].append(DESTAQUES.AMARELO)
           dataframe['Observacao'].append('Fat. Retida')
           continue
