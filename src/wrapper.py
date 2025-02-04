@@ -222,6 +222,7 @@ class SapBot:
       ) -> None:
     ''' Function that send list of invoice document number to print '''
     self.session.StartTransaction(Transaction="ZATC73")
+    self.CHECK_STATUSBAR()
     self.session.FindById(STRINGPATH['ZATC73_PRINT_DEFAULT']).selected = True
     self.session.FindById(STRINGPATH['ZATC73_PRINT_DEFAULT2']).selected = True
     for documento in enumerate(documentos):
@@ -244,6 +245,7 @@ class SapBot:
     ) -> pandas.DataFrame:
     ''' Function to run ZSVC20 transaction and return table data '''
     self.session.StartTransaction(Transaction='ZSVC20')
+    self.CHECK_STATUSBAR()
     #
     if instalacao is not None:
       self.session.FindById(STRINGPATH['ZSVC20_INSTALLATION_INPUT']).text = instalacao.instalacao
@@ -300,6 +302,7 @@ class SapBot:
     servico = ServicoInfo()
     servico.nota = nota
     self.session.StartTransaction(Transaction="IW53")
+    self.CHECK_STATUSBAR()
     self.session.FindById(STRINGPATH['IW53_SERVICE_INPUT']).text = nota
     self.session.FindById(STRINGPATH['IW53_ENTER_BUTTON']).Press() # TODO - Verificar se não pode ser trocado por GLOBAL_ENTER_BUTTON
     self.CHECK_STATUSBAR()
@@ -365,6 +368,7 @@ class SapBot:
       ) -> None:
     ''' Function that request print invoice trought `ZATC45` transaction when `ZATC73` is unavaliable '''
     self.session.StartTransaction(Transaction="ZATC45")
+    self.CHECK_STATUSBAR()
     self.session.FindById(STRINGPATH['ZATC45_2THVIA_RADIO']).Select()
     self.session.findById(STRINGPATH['ZATC45_PARCEIRO_INPUT']).text = instalacao.parceiro
     self.session.findById(STRINGPATH['ZATC45_INSTALLATION_INPUT']).text = instalacao.instalacao
@@ -461,6 +465,7 @@ class SapBot:
     ) -> pandas.DataFrame:
     ''' Function that get information about pending invoice report '''
     self.session.StartTransaction(Transaction="ZARC140")
+    self.CHECK_STATUSBAR()
     self.session.FindById(STRINGPATH['ZARC140_PARCEIRO_INPUT']).text = instalacao.parceiro
     self.session.FindById(STRINGPATH['ZARC140_CONTRATO_INPUT']).text = instalacao.contrato
     self.session.FindById(STRINGPATH['ZARC140_INSTALACAO_INPUT']).text = instalacao.instalacao
@@ -549,6 +554,7 @@ class SapBot:
     ligacao = LigacaoInfo()
     if not ES61_FLAGS.SKIPT_ENTER in flags:
       self.session.StartTransaction(Transaction="ES61")
+      self.CHECK_STATUSBAR()
       self.session.findById(STRINGPATH['ES61_CONSUMO_INPUT']).text = instalacao.consumo
       self.session.FindById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
     ligacao.ligacao = int(self.session.FindById(STRINGPATH['ES61_LIGACAO_TEXT']).text)
@@ -570,6 +576,7 @@ class SapBot:
     ''' Function to get information about about street '''
     if not flag in {ES57_FLAGS.SKIPT_ENTER, ES57_FLAGS.SKIPT_ENTER_LOGRADOURO_ENTER}:
       self.session.StartTransaction(Transaction="ES57")
+      self.CHECK_STATUSBAR()
       self.session.FindById(STRINGPATH['ES57_LIGACAO_INPUT']).text = ligacao.ligacao
       self.session.FindById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
     logradouro = LogradouroInfo(
@@ -589,6 +596,7 @@ class SapBot:
     ''' Function to get information about group of instalations '''
     if flag is not ZMED95_FLAGS.SKIPT_ENTER:
       self.session.StartTransaction(Transaction="ZMED95")
+      self.CHECK_STATUSBAR()
       self.session.FindById(STRINGPATH['ZMED95_LOGRADOURO_INPUT']).text = logradouro.logradouro
       self.session.FindById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
     self.session.FindById(STRINGPATH['ZMED95_ENDERECOS_BUTTON']).Press()
@@ -633,6 +641,7 @@ class SapBot:
     ''' Function that get information about pending invoice report
         throught `FPL9` transaction when `ZARC140` is unavaliable '''
     self.session.StartTransaction(Transaction="FPL9")
+    self.CHECK_STATUSBAR()
     self.session.findById(STRINGPATH['FPL9_PARCEIRO_INPUT']).text = instalacao.parceiro
     self.session.findById(STRINGPATH['FPL9_CONTRATO_INPUT']).text = instalacao.contrato
     self.session.findById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
