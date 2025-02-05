@@ -87,21 +87,8 @@ def obter_historico(robo: SapBot, argumento: int) -> pandas.DataFrame:
 
 def obter_servico_por_instalacao(robo: SapBot, numero_instalacao: int, flags: list[IW53_FLAGS]) -> ServicoInfo:
   ''' Obtém informações do servico a partir do número da instalacao '''
-  instalacao = obter_instalacao_por_instalacao(robo, numero_instalacao, [ES32_FLAGS.ONLY_INST])
-  data_inicio = datetime.date.today() - datetime.timedelta(days=90)
-  relatorio = robo.ZSVC20(
-    instalacao = instalacao,
-    tipos_notas = [],
-    min_data = data_inicio,
-    max_data = datetime.date.today(),
-    statuses = [],
-    danos_filtro = [],
-    regional = '',
-    layout = '/VENCIMENTOS',
-    colluns = ['QMNUM', 'ZZINSTLN', 'QMART', 'FECOD', 'LTRMN', 'LTRUR', 'ZZ_ST_USUARIO', 'QMDAB'],
-    colluns_names = ['Nota', 'Instalacao', 'Tipo', 'Dano', 'Data', 'Hora', 'Status', 'Fim avaria']
-    )
-  return obter_servico_por_servico(robo, relatorio.at[0, 'Nota'], flags)
+  historico = obter_historico(robo, numero_instalacao)
+  return obter_servico_por_servico(robo, historico.at[0, 'Nota'], flags)
 
 def obter_servico_por_medidor(robo: SapBot, numero_medidor: int, flags: list[IW53_FLAGS]) -> ServicoInfo:
   ''' Obtém informações do servico a partir do número de medidor. '''
