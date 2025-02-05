@@ -66,9 +66,8 @@ def obter_medidor_por_servico(robo: SapBot, numero_servico: int, flags: list[IQ0
 def obter_medidor_por_instalacao(robo: SapBot, numero_instalacao: int, flags: list[IQ03_FLAGS]) -> MedidorInfo:
   ''' Obtém informações do medidor a partir do número de instalação. '''
   instalacao = obter_instalacao_por_instalacao(robo, numero_instalacao, [ES32_FLAGS.GET_METER])
-  if len(instalacao.equipamento) > 1:
-    raise TooMannyRequests("Instalação possui mais de um equipamento!")
-  return obter_medidor_por_medidor(robo, instalacao.equipamento[0].serial, instalacao.equipamento[0].material, flags)
+  equipamento = instalacao.get_medidor()
+  return obter_medidor_por_medidor(robo, equipamento.serial, equipamento.material, flags)
 
 def obter_historico(robo: SapBot, argumento: int) -> pandas.DataFrame:
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
