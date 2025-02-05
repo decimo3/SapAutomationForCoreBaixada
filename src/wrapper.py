@@ -348,9 +348,9 @@ class SapBot:
         self.session.FindById(STRINGPATH['POPUP_ENTER_BUTTON']).Press()
         return data
       ESPACO_VAZIO = '__________________'
-      for i in range(self.session.findById(STRINGPATH['ES32_EQUIPAMENTO_TABLE']).RowCount):
-        material = self.session.findById(STRINGPATH['ES32_EQUIPAMENTO_CODIGO'].replace('?',str(i))).text
-        serial = self.session.findById(STRINGPATH['ES32_EQUIPAMENTO_SERIAL'].replace('?',str(i))).text
+      for i in range(self.session.FindById(STRINGPATH['ES32_EQUIPAMENTO_TABLE']).RowCount - 4):
+        material = self.session.findById(STRINGPATH['ES32_EQUIPAMENTO_CODIGO'].replace('?','0')).text
+        serial = self.session.findById(STRINGPATH['ES32_EQUIPAMENTO_SERIAL'].replace('?','0')).text
         if material == ESPACO_VAZIO:
           break
         medidor = MedidorInfo()
@@ -358,6 +358,7 @@ class SapBot:
         medidor.material = int(material)
         medidor.texto_material = material + ' - ' + depara('material_codigo', material)
         data.equipamento.append(medidor)
+        self.session.FindById(STRINGPATH['ES32_EQUIPAMENTO_TABLE']).verticalScrollbar.position = i + 1
       data.equipamento = [eq for eq in data.equipamento if eq.serial != ESPACO_VAZIO]
     return data
   def ZATC45(
