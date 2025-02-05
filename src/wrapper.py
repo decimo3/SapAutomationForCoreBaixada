@@ -400,7 +400,7 @@ class SapBot:
       quantidade: int,
       collumns: list[str],
       collumns_names: list[str],
-      flag: ZMED89_FLAGS
+      flags: list[ZMED89_FLAGS]
       ) -> pandas.DataFrame:
     ''' Function that get information about reading report '''
     if instalacao.centro is None:
@@ -409,7 +409,7 @@ class SapBot:
     mes = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
     lote = instalacao.unidade[:2]
     # Checks if query all meter centers or only one
-    if flag == ZMED89_FLAGS.TELEMEDIDO:
+    if ZMED89_FLAGS.TELEMEDIDO in flags:
       self.session.FindById(STRINGPATH['ZMED89_CENTRO_MIN']).text = '001'
       self.session.FindById(STRINGPATH['ZMED89_CENTRO_MAX']).text = '100'
     else:
@@ -427,7 +427,7 @@ class SapBot:
     self.session.FindById(STRINGPATH['ZMED89_LAYOUT_TABLE']).setCurrentCell(0,'DEFAULT')
     self.session.FindById(STRINGPATH['ZMED89_LAYOUT_TABLE']).clickCurrentCell()
     # Order by sequence number
-    if flag in { ZMED89_FLAGS.SEQ_ORDER, ZMED89_FLAGS.TELEMEDIDO }:
+    if ZMED89_FLAGS.SEQ_ORDER in flags or ZMED89_FLAGS.TELEMEDIDO in flags:
       self.session.FindById(STRINGPATH['ZMED89_RESULT_TABLE']).selectColumn('ZZ_NUMSEQ')
       self.session.FindById(STRINGPATH['ZMED89_ORDER_ASC_BUTTON']).Press()
     # Search for instalation

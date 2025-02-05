@@ -222,21 +222,21 @@ def obter_coordenadas(robo: SapBot, argumento: int) -> str:
     raise InformationNotFound('A instalacao nao possui coordenada cadastrada!')
   return consumo_info.coordenadas
 
-def obter_leiturista(robo: SapBot, argumento: int, _flag: ZMED89_FLAGS) -> pandas.DataFrame:
+def obter_leiturista(robo: SapBot, argumento: int, _flag: list[ZMED89_FLAGS]) -> pandas.DataFrame:
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.GET_CENTER])
   return robo.ZMED89(
     instalacao = instalacao_info,
     quantidade = 30,
     collumns = ['ZZ_NUMSEQ', 'ANLAGE', 'ZENDERECO', 'BAIRRO', 'GERAET', 'ZHORALEIT', 'ABLHINW'],
     collumns_names = ['Seq', 'Instalacao', 'Endereco', 'Bairro', 'Medidor', 'Horario', 'Codigo'],
-    flag = _flag
+    flags = _flag
   )
 
 def obter_sequencial(robo: SapBot, argumento: int) -> pandas.DataFrame:
-  return obter_leiturista(robo, argumento, ZMED89_FLAGS.SEQ_ORDER)
+  return obter_leiturista(robo, argumento, [ZMED89_FLAGS.SEQ_ORDER])
 
 def obter_horariado(robo: SapBot, argumento: int) -> pandas.DataFrame:
-  return obter_leiturista(robo, argumento, ZMED89_FLAGS.TIME_ORDER)
+  return obter_leiturista(robo, argumento, [ZMED89_FLAGS.TIME_ORDER])
 
 def obter_agrupamento(robo: SapBot, argumento: int) -> pandas.DataFrame:
   flag = [ES32_FLAGS.ENTER_CONSUMO] if 'ES61' in NOTUSE else [ES32_FLAGS.ONLY_INST]
