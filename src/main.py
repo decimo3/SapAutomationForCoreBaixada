@@ -99,7 +99,7 @@ def obter_instalacao_por_medidor(robo: SapBot, numero_medidor: int, flags: list[
   medidor = obter_medidor_por_medidor(robo, numero_medidor, 0, [IQ03_FLAGS.ONLY_INST])
   return obter_instalacao_por_instalacao(robo, medidor.instalacao, flags)
 
-def obter_instalacao(robo: SapBot, argumento: int, flags: list[ES32_FLAGS]) -> InstalacaoInfo:
+def obter_instalacao(robo: SapBot, argumento: int, flags: list[ES32_FLAGS] = [ES32_FLAGS.GET_METER]) -> InstalacaoInfo:
   if argumento > 999999999:
     return obter_instalacao_por_servico(robo, argumento, flags)
   elif argumento < 99999999:
@@ -107,7 +107,7 @@ def obter_instalacao(robo: SapBot, argumento: int, flags: list[ES32_FLAGS]) -> I
   else:
     return obter_instalacao_por_instalacao(robo, argumento, flags)
 
-def obter_medidor(robo: SapBot, argumento: int, flags: list[IQ03_FLAGS]) -> MedidorInfo:
+def obter_medidor(robo: SapBot, argumento: int, flags: list[IQ03_FLAGS] = [IQ03_FLAGS.READ_REPORT]) -> MedidorInfo:
   if argumento > 999999999:
     return obter_medidor_por_servico(robo, argumento, flags)
   elif argumento < 99999999:
@@ -115,7 +115,7 @@ def obter_medidor(robo: SapBot, argumento: int, flags: list[IQ03_FLAGS]) -> Medi
   else:
     return obter_medidor_por_instalacao(robo, argumento, flags)
 
-def obter_servico(robo: SapBot, argumento: int, flags: list[IW53_FLAGS]) -> ServicoInfo:
+def obter_servico(robo: SapBot, argumento: int, flags: list[IW53_FLAGS] = [IW53_FLAGS.GET_INFO]) -> ServicoInfo:
   if argumento > 999999999:
     return obter_servico_por_servico(robo, argumento, flags)
   elif argumento < 99999999:
