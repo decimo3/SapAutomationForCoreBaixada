@@ -607,7 +607,7 @@ class SapBot:
     while apontador < self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TABLE']).RowCount:
       self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TABLE']).verticalScrollbar.position = apontador
       # Check if greater number on screen is less that expected number
-      greater_str = self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TEXT'].replace('?',str(tamanho))).text
+      greater_str = self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TEXT'].replace('?',str(tamanho - 1))).text
       match = re.search("[0-9]+", greater_str)
       greater_int = int(match.group()) if match is not None else 99999
       if greater_int < logradouro.numero_int:
@@ -622,12 +622,12 @@ class SapBot:
       if current_int > logradouro.numero_int:
         break
       if current_int == logradouro.numero_int:
-        quantidade = int(self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TEXT']).text)
-        self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TEXT']).GetAbsoluteRow(apontador).selected = True
+        quantidade = int(self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_QNTD']).text)
+        self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TABLE']).GetAbsoluteRow(apontador).selected = True
         self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_BUTTON']).Press()
         for i in range(1, quantidade + 1):
           complemento = self.session.FindById(STRINGPATH['ZMED95_INSTALACOES_COMPLEMENTO']).text
-          dataframe['Endereco'].append(logradouro.numero_str + complemento)
+          dataframe['Endereco'].append(current_str + ' ' + complemento)
           dataframe["Instalacao"].append(self.session.FindById(STRINGPATH['ZMED95_INSTALACOES_INSTALACAO']).text)
           dataframe["Cliente"].append(self.session.FindById(STRINGPATH['ZMED95_INSTALACOES_NOMECLIENTE']).text)
           dataframe["Tipo"].append(self.session.FindById(STRINGPATH['ZMED95_INSTALACOES_CLASSE_INSTALACAO']).text)
