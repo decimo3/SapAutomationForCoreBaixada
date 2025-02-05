@@ -550,7 +550,7 @@ class SapBot:
     instalacao: InstalacaoInfo,
     flags: list[ES61_FLAGS] = [ES61_FLAGS.ENTER_ENTER]
     ) -> LigacaoInfo:
-    ''' Function to get information about objeto de ligacao '''
+    ''' Function to get information about local de consumo '''
     ligacao = LigacaoInfo()
     if not ES61_FLAGS.SKIPT_ENTER in flags:
       self.session.StartTransaction(Transaction="ES61")
@@ -571,10 +571,10 @@ class SapBot:
   def ES57(
     self,
     ligacao: LigacaoInfo,
-    flag: ES57_FLAGS = ES57_FLAGS.ENTER_ENTER
+    flag: list[ES57_FLAGS] = [ES57_FLAGS.ENTER_ENTER]
     ) -> LogradouroInfo:
-    ''' Function to get information about about street '''
-    if not flag in {ES57_FLAGS.SKIPT_ENTER, ES57_FLAGS.SKIPT_ENTER_LOGRADOURO_ENTER}:
+    ''' Function to get information about objeto de ligacao '''
+    if ES57_FLAGS.ENTER_ENTER in flag:
       self.session.StartTransaction(Transaction="ES57")
       self.CHECK_STATUSBAR()
       self.session.FindById(STRINGPATH['ES57_LIGACAO_INPUT']).text = ligacao.ligacao
@@ -584,17 +584,17 @@ class SapBot:
       numero = self.session.FindById(STRINGPATH['ES57_NUMERO_TEXT']).text
     )
     # TODO - Colect the rest of information
-    if flag in {ES57_FLAGS.ENTER_LOGRADOURO, ES57_FLAGS.SKIPT_ENTER_LOGRADOURO_ENTER}:
+    if ES57_FLAGS.ENTER_LOGRADOURO in flag:
       self.session.FindById(STRINGPATH['ES57_LOGRADOURO_TEXT']).setFocus()
       self.SEND_ENTER()
     return logradouro
   def ZMED95(
     self,
     logradouro: LogradouroInfo,
-    flag: ZMED95_FLAGS = ZMED95_FLAGS.ENTER_ENTER
+    flags: list[ZMED95_FLAGS] = [ZMED95_FLAGS.ENTER_ENTER]
     ) -> pandas.DataFrame:
     ''' Function to get information about group of instalations '''
-    if flag is not ZMED95_FLAGS.SKIPT_ENTER:
+    if not ZMED95_FLAGS.SKIPT_ENTER in flags:
       self.session.StartTransaction(Transaction="ZMED95")
       self.CHECK_STATUSBAR()
       self.session.FindById(STRINGPATH['ZMED95_LOGRADOURO_INPUT']).text = logradouro.logradouro
@@ -736,7 +736,7 @@ class SapBot:
   def BP(
     self,
     instalacao: InstalacaoInfo,
-    flag: BP_FLAGS = BP_FLAGS.GET_PHONES
+    flags: list[BP_FLAGS]
   ) -> ParceiroInfo:
     ''' Function to get information about costumer'''
     parceiro = ParceiroInfo()
@@ -751,11 +751,11 @@ class SapBot:
     self.session.findById(STRINGPATH['BP_TIPO_PN_SELECT']).key = "MKK"
     if not self.session.findById(STRINGPATH['POPUP'], False) is None:
       self.session.findById(STRINGPATH['BP_DENY_WRITE_PN_BUTTON']).Press()
-    if flag is BP_FLAGS.GET_DOCS:
+    if BP_FLAGS.GET_DOCS in flags:
       self.session.findById(STRINGPATH['BP_DOCS_CPF_TAB']).Select()
       parceiro.documento_tipo = self.session.findById(STRINGPATH['BP_DOCS_TIPO_TEXT']).text
       parceiro.documento_numero = self.session.findById(STRINGPATH['BP_DOCS_CPF_TEXT']).text
-    if flag is BP_FLAGS.GET_PHONES:
+    if BP_FLAGS.GET_PHONES in flags:
       self.session.findById(STRINGPATH['BP_PHONE_TAB']).Select()
       for lista in {'BP_PHONE_LIST1', 'BP_PHONE_LIST2', 'BP_PHONE_LIST3'}:
         self.session.FindById(STRINGPATH[lista]).Press()
