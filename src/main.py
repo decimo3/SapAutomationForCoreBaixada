@@ -299,7 +299,7 @@ if __name__ == '__main__':
   except TooMannyRequests as erro:
     print(f'409: {erro.message}')
   except UnavailableSap as erro:
-    print(f'500: {erro.message}')
+    print(f'408: {erro.message}')
   except SomethingGoesWrong as erro:
     print(f'500: {erro.message}')
   except WrapperBaseException as erro:
