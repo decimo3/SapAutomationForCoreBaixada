@@ -13,7 +13,6 @@ from logging.handlers import RotatingFileHandler
 import win32com.client
 import pandas
 from constants import (
-  DESIRE_INSTANCES,
   SHORT_TIME_WAIT,
   LONG_TIME_WAIT,
   LOCKFILE,
@@ -99,7 +98,7 @@ class SapBot:
     except:
       self.create_lock()
       self.attach_session(instancia)
-  def create_session(self) -> None:
+  def create_session(self, instancia: int) -> None:
     ''' Function create session in SAPGUI scripting engine '''
     self.logger.info('Starting instance checker...')
     while True:
@@ -153,18 +152,18 @@ class SapBot:
           raise UnavailableSap('User cannot be authenticated!')
         # Create sessions
         number_of_sessions = len(self.connection.sessions)
-        if number_of_sessions < DESIRE_INSTANCES:
+        if number_of_sessions < instancia:
           self.create_lock()
           self.logger.warning('Less instances that desire, creating new ones...')
-          for i in range(DESIRE_INSTANCES - number_of_sessions):
+          for i in range(instancia - number_of_sessions):
             self.connection.Children(0).createSession()
             time.sleep(SHORT_TIME_WAIT)
         # Re-check number of sessions
         number_of_sessions = len(self.connection.sessions)
-        if number_of_sessions > DESIRE_INSTANCES:
+        if number_of_sessions > instancia:
           self.create_lock()
           self.logger.warning('More instances that desire, closing excess...')
-          for i in range(number_of_sessions, DESIRE_INSTANCES, -1):
+          for i in range(number_of_sessions, instancia, -1):
             self.connection.closeSession(self.connection.sessions[i - 1].Id)
         # Unlock instances
         self.delete_lock()

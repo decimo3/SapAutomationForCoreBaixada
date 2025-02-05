@@ -283,7 +283,7 @@ if __name__ == '__main__':
     # Attempts to connect to SAP FrontEnd on the specified instance
     robo = SapBot(instancia_argumento)
     if aplicacao == 'instancia':
-      robo.create_session()
+      robo.create_session(argumento)
     else:
       robo.attach_session(instancia_argumento)
     # Attempts to execute the method requested in the first argument
