@@ -55,13 +55,8 @@ def obter_medidor_por_servico(robo: SapBot, numero_servico: int, flags: list[IQ0
   ''' Obtém informações do medidor a partir do número de serviço. '''
   servico = obter_servico_por_servico(robo, numero_servico, [IW53_FLAGS.GET_INST])
   instalacao = obter_instalacao_por_instalacao(robo, servico.instalacao, [ES32_FLAGS.GET_METER])
-  if len(instalacao.equipamento) > 1:
-    raise TooMannyRequests("Instalação possui mais de um equipamento!")
-  return obter_medidor_por_medidor(
-    robo,
-    instalacao.equipamento[0].serial,
-    instalacao.equipamento[0].material,
-    [IQ03_FLAGS.READ_REPORT])
+  equipamento = instalacao.get_medidor()
+  return obter_medidor_por_medidor(robo, equipamento.serial, equipamento.material, flags)
 
 def obter_medidor_por_instalacao(robo: SapBot, numero_instalacao: int, flags: list[IQ03_FLAGS]) -> MedidorInfo:
   ''' Obtém informações do medidor a partir do número de instalação. '''
