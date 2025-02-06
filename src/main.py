@@ -109,30 +109,27 @@ def obter_instalacao(robo: SapBot, argumento: int, flags: list[ES32_FLAGS] | Non
     flags = [ES32_FLAGS.GET_METER]
   if argumento > 999999999:
     return obter_instalacao_por_servico(robo, argumento, flags)
-  elif argumento < 99999999:
+  if argumento < 99999999:
     return obter_instalacao_por_medidor(robo, argumento, flags)
-  else:
-    return obter_instalacao_por_instalacao(robo, argumento, flags)
+  return obter_instalacao_por_instalacao(robo, argumento, flags)
 
 def obter_medidor(robo: SapBot, argumento: int, flags: list[IQ03_FLAGS] | None = None) -> MedidorInfo:
   if flags is None:
     flags = [IQ03_FLAGS.READ_REPORT]
   if argumento > 999999999:
     return obter_medidor_por_servico(robo, argumento, flags)
-  elif argumento < 99999999:
+  if argumento < 99999999:
     return obter_medidor_por_medidor(robo, argumento, 0, flags)
-  else:
-    return obter_medidor_por_instalacao(robo, argumento, flags)
+  return obter_medidor_por_instalacao(robo, argumento, flags)
 
 def obter_servico(robo: SapBot, argumento: int, flags: list[IW53_FLAGS] | None = None) -> ServicoInfo:
   if flags is None:
     flags = [IW53_FLAGS.GET_INFO]
   if argumento > 999999999:
     return obter_servico_por_servico(robo, argumento, flags)
-  elif argumento < 99999999:
+  if argumento < 99999999:
     return obter_servico_por_medidor(robo, argumento, flags)
-  else:
-    return obter_servico_por_instalacao(robo, argumento, flags)
+  return obter_servico_por_instalacao(robo, argumento, flags)
 
 def obter_religacao(robo: SapBot, argumento: int) -> pandas.DataFrame:
   if argumento > 90:
@@ -178,12 +175,11 @@ def obter_pendente(robo: SapBot, argumento: int) -> pandas.DataFrame:
       instalacao = instalacao_info,
       flag = ZARC140_FLAGS.GET_PENDING
     )
-  elif 'FPL9' not in NOTUSE:
+  if 'FPL9' not in NOTUSE:
     return robo.FPL9(
       instalacao = instalacao_info
     )
-  else:
-    raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
+  raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
 
 def print_pendentes(robo: SapBot, documentos: list[int], instalacao: InstalacaoInfo) -> int:
   if 'ZATC73' not in NOTUSE:
