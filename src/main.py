@@ -289,6 +289,8 @@ if __name__ == '__main__':
     else:
       print(retorno)
     robo.HOME_PAGE()
+  except KeyError as erro:
+    print(f'400: aplicacao nao reconhecida \'{erro.args[0]}\'')
   except ArgumentException as erro:
     print(f'400: {erro.message}')
   except InformationNotFound as erro:
@@ -302,4 +304,4 @@ if __name__ == '__main__':
   except WrapperBaseException as erro:
     print(f'500: {erro.message}')
   except Exception as erro:
-    print(f'500: Something goes wrong! {erro.args[0]}')
+    print(f'500: Unhandled exception! {erro.args[0]}')
