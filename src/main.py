@@ -5,6 +5,7 @@
 import sys
 import datetime
 import pandas
+from dateutil.relativedelta import relativedelta
 from wrapper import SapBot
 from constants import (
   SEPARADOR,
@@ -247,6 +248,46 @@ def obter_agrupamento(robo: SapBot, argumento: int) -> pandas.DataFrame:
   flag = [ZMED95_FLAGS.SKIPT_ENTER] if 'ZMED95' in NOTUSE else [ZMED95_FLAGS.ENTER_ENTER]
   return robo.ZMED95(logradouro_info, flag)
 
+def obter_consumo(robo: SapBot, argumento: int) -> pandas.DataFrame:
+  instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
+  return robo.ZATC66(instalacao_info)
+
+def obter_consumos(robo: SapBot, argumento: int) -> pandas.DataFrame:
+  consumos = pandas.DataFrame()
+  # Get reader data
+  leiturista = obter_leiturista(robo, argumento, [ZMED89_FLAGS.TIME_ORDER])
+  # Trim excessive data if needed
+  if leiturista.shape[0] >= 30:
+    offset = leiturista.shape[0] // 3
+    leiturista = leiturista.iloc[offset:-offset]
+  # Convert columns to numeric types
+  leiturista['#'] = [0 for i in range(leiturista.shape[0])]
+  leiturista['Medidor'] = pandas.to_numeric(leiturista['Medidor'], 'coerce').astype('Int64')
+  leiturista['Instalacao'] = pandas.to_numeric(leiturista['Instalacao'], 'coerce').astype('Int64')
+  # Generate the last 12 months formatted as "MMM.YY" (e.g., "fev.25")
+  meses_de_referencia = [
+      (datetime.datetime.today().replace(day=1) - relativedelta(months=i)).strftime('%b.%y')
+      for i in range(12)
+  ]
+  # Get all consumption data
+  for _, leitura in leiturista.iterrows():
+    consumo = obter_consumo(robo, leitura['Instalacao'])
+    consumos = pandas.concat([consumos, consumo], ignore_index=True)
+  # Pivot the consumption data
+  df_pivot = consumos.pivot(index='Medidor', columns='Mes ref.', values='Consumo')
+  # Rename columns to desired format (e.g., "fev.25" for "2025-02"), handling NaN values safely
+  df_pivot.columns = pandas.to_datetime(df_pivot.columns, format='%m/%Y', errors='coerce').strftime('%b.%y')
+  df_pivot.columns = [col if pandas.notna(col) else "Unknown" for col in df_pivot.columns]
+  # Filter columns to match the last 12 months (ensure all months are present in order)
+  df_pivot = df_pivot.reindex(columns=meses_de_referencia, fill_value=0)
+  # Reset index to merge
+  df_pivot.reset_index(inplace=True)
+  # Merge with consumer information
+  df_final = pandas.merge(leiturista, df_pivot, on='Medidor', how='left')
+  # Sort columns in reverse order (latest month first)
+  df_final = df_final[['#', 'Endereco', 'Instalacao', 'Medidor'] + meses_de_referencia]
+  return df_final
+
 aplicacoes = {
   'instalacao': obter_instalacao,
   'servico': obter_servico,
@@ -263,8 +304,8 @@ aplicacoes = {
   'informacao': obter_documento,
   'leiturista': obter_horariado,
   'roteiro': obter_sequencial,
-  # 'consumo': obter_consumo,
-  # 'ren360': obter_consumos,
+  'consumo': obter_consumo,
+  'ren360': obter_consumos,
   # 'agrupamento': obter_devedores,
   # 'fuga': obter_devedores,
 }
