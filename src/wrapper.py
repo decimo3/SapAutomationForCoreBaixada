@@ -799,7 +799,7 @@ class SapBot:
       dataframe["Mes ref."].append(tabela.getCellValue(i, "MES_ANO"))
       dataframe["Data leit."].append(tabela.getCellValue(i, "ADATSOLL"))
       dataframe["Medidor"].append(int(tabela.getCellValue(i, "GERNR")))
-      temporario_code = int(str(tabela.getCellValue(i, "LEIT_FATURADA")).replace(',', '.'))
+      temporario_code = int(str(tabela.getCellValue(i, "LEIT_FATURADA")).replace('.', ''))
       dataframe["Leitura"].append(temporario_code)
       dataframe["Consumo"].append(0)
       # Código do registrador e texto breve descritivo
