@@ -406,7 +406,7 @@ class SapBot:
     if instalacao.centro is None:
       raise SomethingGoesWrong('A propriedade `centro` não foi definida!')
     self.session.StartTransaction(Transaction="ZMED89")
-    mes = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+    mes = datetime.date.today() - datetime.timedelta(days=45)
     lote = instalacao.unidade[:2]
     # Checks if query all meter centers or only one
     if ZMED89_FLAGS.TELEMEDIDO in flags:
