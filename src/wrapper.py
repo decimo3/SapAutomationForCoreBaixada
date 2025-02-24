@@ -413,7 +413,7 @@ class SapBot:
       self.session.FindById(STRINGPATH['ZMED89_CENTRO_MIN']).text = '001'
       self.session.FindById(STRINGPATH['ZMED89_CENTRO_MAX']).text = '100'
     else:
-      self.session.FindById(STRINGPATH['ZMED89_CENTRO_MIN']).text = instalacao.centro
+      self.session.FindById(STRINGPATH['ZMED89_CENTRO_MIN']).text = str(instalacao.centro).zfill(3)
       self.session.FindById(STRINGPATH['ZMED89_CENTRO_MAX']).text = ''
     # Fill the rest of form
     self.session.FindById(STRINGPATH['ZMED89_LOTE_INPUT']).text = lote
