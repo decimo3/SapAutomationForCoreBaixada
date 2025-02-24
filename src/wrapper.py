@@ -323,7 +323,7 @@ class SapBot:
     self.session.FindById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
     self.CHECK_STATUSBAR(check_false_sucess_text='não existe')
     data = InstalacaoInfo()
-    data.instalacao = instalacao
+    data.instalacao = int(instalacao)
     data.status = self.session.findById(STRINGPATH['ES32_STATUS_TEXT']).text
     data.classe = int(self.session.FindById(STRINGPATH['ES32_CLASSE_TEXT']).text)
     data.texto_classe = str(data.classe) + ' - ' + depara('classe_subclasse', str(data.classe))
