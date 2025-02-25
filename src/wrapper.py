@@ -37,6 +37,7 @@ from models import (
 )
 from enumerators import (
   DESTAQUES,
+  FPL9_FLAGS,
   IW53_FLAGS,
   ES32_FLAGS,
   ZMED89_FLAGS,
@@ -465,7 +466,7 @@ class SapBot:
   def ZARC140(
     self,
     instalacao: InstalacaoInfo,
-    flag: ZARC140_FLAGS = ZARC140_FLAGS.GET_PENDING
+    flags: list[ZARC140_FLAGS] = [ZARC140_FLAGS.GET_PENDING]
     ) -> pandas.DataFrame:
     ''' Function that get information about pending invoice report '''
     self.session.StartTransaction(Transaction="ZARC140")
@@ -476,7 +477,7 @@ class SapBot:
     self.session.FindById(STRINGPATH['ZARC140_REAVISOS_CHECK']).Selected = True
     self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
     self.CHECK_STATUSBAR()
-    if flag == ZARC140_FLAGS.GET_PENDING:
+    if ZARC140_FLAGS.GET_PENDING in flags:
       # Check if has pending invoices
       if self.session.FindById(STRINGPATH['ZARC140_PENDENTES_TAB'], False) is None:
         raise InformationNotFound('Instalacao consultada nao tem registro de faturas!')
@@ -511,8 +512,9 @@ class SapBot:
       dataframe = pandas.DataFrame(dataframe)
       reordered_columns = ['#'] + [col for col in dataframe.columns if col != '#']
       dataframe = dataframe[reordered_columns]
+      dataframe['Vencimento'] = pandas.to_datetime(dataframe['Vencimento'], format='%d.%m.%Y')
       return dataframe
-    if flag == ZARC140_FLAGS.GET_RENOTICE:
+    if ZARC140_FLAGS.GET_RENOTICE in flags:
       if self.session.FindById(STRINGPATH['ZARC140_RENOTICE_TAB'], False) is None:
         raise InformationNotFound('Instalacao consultada nao tem registro de reavisos!')
       self.session.FindById(STRINGPATH['ZARC140_RENOTICE_TAB']).Select()
@@ -644,7 +646,8 @@ class SapBot:
     return pandas.DataFrame(dataframe)
   def FPL9(
     self,
-    instalacao: InstalacaoInfo
+    instalacao: InstalacaoInfo,
+    flags: list[FPL9_FLAGS] = [FPL9_FLAGS.GET_PENDING]
     ) -> pandas.DataFrame:
     ''' Function that get information about pending invoice report
         throught `FPL9` transaction when `ZARC140` is unavaliable '''
