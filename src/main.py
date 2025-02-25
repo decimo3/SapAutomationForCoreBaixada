@@ -24,6 +24,7 @@ from enumerators import (
   ES32_FLAGS,
   ES57_FLAGS,
   ES61_FLAGS,
+  FPL9_FLAGS,
   IQ03_FLAGS,
   ZMED89_FLAGS,
   ZARC140_FLAGS,
@@ -169,11 +170,12 @@ def obter_pendente(robo: SapBot, argumento: int) -> pandas.DataFrame:
   if 'ZARC140' not in NOTUSE:
     return robo.ZARC140(
       instalacao = instalacao_info,
-      flag = ZARC140_FLAGS.GET_PENDING
+      flags = [ZARC140_FLAGS.GET_PENDING]
     )
   if 'FPL9' not in NOTUSE:
     return robo.FPL9(
-      instalacao = instalacao_info
+      instalacao = instalacao_info,
+      flags = [FPL9_FLAGS.GET_PENDING]
     )
   raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
 
