@@ -298,13 +298,14 @@ def obter_consumos(robo: SapBot, argumento: int) -> pandas.DataFrame:
   df_final = df_final[['#', 'Endereco', 'Instalacao', 'Medidor'] + meses_de_referencia]
   return df_final
 
-def obter_debitos_passiveis(robo: SapBot, argumento: int) -> int:
+def obter_debitos_passiveis(robo: SapBot, argumento: int, filtrar_passivas: bool = True) -> int:
   debito = obter_pendente(robo, argumento)
-  prazo_minimo = datetime.date.today() - datetime.timedelta(days=15)
-  prazo_maximo = datetime.date.today() - datetime.timedelta(days=90)
-  debito = debito[debito['#'] == DESTAQUES.VERMELHO]
-  debito = debito[debito['Vencimento'] < pandas.to_datetime(prazo_minimo)]
-  debito = debito[debito['Vencimento'] > pandas.to_datetime(prazo_maximo)]
+  if filtrar_passivas:
+    debito = debito[debito['#'] == DESTAQUES.VERMELHO]
+    prazo_minimo = datetime.date.today() - datetime.timedelta(days=15)
+    prazo_maximo = datetime.date.today() - datetime.timedelta(days=90)
+    debito = debito[debito['Vencimento'] < pandas.to_datetime(prazo_minimo)]
+    debito = debito[debito['Vencimento'] > pandas.to_datetime(prazo_maximo)]
   return debito['Valor'].sum()
 
 def obter_passivo_corte(robo: SapBot, argumento: int) -> str:
@@ -360,6 +361,26 @@ def obter_devedores(robo: SapBot, argumento: int) -> pandas.DataFrame:
   agrupamentos = agrupamentos[['#'] + [col for col in agrupamentos.columns if col != '#']]
   return agrupamentos
 
+def obter_fugitivos(robo: SapBot, argumento: int) -> pandas.DataFrame:
+  passividade = pandas.DataFrame({ 'Instalacao': [], 'Pendente': [] })
+  agrupamentos = obter_agrupamento(robo, argumento)
+  agrupamentos['Instalacao'] = pandas.to_numeric(agrupamentos['Instalacao'], 'coerce').astype('Int64')
+  for _, agrupamento in agrupamentos.iterrows():
+    instalacao = agrupamento['Instalacao']
+    try:
+      passivo = obter_debitos_passiveis(robo, instalacao, False)
+    except:
+      passivo = 0
+    linha = [{
+      '#': DESTAQUES.AUSENTE,
+      'Instalacao': instalacao,
+      'Valor': passivo
+    }]
+    passividade = pandas.concat([passividade, pandas.DataFrame(linha)], ignore_index=True)
+  agrupamentos = agrupamentos.merge(passividade, how='left', on='Instalacao')
+  agrupamentos = agrupamentos[['#'] + [col for col in agrupamentos.columns if col != '#']]
+  return agrupamentos
+
 aplicacoes = {
   'instalacao': obter_instalacao,
   'servico': obter_servico,
@@ -380,7 +401,7 @@ aplicacoes = {
   'ren360': obter_consumos,
   'instalacoes': obter_agrupamento,
   'agrupamento': obter_devedores,
-  # 'fuga': obter_fugitivos,
+  'fuga': obter_fugitivos,
   'passivo': obter_passivo_corte,
   'pendente': obter_pendente,
 }
