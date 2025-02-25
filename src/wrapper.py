@@ -349,6 +349,8 @@ class SapBot:
       if self.session.FindById(STRINGPATH['POPUP'], False) is not None:
         self.session.FindById(STRINGPATH['POPUP_ENTER_BUTTON']).Press()
         return data
+      if self.session.FindById(STRINGPATH['ES32_EQUIPAMENTO_TABLE'], False) is None:
+        raise InformationNotFound('Instalacao nao possui medidor!')
       ESPACO_VAZIO = '__________________'
       for i in range(self.session.FindById(STRINGPATH['ES32_EQUIPAMENTO_TABLE']).RowCount - 4):
         material = self.session.findById(STRINGPATH['ES32_EQUIPAMENTO_CODIGO'].replace('?','0')).text
