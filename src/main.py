@@ -406,7 +406,7 @@ if __name__ == '__main__':
       print(retorno)
     robo.HOME_PAGE()
   except KeyError as erro:
-    print(f'400: aplicacao nao reconhecida \'{erro.args[0]}\'')
+    print(f'400: aplicacao \'{erro.args[0]}\' desconhecida!')
   except ArgumentException as erro:
     print(f'400: {erro.message}')
   except InformationNotFound as erro:
