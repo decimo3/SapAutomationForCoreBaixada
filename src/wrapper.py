@@ -623,6 +623,8 @@ class SapBot:
         break
       if current_int == logradouro.numero_int:
         quantidade = int(self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_QNTD']).text)
+        if quantidade > 12:
+          raise TooMannyRequests('Agrupamento possui instalacoes demais!')
         self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TABLE']).GetAbsoluteRow(apontador).selected = True
         self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_BUTTON']).Press()
         for i in range(1, quantidade + 1):
