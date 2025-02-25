@@ -594,6 +594,8 @@ class SapBot:
     flags: list[ZMED95_FLAGS] = [ZMED95_FLAGS.ENTER_ENTER]
     ) -> pandas.DataFrame:
     ''' Function to get information about group of instalations '''
+    if not logradouro.numero_int:
+      raise InformationNotFound('Instalacao sem numero de rua, nao agrupado!')
     if not ZMED95_FLAGS.SKIPT_ENTER in flags:
       self.session.StartTransaction(Transaction="ZMED95")
       self.CHECK_STATUSBAR()
