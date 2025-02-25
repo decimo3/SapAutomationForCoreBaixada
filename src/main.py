@@ -195,6 +195,8 @@ def obter_faturas(robo: SapBot, argumento: int) -> int:
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
   # Getting the pending invoice report
   relatorio = obter_pendente(robo, argumento)
+  if relatorio.shape[0] == 0:
+    raise InformationNotFound('Cliente nao possui faturas pendentes!')
   # Printing pending invoices
   return print_pendentes(robo, relatorio['Documento'].to_list(), instalacao_info)
 
