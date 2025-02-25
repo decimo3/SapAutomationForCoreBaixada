@@ -26,6 +26,12 @@ class ZMED89_FLAGS(IntEnum):
 class ZARC140_FLAGS(IntEnum):
   GET_PENDING = 0
   GET_RENOTICE = 1
+  DONOT_THROW = 2
+
+class FPL9_FLAGS(IntEnum):
+  GET_PENDING = 0
+  GET_RENOTICE = 1
+  DONOT_THROW = 2
 
 class ES61_FLAGS(IntEnum):
   ENTER_ENTER = 0
