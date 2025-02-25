@@ -21,6 +21,7 @@ from exceptions import (
 )
 from enumerators import (
   BP_FLAGS,
+  DESTAQUES,
   ES32_FLAGS,
   ES57_FLAGS,
   ES61_FLAGS,
@@ -297,6 +298,68 @@ def obter_consumos(robo: SapBot, argumento: int) -> pandas.DataFrame:
   df_final = df_final[['#', 'Endereco', 'Instalacao', 'Medidor'] + meses_de_referencia]
   return df_final
 
+def obter_debitos_passiveis(robo: SapBot, argumento: int) -> int:
+  debito = obter_pendente(robo, argumento)
+  prazo_minimo = datetime.date.today() - datetime.timedelta(days=15)
+  prazo_maximo = datetime.date.today() - datetime.timedelta(days=90)
+  debito = debito[debito['#'] == DESTAQUES.VERMELHO]
+  debito = debito[debito['Vencimento'] < pandas.to_datetime(prazo_minimo)]
+  debito = debito[debito['Vencimento'] > pandas.to_datetime(prazo_maximo)]
+  return debito['Valor'].sum()
+
+def obter_passivo_corte(robo: SapBot, argumento: int) -> str:
+  try:
+    instalacao = obter_instalacao(robo, argumento, [ES32_FLAGS.GET_METER])
+  except InformationNotFound as erro:
+    if erro.message == 'Instalacao sem medidor!':
+      return erro.message
+    return ''
+  except:
+    ...
+  if instalacao.status == ' Instalação complet.suspensa':
+    return 'Já suspenso no sistema!'
+  if instalacao.contrato == 0:
+    return 'Instalacao sem contrato!'
+  if not instalacao.nome_cliente:
+    return 'Instalacao sem parceiro!'
+  if instalacao.nome_cliente.startswith("UNIDADE C/ CONSUMO"):
+    return 'Instalacao sem parceiro!'
+  if instalacao.nome_cliente.startswith("PARCEIRO DE NEGOCIO"):
+    return 'Instalacao sem parceiro!'
+  try:
+    instalacao.get_medidor()
+  except InformationNotFound as erro:
+    return 'Instalacao sem medidor!'
+  except:
+    ...
+  # TODO - Verificar se baixa renda é critério para passividade
+  # if 'Baixa Renda' in instalacao.texto_classe:
+  #   return 'Instalacao nao passivel'
+  try:
+    if obter_debitos_passiveis(robo, instalacao.instalacao) > 0:
+      return 'Debitos passiveis de corte!'
+  except:
+    ...
+  return 'Instalacao nao passivel'
+
+def obter_devedores(robo: SapBot, argumento: int) -> pandas.DataFrame:
+  passividade = pandas.DataFrame({ 'Instalacao': [], 'Observacao': [] })
+  agrupamentos = obter_agrupamento(robo, argumento)
+  agrupamentos['Instalacao'] = pandas.to_numeric(agrupamentos['Instalacao'], 'coerce').astype('Int64')
+  for _, agrupamento in agrupamentos.iterrows():
+    instalacao = agrupamento['Instalacao']
+    passivo = obter_passivo_corte(robo, instalacao)
+    status = DESTAQUES.VERDE if passivo == 'Instalacao nao passivel' else DESTAQUES.VERMELHO
+    linha = [{
+      '#': status,
+      'Instalacao': instalacao,
+      'Observacao': passivo
+    }]
+    passividade = pandas.concat([passividade, pandas.DataFrame(linha)], ignore_index=True)
+  agrupamentos = agrupamentos.merge(passividade, how='left', on='Instalacao')
+  agrupamentos = agrupamentos[['#'] + [col for col in agrupamentos.columns if col != '#']]
+  return agrupamentos
+
 aplicacoes = {
   'instalacao': obter_instalacao,
   'servico': obter_servico,
@@ -315,8 +378,11 @@ aplicacoes = {
   'roteiro': obter_sequencial,
   'consumo': obter_consumo,
   'ren360': obter_consumos,
-  # 'agrupamento': obter_devedores,
-  # 'fuga': obter_devedores,
+  'instalacoes': obter_agrupamento,
+  'agrupamento': obter_devedores,
+  # 'fuga': obter_fugitivos,
+  'passivo': obter_passivo_corte,
+  'pendente': obter_pendente,
 }
 
 if __name__ == '__main__':
