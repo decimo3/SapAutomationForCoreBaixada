@@ -275,8 +275,13 @@ def obter_consumos(robo: SapBot, argumento: int) -> pandas.DataFrame:
   ]
   # Get all consumption data
   for _, leitura in leiturista.iterrows():
-    consumo = obter_consumo(robo, leitura['Instalacao'])
-    consumos = pandas.concat([consumos, consumo], ignore_index=True)
+    try:
+      consumo = obter_consumo(robo, leitura['Instalacao'])
+      consumos = pandas.concat([consumos, consumo], ignore_index=True)
+    except:
+      ...
+  if consumos.shape[0] == 0:
+    raise InformationNotFound('Nao foi possivel obter consumos!')
   # Pivot the consumption data
   df_pivot = consumos.pivot(index='Medidor', columns='Mes ref.', values='Consumo')
   # Rename columns to desired format (e.g., "fev.25" for "2025-02"), handling NaN values safely
