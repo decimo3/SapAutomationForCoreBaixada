@@ -108,7 +108,7 @@ class ParceiroInfo():
     texto += f'Nome do cliente: {self.nome_cliente}\n' if self.nome_cliente else ''
     texto += f'Tipo do documento: {self.documento_tipo}\n' if self.documento_tipo else ''
     texto += f'Numero do documento: {self.documento_numero}\n' if self.documento_numero else ''
-    texto += f'Telefones: {'/'.join(self.telefones)}' if len(self.telefones) > 0 else ''
+    texto += f'Telefones: {' '.join(self.telefones)}' if len(self.telefones) > 0 else ''
     return  texto
 
 class LigacaoInfo():
