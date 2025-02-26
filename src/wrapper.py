@@ -426,6 +426,11 @@ class SapBot:
     self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
     # Check if has error
     self.CHECK_STATUSBAR()
+    # check if has error window
+    if self.session.FindById(STRINGPATH['POPUP'], False) is not None:
+      texto = self.session.FindById(STRINGPATH['ZMED89_POPUP_ERROR']).text
+      self.session.FindById(STRINGPATH['POPUP']).Close()
+      raise InformationNotFound(texto)
     # Select first layout
     self.session.FindById(STRINGPATH['ZMED89_LAYOUT_BUTTON']).Press()
     self.session.FindById(STRINGPATH['ZMED89_LAYOUT_TABLE']).setCurrentCell(0,'DEFAULT')
