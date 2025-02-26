@@ -601,7 +601,7 @@ class SapBot:
   def ZMED95(
     self,
     logradouro: LogradouroInfo,
-    flags: list[ZMED95_FLAGS] = [ZMED95_FLAGS.ENTER_ENTER]
+    flags: list[ZMED95_FLAGS] = [ZMED95_FLAGS.ENTER_ENTER, ZMED95_FLAGS.GET_GROUPING]
     ) -> pandas.DataFrame:
     ''' Function to get information about group of instalations '''
     if not logradouro.numero_int:
@@ -611,43 +611,66 @@ class SapBot:
       self.CHECK_STATUSBAR()
       self.session.FindById(STRINGPATH['ZMED95_LOGRADOURO_INPUT']).text = logradouro.logradouro
       self.session.FindById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
-    self.session.FindById(STRINGPATH['ZMED95_ENDERECOS_BUTTON']).Press()
-    tamanho = self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TABLE']).rows.length
-    apontador = 0
-    colunas = ['Endereco', 'Instalacao', 'Cliente', 'Tipo']
-    dataframe = {key: [] for key in colunas}
-    while apontador < self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TABLE']).RowCount:
-      self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TABLE']).verticalScrollbar.position = apontador
-      # Check if greater number on screen is less that expected number
-      greater_str = self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TEXT'].replace('?',str(tamanho - 1))).text
-      match = re.search("[0-9]+", greater_str)
-      greater_int = int(match.group()) if match is not None else 99999
-      if greater_int < logradouro.numero_int:
-        apontador += tamanho
-        continue
-      current_str = self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TEXT'].replace('?',str(0))).text
-      match = re.search("[0-9]+", current_str)
-      if match is None:
+    if ZMED95_FLAGS.GET_GROUPING in flags:
+      self.session.FindById(STRINGPATH['ZMED95_ENDERECOS_BUTTON']).Press()
+      tamanho = self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TABLE']).rows.length
+      apontador = 0
+      colunas = ['Endereco', 'Instalacao', 'Cliente', 'Tipo']
+      dataframe = {key: [] for key in colunas}
+      while apontador < self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TABLE']).RowCount:
+        self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TABLE']).verticalScrollbar.position = apontador
+        # Check if greater number on screen is less that expected number
+        greater_str = self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TEXT'].replace('?',str(tamanho - 1))).text
+        match = re.search("[0-9]+", greater_str)
+        greater_int = int(match.group()) if match is not None else 99999
+        if greater_int < logradouro.numero_int:
+          apontador += tamanho
+          continue
+        current_str = self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TEXT'].replace('?',str(0))).text
+        match = re.search("[0-9]+", current_str)
+        if match is None:
+          apontador += 1
+          continue
+        current_int = int(match.group())
+        if current_int > logradouro.numero_int:
+          break
+        if current_int == logradouro.numero_int:
+          quantidade = int(self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_QNTD']).text)
+          if quantidade > 12:
+            raise TooMannyRequests('Agrupamento possui instalacoes demais!')
+          self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TABLE']).GetAbsoluteRow(apontador).selected = True
+          self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_BUTTON']).Press()
+          for i in range(1, quantidade + 1):
+            complemento = self.session.FindById(STRINGPATH['ZMED95_INSTALACOES_COMPLEMENTO']).text
+            dataframe['Endereco'].append(current_str + ' ' + complemento)
+            dataframe["Instalacao"].append(self.session.FindById(STRINGPATH['ZMED95_INSTALACOES_INSTALACAO']).text)
+            dataframe["Cliente"].append(self.session.FindById(STRINGPATH['ZMED95_INSTALACOES_NOMECLIENTE']).text)
+            dataframe["Tipo"].append(self.session.FindById(STRINGPATH['ZMED95_INSTALACOES_CLASSE_INSTALACAO']).text)
+            self.session.FindById(STRINGPATH['ZMED95_INSTALACOES_TABLE']).verticalScrollbar.position = i
         apontador += 1
-        continue
-      current_int = int(match.group())
-      if current_int > logradouro.numero_int:
-        break
-      if current_int == logradouro.numero_int:
-        quantidade = int(self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_QNTD']).text)
-        if quantidade > 12:
-          raise TooMannyRequests('Agrupamento possui instalacoes demais!')
-        self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_TABLE']).GetAbsoluteRow(apontador).selected = True
-        self.session.FindById(STRINGPATH['ZMED95_NUMBERS_LIST_BUTTON']).Press()
-        for i in range(1, quantidade + 1):
-          complemento = self.session.FindById(STRINGPATH['ZMED95_INSTALACOES_COMPLEMENTO']).text
-          dataframe['Endereco'].append(current_str + ' ' + complemento)
-          dataframe["Instalacao"].append(self.session.FindById(STRINGPATH['ZMED95_INSTALACOES_INSTALACAO']).text)
-          dataframe["Cliente"].append(self.session.FindById(STRINGPATH['ZMED95_INSTALACOES_NOMECLIENTE']).text)
-          dataframe["Tipo"].append(self.session.FindById(STRINGPATH['ZMED95_INSTALACOES_CLASSE_INSTALACAO']).text)
-          self.session.FindById(STRINGPATH['ZMED95_INSTALACOES_TABLE']).verticalScrollbar.position = i
-      apontador += 1
-    return pandas.DataFrame(dataframe)
+      dataframe = pandas.DataFrame(dataframe)
+      if dataframe.shape[0] == 1:
+        raise InformationNotFound('Instalacao unica no sistema!')
+      return dataframe
+    if ZMED95_FLAGS.GET_CROSSING in flags:
+      self.session.FindById(STRINGPATH['ZMED95_CRUZAMENTOS_BUTTON']).Press()
+      container = self.session.FindById(STRINGPATH['ZMED95_CRUZAMENTOS_TABLE'])
+      if container.RowCount == 0:
+        raise InformationNotFound('Nao ha informacao de cruzamentos')
+      colunas = ['#', 'Num. 1', 'Cod. Cruza', 'Cod. rua', 'Logradouro', 'Num. 2', 'Latitude', 'Longitude', 'Cidade']
+      dataframe = {key: [] for key in colunas}
+      for i in range(container.RowCount):
+        dataframe['#'].append(DESTAQUES.AUSENTE)
+        dataframe['Num. 1'].append(container.getCellValue(i, "NUMERO"))
+        dataframe['Cod. Cruza'].append(container.getCellValue(i, "COD_CRUZAMENTO"))
+        dataframe['Cod. rua'].append(container.getCellValue(i, "STRT_CODE"))
+        dataframe['Logradouro'].append(container.getCellValue(i, "STREET"))
+        dataframe['Num. 2'].append(container.getCellValue(i, "NUMERO_OUTR"))
+        dataframe['Latitude'].append(str.replace(container.getCellValue(i, "LATITUDE"), ',', '.'))
+        dataframe['Longitude'].append(str.replace(container.getCellValue(i, "LONGITUDE"), ',', '.'))
+        dataframe['Cidade'].append(container.getCellValue(i, "CITY_NAME"))
+      return pandas.DataFrame(dataframe)
+    raise SomethingGoesWrong('Probably the lack of a flag made you fall here')
   def FPL9(
     self,
     instalacao: InstalacaoInfo,
