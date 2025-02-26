@@ -313,11 +313,10 @@ def obter_passivo_corte(robo: SapBot, argumento: int) -> str:
   try:
     instalacao = obter_instalacao(robo, argumento, [ES32_FLAGS.GET_METER])
   except InformationNotFound as erro:
-    if erro.message == 'Instalacao sem medidor!':
+    if erro.message == 'Instalacao nao possui medidor!':
       return erro.message
-    return 'Instalacao nao passivel'
-  except:
-    ...
+  except Exception as erro:
+    raise erro
   if instalacao.status == ' Instalação complet.suspensa':
     return 'Já suspenso no sistema!'
   if instalacao.contrato == 0:
