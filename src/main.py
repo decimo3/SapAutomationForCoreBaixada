@@ -381,6 +381,19 @@ def obter_fugitivos(robo: SapBot, argumento: int) -> pandas.DataFrame:
   agrupamentos = agrupamentos[['#'] + [col for col in agrupamentos.columns if col != '#']]
   return agrupamentos
 
+def obter_cruzamento(robo: SapBot, argumento: int) -> pandas.DataFrame:
+  flag = [ES32_FLAGS.ENTER_CONSUMO] if 'ES61' in NOTUSE else [ES32_FLAGS.ONLY_INST]
+  instalacao_info = obter_instalacao(robo, argumento, flag)
+  flag = [ES61_FLAGS.SKIPT_ENTER] if 'ES61' in NOTUSE else [ES61_FLAGS.ENTER_ENTER]
+  if 'ES57' in NOTUSE:
+    flag.extend([ES61_FLAGS.ENTER_LIGACAO])
+  ligacao_info = robo.ES61(instalacao_info, flag)
+  flag = [ES57_FLAGS.SKIPT_ENTER] if 'ES57' in NOTUSE else [ES57_FLAGS.ENTER_ENTER]
+  logradouro_info = robo.ES57(ligacao_info, flag) 
+  flag = [ZMED95_FLAGS.SKIPT_ENTER] if 'ZMED95' in NOTUSE else [ZMED95_FLAGS.ENTER_ENTER]
+  flag.extend([ZMED95_FLAGS.GET_CROSSING])
+  return robo.ZMED95(logradouro_info, flag)
+
 aplicacoes = {
   'instalacao': obter_instalacao,
   'servico': obter_servico,
