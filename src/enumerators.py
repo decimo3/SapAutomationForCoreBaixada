@@ -47,8 +47,8 @@ class ES57_FLAGS(IntEnum):
 class ZMED95_FLAGS(IntEnum):
   ENTER_ENTER = 0
   SKIPT_ENTER = 1
-  CHECK_PASIVE = 2
-  CHECK_VALUES = 3
+  GET_GROUPING = 3
+  GET_CROSSING = 4
 
 class BP_FLAGS(IntEnum):
   GET_PHONES = 0
