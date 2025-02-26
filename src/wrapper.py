@@ -335,7 +335,7 @@ class SapBot:
     data.parceiro = int(temporario) if temporario else 0
     data.unidade = self.session.FindById(STRINGPATH['ES32_UNIDADE_TEXT']).text
     data.endereco = self.session.FindById(STRINGPATH['ES32_NOME_ENDERECO_TEXT']).text
-    data.nome_cliente = self.session.findById(STRINGPATH['ES32_NOMECLIENTE_TEXT']).text
+    data.nome_cliente = str(self.session.findById(STRINGPATH['ES32_NOMECLIENTE_TEXT']).text).split('/')[0]
     if ES32_FLAGS.ENTER_CONSUMO in flags:
       self.session.FindById(STRINGPATH['ES32_CONSUMO_TEXT']).setFocus()
       self.SEND_ENTER()
