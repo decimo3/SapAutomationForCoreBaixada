@@ -214,7 +214,7 @@ class SapBot:
     return statusbar.text
   def GETBY_XY(self, id_template: str, col: int, row: int):
     ''' function to get element replace col and row from array id '''
-    id_string = id_template.replace('¿', str(col)).replace('?', str(row))
+    id_string = STRINGPATH[id_template].replace('¿', str(col)).replace('?', str(row))
     return self.session.FindById(id_string, False)
   def ZATC73(
       self,
