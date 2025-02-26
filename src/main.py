@@ -251,6 +251,7 @@ def obter_agrupamento(robo: SapBot, argumento: int) -> pandas.DataFrame:
   flag = [ES57_FLAGS.SKIPT_ENTER] if 'ES57' in NOTUSE else [ES57_FLAGS.ENTER_ENTER]
   logradouro_info = robo.ES57(ligacao_info, flag)
   flag = [ZMED95_FLAGS.SKIPT_ENTER] if 'ZMED95' in NOTUSE else [ZMED95_FLAGS.ENTER_ENTER]
+  flag.extend([ZMED95_FLAGS.GET_GROUPING])
   return robo.ZMED95(logradouro_info, flag)
 
 def obter_consumo(robo: SapBot, argumento: int) -> pandas.DataFrame:
