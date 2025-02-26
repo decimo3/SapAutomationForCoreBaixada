@@ -767,13 +767,19 @@ class SapBot:
       parceiro.documento_tipo = self.session.findById(STRINGPATH['BP_DOCS_TIPO_TEXT']).text
       parceiro.documento_numero = self.session.findById(STRINGPATH['BP_DOCS_CPF_TEXT']).text
     if BP_FLAGS.GET_PHONES in flags:
-      self.session.findById(STRINGPATH['BP_PHONE_TAB']).Select()
-      for lista in {'BP_PHONE_LIST1', 'BP_PHONE_LIST2', 'BP_PHONE_LIST3'}:
-        self.session.FindById(STRINGPATH[lista]).Press()
-        for i in range(4):
-          parceiro.telefones.append(self.GETBY_XY('BP_PHONE_TEXT', 2, i))
-      parceiro.telefones = list(dict.fromkeys(parceiro.telefones))
       ESPACO_VAZIO = "______________________________"
+      self.session.findById(STRINGPATH['BP_PHONE_TAB']).Select()
+      for lista in {'BP_PHONE_LIST1', 'BP_PHONE_LIST2', 'BP_PHONE_LIST3', 'BP_PHONE_LIST4', 'BP_PHONE_LIST5'}:
+        self.session.FindById(STRINGPATH[lista]).Press()
+        if self.session.FindById(STRINGPATH['POPUP'], False) is None:
+          continue
+        for i in range(4):
+          telefone = self.GETBY_XY('BP_PHONE_TEXT', 2, i).text
+          if telefone == '' or telefone == ESPACO_VAZIO:
+            continue
+          parceiro.telefones.append(telefone)
+        self.session.FindById(STRINGPATH['POPUP']).Close()
+      parceiro.telefones = list(dict.fromkeys(parceiro.telefones))
       if ESPACO_VAZIO in parceiro.telefones:
         parceiro.telefones.remove(ESPACO_VAZIO)
       if not parceiro.telefones:
