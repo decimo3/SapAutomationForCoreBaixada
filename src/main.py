@@ -7,6 +7,7 @@ import datetime
 import pandas
 from dateutil.relativedelta import relativedelta
 from wrapper import SapBot
+from helpers import depara
 from constants import (
   SEPARADOR,
   NOTUSE,
@@ -164,6 +165,28 @@ def obter_bandeirada(robo: SapBot, argumento: int) -> pandas.DataFrame:
     colluns = ['QMNUM', 'ZZINSTLN', 'QMART', 'FECOD', 'LTRMN', 'LTRUR', 'ZZ_ST_USUARIO', 'QMDAB'],
     colluns_names = ['Nota', 'Instalacao', 'Tipo', 'Dano', 'Data', 'Hora', 'Status', 'Fim avaria']
   )
+
+def obter_lideanexo(robo: SapBot, argumento: int) -> pandas.DataFrame:
+  if argumento > 90:
+    raise ArgumentException('O numero de dias eh superior ao permitido!')
+  if 'ZSVC20' in NOTUSE:
+    raise UnavailableSap('A aplicacao necessaria esta indisponivel!')
+  data_inicio = datetime.date.today() - datetime.timedelta(days=argumento)
+  relatorio = robo.ZSVC20(
+    tipos_notas = ['B5', 'B8', 'BA', 'BC', 'BN', 'BS', 'BV'],
+    min_data = data_inicio,
+    max_data = datetime.date.today(),
+    danos_filtro = [],
+    statuses = ['ENVI', 'LIBE', 'TABL'],
+    regional = 'RO',
+    layout = '/VENCIMENTOS',
+    colluns = ['QMNUM', 'ZZINSTLN', 'QMART', 'FECOD', 'LTRMN', 'LTRUR', 'ZZ_ST_USUARIO', 'QMDAB'],
+    colluns_names = ['Nota', 'Instalacao', 'Tipo', 'Dano', 'Data', 'Hora', 'Status', 'Fim avaria']
+  )
+  filtrar_danos = depara('relatorio_filtro', 'LIDE').split(',')
+  filtrar_danos.extend(depara('relatorio_filtro', 'ANEXO').split(','))
+  relatorio = relatorio[~relatorio['Dano'].isin(filtrar_danos)]
+  return relatorio
 
 def obter_pendente(robo: SapBot, argumento: int) -> pandas.DataFrame:
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
@@ -417,6 +440,10 @@ aplicacoes = {
   'fuga': obter_fugitivos,
   'passivo': obter_passivo_corte,
   'pendente': obter_pendente,
+  'cruzamento': obter_cruzamento,
+  'lideanexo': obter_lideanexo,
+  # 'abertura': checar_inspecao,
+  # 'informacao': obter_informacao,
 }
 
 if __name__ == '__main__':
