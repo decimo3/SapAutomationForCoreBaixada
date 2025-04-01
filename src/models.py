@@ -57,8 +57,8 @@ class InstalacaoInfo():
     texto += f'*Classe:* {self.texto_classe}\n' if self.texto_classe else ''
     if self.equipamento:
       for i, medidor in enumerate(self.equipamento):
-        texto += f'*Equipamento {i+1}:* {medidor.serial}\n'
-        texto += f'*Material {i+1}:* {medidor.texto_material}\n'
+        texto += f'*Serial:* {medidor.serial}\n'
+        texto += f'*Material:* {medidor.texto_material}\n'
     else:
       texto += f'Instalacao nao possui equipamentos vinculados!'
     return texto
@@ -105,7 +105,7 @@ class ParceiroInfo():
   telefones: list[str] = field(default_factory=list)
   def __str__(self) -> str:
     texto = f'Parceiro: {self.parceiro}\n' if self.parceiro else ''
-    texto += f'Nome do cliente: {self.nome_cliente}\n' if self.nome_cliente else ''
+    texto += f'Nome: {self.nome_cliente}\n' if self.nome_cliente else ''
     texto += f'Tipo do documento: {self.documento_tipo}\n' if self.documento_tipo else ''
     texto += f'Numero do documento: {self.documento_numero}\n' if self.documento_numero else ''
     texto += f'Telefones: {' '.join(self.telefones)}' if len(self.telefones) > 0 else ''
