@@ -348,8 +348,12 @@ class SapBot:
     if ES32_FLAGS.GET_METER in flags:
       self.session.FindById(STRINGPATH['ES32_MEDIDOR_BUTTON']).Press()
       if self.session.FindById(STRINGPATH['POPUP'], False) is not None:
+        if ES32_FLAGS.DONOT_THROW in flags:
+          return data
         raise InformationNotFound('Instalacao nao possui medidor!')
       if self.session.FindById(STRINGPATH['ES32_EQUIPAMENTO_TABLE'], False) is None:
+        if ES32_FLAGS.DONOT_THROW in flags:
+          return data
         raise InformationNotFound('Instalacao nao possui medidor!')
       ESPACO_VAZIO = '__________________'
       for i in range(self.session.FindById(STRINGPATH['ES32_EQUIPAMENTO_TABLE']).RowCount - 4):

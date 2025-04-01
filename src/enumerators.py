@@ -13,6 +13,7 @@ class ES32_FLAGS(IntEnum):
   GET_CENTER = 1
   GET_METER = 2
   ENTER_CONSUMO = 3
+  DONOT_THROW = 4
 
 class IW53_FLAGS(IntEnum):
   GET_INST = 0
