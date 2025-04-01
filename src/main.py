@@ -417,6 +417,26 @@ def obter_cruzamento(robo: SapBot, argumento: int) -> pandas.DataFrame:
   flag.extend([ZMED95_FLAGS.GET_CROSSING])
   return robo.ZMED95(logradouro_info, flag)
 
+def obter_informacao(robo: SapBot, argumento: int) -> str:
+  texto = ''
+  instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.GET_METER, ES32_FLAGS.DONOT_THROW])
+  texto += instalacao_info.__str__() + '\n'
+  if instalacao_info.parceiro:
+    try:
+      parceiro_info = robo.BP(instalacao_info, [BP_FLAGS.GET_DOCS])
+      texto += parceiro_info.__str__() + '\n'
+    except WrapperBaseException as erro:
+      texto += erro.message
+  if len(instalacao_info.equipamento) > 0:
+    try:
+      medidor_info = instalacao_info.get_medidor()
+      medidor_info = robo.IQ03(medidor_info.serial, medidor_info.material, [IQ03_FLAGS.READ_REPORT])
+      texto += medidor_info.__str__()
+    except WrapperBaseException as erro:
+      texto += erro.message
+  texto = '\n'.join(list(set(texto.split('\n'))))
+  return texto
+
 aplicacoes = {
   'instalacao': obter_instalacao,
   'servico': obter_servico,
@@ -440,7 +460,7 @@ aplicacoes = {
   'cruzamento': obter_cruzamento,
   'lideanexo': obter_lideanexo,
   # 'abertura': checar_inspecao,
-  # 'informacao': obter_informacao,
+  'informacao': obter_informacao,
 }
 
 if __name__ == '__main__':
