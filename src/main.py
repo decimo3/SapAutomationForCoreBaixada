@@ -437,6 +437,54 @@ def obter_informacao(robo: SapBot, argumento: int) -> str:
   texto = '\n'.join(list(set(texto.split('\n'))))
   return texto
 
+def checar_inspecao(robo: SapBot, argumento: int) -> str:
+  instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.GET_METER, ES32_FLAGS.DONOT_THROW])
+  texto = f'Instalacao {instalacao_info.instalacao} nao esta apta para abertura de nota de recuperacao devido '
+  # Checking installation information
+  if instalacao_info.status != ' Instalação não suspensa':
+    raise InformationNotFound(texto + 'nao estar ativa!')
+  if not instalacao_info.parceiro:
+    raise InformationNotFound(texto + 'nao ter cliente vinculado!')
+  if instalacao_info.nome_cliente.startswith('UNIDADE C/ CONSUMO'):
+    raise InformationNotFound(texto + 'nao ter cliente vinculado!')
+  if instalacao_info.nome_cliente.startswith('PARCEIRO DE NEGOCIO'):
+    raise InformationNotFound(texto + 'nao ter cliente vinculado!')
+  if instalacao_info.texto_classe.find('Baixa Renda') >= 0:
+    raise InformationNotFound(texto + 'instalacao ser baixa renda!')
+  # REMOVED - Checking restriction information
+  # localidade = instalacao_info.unidade[2:6:1]
+  # is_residencial = instalacao_info.classe > 1000 and instalacao_info.classe < 2000
+  # if instalacao_info.fases_instalacao == 1 and is_residencial and (localidade != 'L539' and localidade != 'L595'):
+  #   raise InformationNotFound(texto + 'ser residencial em area restrita de inspecao pelo tipo de instalacao')
+  # if instalacao_info.fases_instalacao == 2 and is_residencial:
+  #   raise InformationNotFound(texto + 'ser residencial em area restrita de inspecao pelo tipo de instalacao')
+  # Checking measurement information
+  if not instalacao_info.equipamento:
+    raise InformationNotFound(texto + 'nao tem medidor vinculado!')
+  medidor = instalacao_info.get_medidor() if len(instalacao_info.equipamento) > 1 else instalacao_info.equipamento[0]
+  medidor_info = robo.IQ03(medidor.serial, medidor.material)[0]
+  if medidor_info.code_status != 'INST':
+    raise InformationNotFound(texto + f'medidor `{medidor_info.serial}` com status `{medidor_info.code_status}`!')
+  # Checking customer information
+  parceiro_info = obter_parceiro(robo, instalacao_info.instalacao, [BP_FLAGS.GET_DOCS])
+  if not parceiro_info.documento_numero:
+    raise InformationNotFound(texto + 'ao cliente nao ter CPF ou CNPJ no cadastro!')
+  if parceiro_info.documento_tipo != 'Brasil: nº CPF' and parceiro_info.documento_tipo != 'Brasil: nº CNPJ':
+    raise InformationNotFound(texto + 'ao cliente nao ter CPF ou CNPJ no cadastro!')
+  # REMOVED - Checking outstanding debts information
+  # if obter_debitos_passiveis(robo, instalacao_info.instalacao) > 0:
+  #   raise InformationNotFound(texto + 'o cliente possuir debito(s) pendente(s)')
+  # Checking if installation already has order
+  meses_verificacao_inspecoes =  6  # if not is_residencial else 12
+  prazo_maximo_verificacao = datetime.date.today() - datetime.timedelta(days=meses_verificacao_inspecoes * 30)
+  historico_info = obter_historico(robo, instalacao_info.instalacao)
+  historico_info = historico_info[historico_info["Data"] >= pandas.to_datetime(prazo_maximo_verificacao)]
+  historico_info = historico_info[(historico_info["Tipo"] == "BI") | (historico_info["Tipo"] == "BU")]
+  historico_info = historico_info[historico_info["Status"] == "EXEC"]
+  if historico_info.shape[0] > 0:
+    raise InformationNotFound(texto + f'ja tem nota {historico_info['Nota'].to_string(index=False)} executada!')
+  return f"A instalacao {instalacao_info.instalacao} esta apta sim para abertura de nota de recuperacao!"
+
 aplicacoes = {
   'instalacao': obter_instalacao,
   'servico': obter_servico,
@@ -459,7 +507,7 @@ aplicacoes = {
   'pendente': obter_pendente,
   'cruzamento': obter_cruzamento,
   'lideanexo': obter_lideanexo,
-  # 'abertura': checar_inspecao,
+  'abertura': checar_inspecao,
   'informacao': obter_informacao,
 }
 
