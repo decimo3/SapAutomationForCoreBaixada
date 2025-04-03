@@ -488,12 +488,16 @@ class SapBot:
     if ZARC140_FLAGS.GET_PENDING in flags:
       # Check if has pending invoices
       if self.session.FindById(STRINGPATH['ZARC140_PENDENTES_TAB'], False) is None:
+        if ZARC140_FLAGS.DONOT_THROW in flags:
+          return pandas.DataFrame()
         raise InformationNotFound('Instalacao consultada nao tem registro de faturas!')
       self.session.FindById(STRINGPATH['ZARC140_PENDENTES_TAB']).Select()
       tabela = self.session.FindById(STRINGPATH['ZARC140_PENDENTES_TABLE'])
       linhas = tabela.RowCount
       if linhas == 0:
-        return pandas.DataFrame()
+        if ZARC140_FLAGS.DONOT_THROW in flags:
+          return pandas.DataFrame()
+        raise InformationNotFound('Instalacao consultada nao tem registro de faturas!')
       # Collect information on pending invoice report
       collumns = ['BILLING_PERIOD', 'FAEDN', 'ZIMPRES', 'TOTAL_AMNT', 'TIP_FATURA', 'STATUS']
       collumns_names = ['Mes ref', 'Vencimento', 'Documento', 'Valor', 'Tipo', 'Status']
@@ -529,7 +533,9 @@ class SapBot:
       tabela = self.session.FindById(STRINGPATH['ZARC140_RENOTICE_TABLE'])
       linhas = tabela.RowCount
       if linhas == 0:
-        return pandas.DataFrame()
+        if ZARC140_FLAGS.DONOT_THROW in flags:
+          return pandas.DataFrame()
+        raise InformationNotFound('Instalacao consultada nao tem registro de reavisos!')
       collumns = ['STATUS', 'DT_MAX_CRT', 'DT_MIN_CRT']
       collumns_names = ['Status', 'Data min', 'Data max']
       dataframe = {key: [] for key in collumns_names}
