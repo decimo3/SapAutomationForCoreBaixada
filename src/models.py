@@ -51,7 +51,7 @@ class InstalacaoInfo():
     texto = f'*Instalacao:* {self.instalacao}\n' if self.instalacao else ''
     texto += f'*Status:* {self.status}\n' if self.status else ''
     texto += f'*Contrato:* {self.contrato}\n' if self.contrato else ''
-    texto += f'*Cliente*: {self.parceiro}\n' if self.parceiro else ''
+    texto += f'*Parceiro:* {self.parceiro}\n' if self.parceiro else ''
     texto += f'*Nome:* {self.nome_cliente}\n' if self.nome_cliente else ''
     texto += f'*Endereco:* {self.endereco}\n' if self.endereco else ''
     texto += f'*Classe:* {self.texto_classe}\n' if self.texto_classe else ''
