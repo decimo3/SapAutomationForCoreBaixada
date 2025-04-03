@@ -570,19 +570,22 @@ class SapBot:
       dataframe = dataframe[reordered_columns]
       return dataframe
     raise SomethingGoesWrong('Flag argument value is unknow!')
-  def ES61(
+  def ES6X(
     self,
     instalacao: InstalacaoInfo,
-    flags: list[ES61_FLAGS] = [ES61_FLAGS.ENTER_ENTER]
+    flags: list[ES61_FLAGS] = [ES61_FLAGS.ENTER_ENTER],
+    transaction: str = 'ES61'
     ) -> LigacaoInfo:
     ''' Function to get information about local de consumo '''
     ligacao = LigacaoInfo()
     if not ES61_FLAGS.SKIPT_ENTER in flags:
-      self.session.StartTransaction(Transaction="ES61")
+      self.session.StartTransaction(Transaction=transaction)
       self.CHECK_STATUSBAR()
       self.session.findById(STRINGPATH['ES61_CONSUMO_INPUT']).text = instalacao.consumo
       self.session.FindById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
     ligacao.ligacao = int(self.session.FindById(STRINGPATH['ES61_LIGACAO_TEXT']).text)
+    self.session.FindById(STRINGPATH['ES61_DADOS_TECNICOS_TAB']).Select()
+    ligacao.tipo_instalacao = self.session.FindById(STRINGPATH['ES61_TIPO_INSTALACAO']).text
     if ES61_FLAGS.GET_COORD in flags:
       self.session.FindById(STRINGPATH['ES61_COORDENADAS_TAB']).Select()
       coordenadas = str(self.session.FindById(STRINGPATH['ES61_COORDENADAS_TEXT']).text)
@@ -593,6 +596,18 @@ class SapBot:
       self.session.FindById(STRINGPATH['ES61_LIGACAO_TEXT']).setFocus()
       self.SEND_ENTER()
     return ligacao
+  def ES61(
+    self,
+    instalacao: InstalacaoInfo,
+    flags: list[ES61_FLAGS] = [ES61_FLAGS.ENTER_ENTER]
+  ) -> LigacaoInfo:
+    return self.ES6X(instalacao, flags, 'ES61')
+  def ES62(
+    self,
+    instalacao: InstalacaoInfo,
+    flags: list[ES61_FLAGS] = [ES61_FLAGS.ENTER_ENTER]
+  ) -> LigacaoInfo:
+    return self.ES6X(instalacao, flags, 'ES62')
   def ES57(
     self,
     ligacao: LigacaoInfo,
