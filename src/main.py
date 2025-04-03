@@ -226,7 +226,7 @@ def print_pendentes(robo: SapBot, documentos: list[int], instalacao: InstalacaoI
 def obter_faturas(robo: SapBot, argumento: int) -> int:
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
   # Getting the pending invoice report
-  relatorio = obter_pendente(robo, argumento)
+  relatorio = obter_pendente(robo, argumento, False)
   if relatorio.shape[0] == 0:
     raise InformationNotFound('Cliente nao possui faturas pendentes!')
   # Printing pending invoices
@@ -329,7 +329,9 @@ def obter_consumos(robo: SapBot, argumento: int) -> pandas.DataFrame:
   return df_final
 
 def obter_debitos_passiveis(robo: SapBot, argumento: int, filtrar_passivas: bool = True) -> int:
-  debito = obter_pendente(robo, argumento)
+  debito = obter_pendente(robo, argumento, False)
+  if debito.empty:
+    return 0
   if filtrar_passivas:
     debito = debito[debito['#'] == DESTAQUES.VERMELHO]
     prazo_minimo = datetime.date.today() - datetime.timedelta(days=15)
