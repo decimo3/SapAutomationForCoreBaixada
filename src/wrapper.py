@@ -525,6 +525,11 @@ class SapBot:
       reordered_columns = ['#'] + [col for col in dataframe.columns if col != '#']
       dataframe = dataframe[reordered_columns]
       dataframe['Vencimento'] = pandas.to_datetime(dataframe['Vencimento'], format='%d.%m.%Y')
+      dataframe['Valor'] = dataframe['Valor'].astype('string') # Convert to string
+      dataframe['Valor'] = dataframe['Valor'].str.strip() # Strip whitespaces
+      dataframe['Valor'] = dataframe['Valor'].str.replace('.', '', regex=False) # Remove periods
+      dataframe['Valor'] = dataframe['Valor'].str.replace(',', '.', regex=False) # Replace commas with periods
+      dataframe['Valor'] = pandas.to_numeric(dataframe['Valor'], errors='coerce').astype('float')
       return dataframe
     if ZARC140_FLAGS.GET_RENOTICE in flags:
       if self.session.FindById(STRINGPATH['ZARC140_RENOTICE_TAB'], False) is None:
