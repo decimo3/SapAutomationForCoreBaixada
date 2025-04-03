@@ -314,6 +314,7 @@ def obter_consumos(robo: SapBot, argumento: int) -> pandas.DataFrame:
   if consumos.shape[0] == 0:
     raise InformationNotFound('Nao foi possivel obter consumos!')
   # Pivot the consumption data
+  consumos = consumos.drop_duplicates(subset=['Medidor', 'Mes ref.'])
   df_pivot = consumos.pivot(index='Medidor', columns='Mes ref.', values='Consumo')
   # Rename columns to desired format (e.g., "fev.25" for "2025-02"), handling NaN values safely
   df_pivot.columns = pandas.to_datetime(df_pivot.columns, format='%m/%Y', errors='coerce').strftime('%b.%y')
