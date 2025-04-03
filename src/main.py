@@ -429,22 +429,27 @@ def obter_cruzamento(robo: SapBot, argumento: int) -> pandas.DataFrame:
 def obter_informacao(robo: SapBot, argumento: int) -> str:
   texto = ''
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.GET_METER, ES32_FLAGS.DONOT_THROW])
-  texto += instalacao_info.__str__() + '\n'
   if instalacao_info.parceiro:
     try:
       parceiro_info = robo.BP(instalacao_info, [BP_FLAGS.GET_DOCS])
       texto += parceiro_info.__str__() + '\n'
     except WrapperBaseException as erro:
       texto += erro.message
-  if len(instalacao_info.equipamento) > 0:
+  texto += instalacao_info.__str__() + '\n'
+  if instalacao_info.equipamento:
     try:
       medidor_info = instalacao_info.get_medidor()
-      medidor_info = robo.IQ03(medidor_info.serial, medidor_info.material, [IQ03_FLAGS.READ_REPORT])
+      medidor_info = robo.IQ03(medidor_info.serial, medidor_info.material, [IQ03_FLAGS.READ_REPORT])[0]
       texto += medidor_info.__str__()
     except WrapperBaseException as erro:
       texto += erro.message
-  texto = '\n'.join(list(set(texto.split('\n'))))
-  return texto
+  output = []
+  for linha in texto.split('\n'):
+    if not linha.strip():
+      continue
+    if not linha in output:
+      output.append(linha)
+  return '\n'.join(output)
 
 def checar_inspecao(robo: SapBot, argumento: int) -> str:
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.GET_METER, ES32_FLAGS.DONOT_THROW])
