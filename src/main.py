@@ -188,18 +188,24 @@ def obter_lideanexo(robo: SapBot, argumento: int) -> pandas.DataFrame:
   relatorio = relatorio[~relatorio['Dano'].isin(filtrar_danos)]
   return relatorio
 
-def obter_pendente(robo: SapBot, argumento: int) -> pandas.DataFrame:
+def obter_pendente(robo: SapBot, argumento: int, raise_error: bool = True) -> pandas.DataFrame:
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
   # Getting the pending invoice report
   if 'ZARC140' not in NOTUSE:
+    flags = [ZARC140_FLAGS.GET_PENDING]
+    if not raise_error:
+      flags.extend([ZARC140_FLAGS.DONOT_THROW])
     return robo.ZARC140(
       instalacao = instalacao_info,
-      flags = [ZARC140_FLAGS.GET_PENDING]
+      flags = flags
     )
   if 'FPL9' not in NOTUSE:
+    flags = [FPL9_FLAGS.GET_PENDING]
+    if not raise_error:
+      flags.extend([FPL9_FLAGS.DONOT_THROW])
     return robo.FPL9(
       instalacao = instalacao_info,
-      flags = [FPL9_FLAGS.GET_PENDING]
+      flags = flags
     )
   raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
 
