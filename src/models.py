@@ -104,11 +104,11 @@ class ParceiroInfo():
   documento_numero: str = ''
   telefones: list[str] = field(default_factory=list)
   def __str__(self) -> str:
-    texto = f'Parceiro: {self.parceiro}\n' if self.parceiro else ''
-    texto += f'Nome: {self.nome_cliente}\n' if self.nome_cliente else ''
-    texto += f'Tipo do documento: {self.documento_tipo}\n' if self.documento_tipo else ''
-    texto += f'Numero do documento: {self.documento_numero}\n' if self.documento_numero else ''
-    texto += f'Telefones: {' '.join(self.telefones)}' if len(self.telefones) > 0 else ''
+    texto = f'*Parceiro:* {self.parceiro}\n' if self.parceiro else ''
+    texto += f'*Nome:* {self.nome_cliente}\n' if self.nome_cliente else ''
+    texto += f'*Tipo do documento:* {self.documento_tipo}\n' if self.documento_tipo else ''
+    texto += f'*Numero do documento:* {self.documento_numero}\n' if self.documento_numero else ''
+    texto += f'*Telefones:* {' '.join(self.telefones)}' if len(self.telefones) > 0 else ''
     return  texto
 
 class LigacaoInfo():
