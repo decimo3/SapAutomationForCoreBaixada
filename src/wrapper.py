@@ -636,6 +636,8 @@ class SapBot:
     ''' Function to get information about group of instalations '''
     if not logradouro.numero_int:
       raise InformationNotFound('Instalacao sem numero de rua, nao agrupado!')
+    if logradouro.numero_str.find('SN') >= 0:
+      raise InformationNotFound('Instalacao sem numero de rua, nao agrupado!')
     if not ZMED95_FLAGS.SKIPT_ENTER in flags:
       self.session.StartTransaction(Transaction="ZMED95")
       self.CHECK_STATUSBAR()
