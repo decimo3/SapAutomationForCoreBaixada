@@ -35,6 +35,7 @@ from enumerators import (
 )
 from models import (
   InstalacaoInfo,
+  LigacaoInfo,
   MedidorInfo,
   ParceiroInfo,
   ServicoInfo,
@@ -223,6 +224,28 @@ def print_pendentes(robo: SapBot, documentos: list[int], instalacao: InstalacaoI
     raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
   return len(documentos)
 
+def obter_ligacao(robo: SapBot, instalacao: InstalacaoInfo, _flags: list[ES61_FLAGS] | None = None) -> LigacaoInfo:
+  if _flags == None:
+    _flags = [ES61_FLAGS.ENTER_ENTER]
+  if ES61_FLAGS.SKIPT_ENTER in _flags:
+    return robo.ES6X(
+      instalacao = instalacao,
+      flags = _flags,
+      transaction = ''
+    )
+  elif 'ES61' not in NOTUSE:
+    return robo.ES61(
+      instalacao = instalacao,
+      flags = _flags
+    )
+  elif 'ES62' not in NOTUSE:
+    return robo.ES62(
+      instalacao = instalacao,
+      flags = _flags
+    )
+  else:
+    raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
+
 def obter_faturas(robo: SapBot, argumento: int) -> int:
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
   # Getting the pending invoice report
@@ -249,7 +272,7 @@ def obter_coordenadas(robo: SapBot, argumento: int) -> str:
   instalacao_info = obter_instalacao(robo, argumento, flag)
   flag = [ES61_FLAGS.GET_COORD]
   flag.extend([ES61_FLAGS.SKIPT_ENTER]) if 'ES61' in NOTUSE else flag.extend([ES61_FLAGS.ENTER_ENTER])
-  consumo_info = robo.ES61(instalacao_info, flag)
+  consumo_info = obter_ligacao(robo, instalacao_info, flag)
   if not consumo_info.coordenadas:
     raise InformationNotFound('A instalacao nao possui coordenada cadastrada!')
   return consumo_info.coordenadas
@@ -276,7 +299,7 @@ def obter_agrupamento(robo: SapBot, argumento: int) -> pandas.DataFrame:
   flag = [ES61_FLAGS.SKIPT_ENTER] if 'ES61' in NOTUSE else [ES61_FLAGS.ENTER_ENTER]
   if 'ES57' in NOTUSE:
     flag.extend([ES61_FLAGS.ENTER_LIGACAO])
-  ligacao_info = robo.ES61(instalacao_info, flag)
+  ligacao_info = obter_ligacao(robo, instalacao_info, flag)
   flag = [ES57_FLAGS.SKIPT_ENTER] if 'ES57' in NOTUSE else [ES57_FLAGS.ENTER_ENTER]
   logradouro_info = robo.ES57(ligacao_info, flag)
   flag = [ZMED95_FLAGS.SKIPT_ENTER] if 'ZMED95' in NOTUSE else [ZMED95_FLAGS.ENTER_ENTER]
@@ -466,11 +489,12 @@ def checar_inspecao(robo: SapBot, argumento: int) -> str:
   if instalacao_info.texto_classe.find('Baixa Renda') >= 0:
     raise InformationNotFound(texto + 'instalacao ser baixa renda!')
   # REMOVED - Checking restriction information
+  # ligacao_info = obter_ligacao(robo, instalacao_info)
   # localidade = instalacao_info.unidade[2:6:1]
   # is_residencial = instalacao_info.classe > 1000 and instalacao_info.classe < 2000
-  # if instalacao_info.fases_instalacao == 1 and is_residencial and (localidade != 'L539' and localidade != 'L595'):
+  # if ligacao_info.tipo_instalacao == 1 and is_residencial and (localidade != 'L539' and localidade != 'L595'):
   #   raise InformationNotFound(texto + 'ser residencial em area restrita de inspecao pelo tipo de instalacao')
-  # if instalacao_info.fases_instalacao == 2 and is_residencial:
+  # if ligacao_info.tipo_instalacao == 2 and is_residencial:
   #   raise InformationNotFound(texto + 'ser residencial em area restrita de inspecao pelo tipo de instalacao')
   # Checking measurement information
   if not instalacao_info.equipamento:
