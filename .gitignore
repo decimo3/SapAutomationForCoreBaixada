@@ -1,14 +1,13 @@
 __pycache__
-node_modules
-.whatsapp
 *.db
 venv
 build
 dist
+tmp
 .env
 .vs
-*.png
+
 *.spec
 *.csv
-mock
 *.log
+*.vbs
