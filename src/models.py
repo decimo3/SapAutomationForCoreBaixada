@@ -114,6 +114,7 @@ class ParceiroInfo():
 class LigacaoInfo():
   ''' Class to hold information about linker object '''
   ligacao: int
+  tipo_instalacao: str
   coordenadas: str
 
 class LogradouroInfo():
