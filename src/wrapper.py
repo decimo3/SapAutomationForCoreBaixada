@@ -364,7 +364,7 @@ class SapBot:
         medidor = MedidorInfo()
         medidor.serial = int(serial)
         medidor.material = int(material)
-        medidor.texto_material = material + ' - ' + depara('material_codigo', material)
+        medidor.texto_material = material + ' - ' + depara('material_codigo', material) or ''
         data.equipamento.append(medidor)
         self.session.FindById(STRINGPATH['ES32_EQUIPAMENTO_TABLE']).verticalScrollbar.position = i + 1
       data.equipamento = [eq for eq in data.equipamento if eq.serial != ESPACO_VAZIO]
@@ -910,7 +910,7 @@ class SapBot:
     medidor = MedidorInfo()
     medidor.serial = serial
     medidor.material = material
-    medidor.texto_material = depara("material_codigo", str(medidor.material)) or ""
+    medidor.texto_material = str(material) + ' - ' + depara("material_codigo", str(medidor.material)) or ''
     medidor.code_montagem = self.session.FindById(STRINGPATH['IQ03_MONTAGEM_CODE']).text
     medidor.code_status = self.session.FindById(STRINGPATH['IQ03_STATUS_CODE']).text
     medidor.texto_montagem = f"{medidor.code_montagem}  -  {depara('medidor_montagem', medidor.code_montagem)}"
