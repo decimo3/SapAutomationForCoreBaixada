@@ -730,7 +730,7 @@ INSERT INTO depara (tipo, de, para) VALUES
 ('relatorio_tipo','ANEXO','B5,BA,BC,BS');
 -- Entering values ​​for report filters
 INSERT INTO depara (tipo, de, para) VALUES
-('relatorio_filtro', 'RELIGA', 'ORTI'),
+('relatorio_filtro', 'RELIGA', 'ORTI,ORIS'),
 ('relatorio_filtro','LIDE','OSLT'),
 ('relatorio_filtro','ANEXO','OSDC');
 
