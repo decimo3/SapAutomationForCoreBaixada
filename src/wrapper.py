@@ -19,6 +19,7 @@ from constants import (
   BASE_FOLDER,
 )
 from helpers import depara, STRINGPATH
+from conversor import conversor
 from exceptions import (
   WrapperBaseException,
   TooMannyRequests,
@@ -216,6 +217,28 @@ class SapBot:
     ''' function to get element replace col and row from array id '''
     id_string = STRINGPATH[id_template].replace('¿', str(col)).replace('?', str(row))
     return self.session.FindById(id_string, False)
+  def GET_ROWS(self, table_id: str, columns_ids: str, columns_names: str, data_types: str) -> pandas.DataFrame:
+    data_types_list = STRINGPATH[data_types].split('/')
+    columns_ids_list = STRINGPATH[columns_ids].split('/')
+    columns_names_list = STRINGPATH[columns_names].split('/')
+    dataframe = {key: [] for key in columns_names_list}
+    tabela = self.session.FindById(STRINGPATH[table_id], False)
+    if not tabela:
+      return pandas.DataFrame(dataframe)
+    if tabela.RowCount == 0:
+      return pandas.DataFrame(dataframe)
+    for i in range(1, tabela.RowCount):
+      for j, column in enumerate(columns_ids_list):
+        try:
+          valor = tabela.getCellValue(i, column)
+          valor = conversor[data_types_list[j]](valor)
+          dataframe[columns_names_list[j]].append(valor)
+        except:
+          dataframe[columns_names_list[j]].append(None)
+      tabela.firstVisibleRow = i
+    dataframe = pandas.DataFrame(dataframe)
+    dataframe = dataframe.dropna(axis=1, how='all')
+    return pandas.DataFrame(dataframe)
   def ZATC73(
       self,
       documentos: list[int]
