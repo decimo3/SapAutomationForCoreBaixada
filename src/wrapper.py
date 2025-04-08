@@ -145,6 +145,11 @@ class SapBot:
           self.session.FindById(STRINGPATH['LOGIN_AUTH_USERNAME']).text = os.environ.get('USUARIO')
           self.session.FindById(STRINGPATH['LOGIN_AUTH_PASSWORD']).text = os.environ.get('PALAVRA')
           self.session.FindById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
+          try:
+            self.CHECK_STATUSBAR()
+          except InformationNotFound as erro:
+            self.logger.error(erro.message)
+            sys.exit(1)
           if self.session.findById('wnd[1]', False) is not None:
             if self.session.findById(STRINGPATH['LOGIN_POPUP_OPTION'], False) is not None:
               self.session.findById(STRINGPATH['LOGIN_POPUP_OPTION']).Select()
