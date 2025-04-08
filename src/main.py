@@ -142,7 +142,7 @@ def obter_religacao(robo: SapBot, argumento: int) -> pandas.DataFrame:
     statuses = ['ENVI', 'LIBE', 'TABL'],
     danos_filtro = [],
     regional = 'RO',
-    layout = '/VENCIMENTOS'
+    layout = '//TT'
   )
 
 def obter_bandeirada(robo: SapBot, argumento: int) -> pandas.DataFrame:
@@ -158,7 +158,7 @@ def obter_bandeirada(robo: SapBot, argumento: int) -> pandas.DataFrame:
     danos_filtro = ['OSTA', 'OSJD', 'OSFT', 'OSAT', 'OSAR', 'OATI'],
     statuses = ['ANAL', 'POSB', 'PCOM', 'NEXE', 'EXEC'],
     regional = 'RO',
-    layout = '/VENCIMENTOS'
+    layout = '/WILLIAM'
   )
 
 def obter_lideanexo(robo: SapBot, argumento: int) -> pandas.DataFrame:
@@ -174,7 +174,7 @@ def obter_lideanexo(robo: SapBot, argumento: int) -> pandas.DataFrame:
     danos_filtro = [],
     statuses = ['ENVI', 'LIBE', 'TABL'],
     regional = 'RO',
-    layout = '/VENCIMENTOS'
+    layout = '//TT'
   )
   filtrar_danos = depara('relatorio_filtro', 'LIDE').split(',')
   filtrar_danos.extend(depara('relatorio_filtro', 'ANEXO').split(','))
