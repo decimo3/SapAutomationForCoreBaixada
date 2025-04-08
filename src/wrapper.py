@@ -11,6 +11,7 @@ import subprocess
 import logging
 from logging.handlers import RotatingFileHandler
 import win32com.client
+import numpy
 import pandas
 from constants import (
   SHORT_TIME_WAIT,
@@ -599,80 +600,49 @@ class SapBot:
           return pandas.DataFrame()
         raise InformationNotFound('Instalacao consultada nao tem registro de faturas!')
       self.session.FindById(STRINGPATH['ZARC140_PENDENTES_TAB']).Select()
-      tabela = self.session.FindById(STRINGPATH['ZARC140_PENDENTES_TABLE'])
-      linhas = tabela.RowCount
-      if linhas == 0:
+      dataframe = self.GET_ROWS(
+        'ZARC140_PENDENTES_TABLE',
+        'ZARC140_PENDENTES_IDS',
+        'ZARC140_PENDENTES_NAMES',
+        'ZARC140_PENDENTES_TYPES'
+      )
+      if dataframe.shape[0] == 0:
         if ZARC140_FLAGS.DONOT_THROW in flags:
-          return pandas.DataFrame()
+          return dataframe
         raise InformationNotFound('Instalacao consultada nao tem registro de faturas!')
-      # Collect information on pending invoice report
-      collumns = ['BILLING_PERIOD', 'FAEDN', 'ZIMPRES', 'TOTAL_AMNT', 'TIP_FATURA', 'STATUS']
-      collumns_names = ['Mes ref', 'Vencimento', 'Documento', 'Valor', 'Tipo', 'Status']
-      dataframe = {key: [] for key in collumns_names}
-      dataframe['#'] = []
-      dataframe['Observacao'] = []
-      for i in range(1, linhas):
-        for j, collumn in enumerate(collumns):
-          dataframe[collumns_names[j]].append(tabela.getCellValue(i, collumn))
-        if dataframe['Status'][i-1] == '@5B@':
-          dataframe['#'].append(DESTAQUES.VERDE)
-          dataframe['Observacao'].append('Fat. no prazo')
-          continue
-        if dataframe['Status'][i-1] == '@5C@':
-          dataframe['#'].append(DESTAQUES.VERMELHO)
-          dataframe['Observacao'].append('Fat. vencida')
-          continue
-        if dataframe['Status'][i-1] == '@06@':
-          dataframe['#'].append(DESTAQUES.AMARELO)
-          dataframe['Observacao'].append('Fat. Retida')
-          continue
-        dataframe["#"].append(DESTAQUES.AUSENTE)
-        dataframe['Observacao'].append('Consultar')
-      dataframe = pandas.DataFrame(dataframe)
+      __status = {
+        '@5B@': [DESTAQUES.VERDE, 'Fat. no prazo'],
+        '@5C@': [DESTAQUES.VERMELHO, 'Fat. vencida'],
+        '@06@': [DESTAQUES.AMARELO, 'Fat. Retida']
+      }
+      dataframe['#'] = dataframe['Status'].apply(lambda x: __status.get(x, [DESTAQUES.AUSENTE, 'Consultar'])[0])
+      dataframe['Observacao'] = dataframe['Status'].apply(lambda x: __status.get(x, [DESTAQUES.AUSENTE, 'Consultar'])[1])
       reordered_columns = ['#'] + [col for col in dataframe.columns if col != '#']
       dataframe = dataframe[reordered_columns]
-      dataframe['Vencimento'] = pandas.to_datetime(dataframe['Vencimento'], format='%d.%m.%Y')
-      dataframe['Valor'] = dataframe['Valor'].astype('string') # Convert to string
-      dataframe['Valor'] = dataframe['Valor'].str.strip() # Strip whitespaces
-      dataframe['Valor'] = dataframe['Valor'].str.replace('.', '', regex=False) # Remove periods
-      dataframe['Valor'] = dataframe['Valor'].str.replace(',', '.', regex=False) # Replace commas with periods
-      dataframe['Valor'] = pandas.to_numeric(dataframe['Valor'], errors='coerce').astype('float')
       return dataframe
     if ZARC140_FLAGS.GET_RENOTICE in flags:
       if self.session.FindById(STRINGPATH['ZARC140_RENOTICE_TAB'], False) is None:
         raise InformationNotFound('Instalacao consultada nao tem registro de reavisos!')
       self.session.FindById(STRINGPATH['ZARC140_RENOTICE_TAB']).Select()
-      tabela = self.session.FindById(STRINGPATH['ZARC140_RENOTICE_TABLE'])
-      linhas = tabela.RowCount
-      if linhas == 0:
+      dataframe = self.GET_ROWS(
+        'ZARC140_RENOTICE_TABLE',
+        'ZARC140_RENOTICE_IDS',
+        'ZARC140_RENOTICE_NAMES',
+        'ZARC140_RENOTICE_TYPES'
+      )
+      if dataframe.shape[0] == 0:
         if ZARC140_FLAGS.DONOT_THROW in flags:
           return pandas.DataFrame()
         raise InformationNotFound('Instalacao consultada nao tem registro de reavisos!')
-      collumns = ['STATUS', 'DT_MAX_CRT', 'DT_MIN_CRT']
-      collumns_names = ['Status', 'Data min', 'Data max']
-      dataframe = {key: [] for key in collumns_names}
-      dataframe['#'] = []
-      dataframe['Observacao'] = []
-      for i in range(1, linhas + 1):
-        for j, collumn in enumerate(collumns):
-          dataframe[collumns_names[j]].append(tabela.getCellValue(i, collumn))
-        if dataframe['Status'][i] == '@45@':
-          dataframe['#'].append(DESTAQUES.VERMELHO)
-          dataframe['Observacao'].append('Com reaviso')
-          continue
-        if dataframe['Data min'][i] == '' or dataframe['Data max'][i] == '':
-          dataframe['#'].append(DESTAQUES.VERDE)
-          dataframe['Observacao'].append('Sem reaviso')
-          continue
-        dtMax = datetime.datetime.strptime(dataframe['Data min'][i], '%d.%m.%Y').date()
-        dtMin = datetime.datetime.strptime(dataframe['Data max'][i], '%d.%m.%Y').date()
-        if datetime.date.today() > dtMin and datetime.date.today() < dtMax:
-          dataframe['#'].append(DESTAQUES.VERMELHO)
-          dataframe['Observacao'].append('Com reaviso')
-          continue
-        dataframe['#'].append(DESTAQUES.VERDE)
-        dataframe['Observacao'].append('Sem reaviso')
-      dataframe = pandas.DataFrame(dataframe)
+      __conditions = [
+        dataframe['Status'] == '@45@',
+        (dataframe['Data min'].isna() | dataframe['Data max'].isna()),
+        (datetime.date.today() > dataframe['Data min']) & (datetime.date.today() < dataframe['Data max'])
+      ]
+      __choices = [DESTAQUES.VERMELHO, DESTAQUES.VERDE, DESTAQUES.VERMELHO]
+      dataframe['#'] = numpy.select(__conditions, __choices, default=DESTAQUES.VERDE)
+      dataframe['Observacao'] = dataframe['#'].apply(lambda x: 
+          'Com reaviso' if x == DESTAQUES.VERMELHO else DESTAQUES.VERDE)
       reordered_columns = ['#'] + [col for col in dataframe.columns if col != '#']
       dataframe = dataframe[reordered_columns]
       return dataframe
