@@ -277,10 +277,10 @@ class SapBot:
     ''' Function that send list of invoice document number to print '''
     self.session.StartTransaction(Transaction="ZATC73")
     self.CHECK_STATUSBAR()
-    self.session.FindById(STRINGPATH['ZATC73_PRINT_DEFAULT']).selected = True
+    self.session.FindById(STRINGPATH['ZATC73_PRINT_DEFAULT1']).selected = True
     self.session.FindById(STRINGPATH['ZATC73_PRINT_DEFAULT2']).selected = True
-    for documento in enumerate(documentos):
-      self.session.FindById(STRINGPATH['ZATC73_PRINT_ASDDASD']).text = documento
+    for documento in documentos:
+      self.session.FindById(STRINGPATH['ZATC73_PRINT_DOCUMENT']).text = documento
       self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
       if self.session.FindById(STRINGPATH['ZATC73_POPUP_OPTION'], False) is not None:
         self.session.FindById(STRINGPATH['ZATC73_POPUP_OPTION']).Press()
