@@ -284,8 +284,6 @@ class SapBot:
       statuses: list[str],
       regional: str,
       layout: str,
-      colluns: list[str],
-      colluns_names: list[str],
       instalacao: InstalacaoInfo | None = None
     ) -> pandas.DataFrame:
     ''' Function to run ZSVC20 transaction and return table data '''
@@ -438,10 +436,8 @@ class SapBot:
   def ZMED89(
       self,
       instalacao: InstalacaoInfo,
-      quantidade: int,
-      collumns: list[str],
-      collumns_names: list[str],
-      flags: list[ZMED89_FLAGS]
+      flags: list[ZMED89_FLAGS],
+      quantidade: int = 30
       ) -> pandas.DataFrame:
     ''' Function that get information about reading report '''
     if instalacao.centro is None:

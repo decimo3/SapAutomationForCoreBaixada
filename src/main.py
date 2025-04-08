@@ -79,9 +79,7 @@ def obter_historico(robo: SapBot, argumento: int) -> pandas.DataFrame:
     danos_filtro = [''],
     statuses = [''],
     regional = '',
-    layout = '/WILLIAN',
-    colluns = ['QMNUM', 'QMART', 'KURZTEXT', 'MATXT', 'AUSBS', 'ZZ_ST_USUARIO'],
-    colluns_names = ['Nota', 'Tipo', 'Texto do dano', 'Texto do code', 'Data', 'Status']
+    layout = '/WILLIAM'
   )
 
 def obter_servico_por_instalacao(robo: SapBot, numero_instalacao: int, flags: list[IW53_FLAGS]) -> ServicoInfo:
@@ -144,9 +142,7 @@ def obter_religacao(robo: SapBot, argumento: int) -> pandas.DataFrame:
     statuses = ['ENVI', 'LIBE', 'TABL'],
     danos_filtro = [],
     regional = 'RO',
-    layout = '/VENCIMENTOS',
-    colluns = ['QMNUM', 'ZZINSTLN', 'QMART', 'FECOD', 'LTRMN', 'LTRUR', 'ZZ_ST_USUARIO', 'QMDAB'],
-    colluns_names = ['Nota', 'Instalacao', 'Tipo', 'Dano', 'Data', 'Hora', 'Status', 'Fim avaria']
+    layout = '/VENCIMENTOS'
   )
 
 def obter_bandeirada(robo: SapBot, argumento: int) -> pandas.DataFrame:
@@ -162,9 +158,7 @@ def obter_bandeirada(robo: SapBot, argumento: int) -> pandas.DataFrame:
     danos_filtro = ['OSTA', 'OSJD', 'OSFT', 'OSAT', 'OSAR', 'OATI'],
     statuses = ['ANAL', 'POSB', 'PCOM', 'NEXE', 'EXEC'],
     regional = 'RO',
-    layout = '/VENCIMENTOS',
-    colluns = ['QMNUM', 'ZZINSTLN', 'QMART', 'FECOD', 'LTRMN', 'LTRUR', 'ZZ_ST_USUARIO', 'QMDAB'],
-    colluns_names = ['Nota', 'Instalacao', 'Tipo', 'Dano', 'Data', 'Hora', 'Status', 'Fim avaria']
+    layout = '/VENCIMENTOS'
   )
 
 def obter_lideanexo(robo: SapBot, argumento: int) -> pandas.DataFrame:
@@ -180,9 +174,7 @@ def obter_lideanexo(robo: SapBot, argumento: int) -> pandas.DataFrame:
     danos_filtro = [],
     statuses = ['ENVI', 'LIBE', 'TABL'],
     regional = 'RO',
-    layout = '/VENCIMENTOS',
-    colluns = ['QMNUM', 'ZZINSTLN', 'QMART', 'FECOD', 'LTRMN', 'LTRUR', 'ZZ_ST_USUARIO', 'QMDAB'],
-    colluns_names = ['Nota', 'Instalacao', 'Tipo', 'Dano', 'Data', 'Hora', 'Status', 'Fim avaria']
+    layout = '/VENCIMENTOS'
   )
   filtrar_danos = depara('relatorio_filtro', 'LIDE').split(',')
   filtrar_danos.extend(depara('relatorio_filtro', 'ANEXO').split(','))
@@ -282,9 +274,6 @@ def obter_leiturista(robo: SapBot, argumento: int, _flag: list[ZMED89_FLAGS]) ->
   return robo.ZMED89(
     instalacao = instalacao_info,
     quantidade = 30,
-    collumns = ['ZZ_NUMSEQ', 'ANLAGE', 'ZENDERECO', 'BAIRRO', 'GERAET', 'ZHORALEIT', 'ABLHINW'],
-    collumns_names = ['Seq', 'Instalacao', 'Endereco', 'Bairro', 'Medidor', 'Horario', 'Codigo'],
-    flags = _flag
   )
 
 def obter_sequencial(robo: SapBot, argumento: int) -> pandas.DataFrame:
