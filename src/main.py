@@ -269,10 +269,13 @@ def obter_coordenadas(robo: SapBot, argumento: int) -> str:
     raise InformationNotFound('A instalacao nao possui coordenada cadastrada!')
   return consumo_info.coordenadas
 
-def obter_leiturista(robo: SapBot, argumento: int, _flag: list[ZMED89_FLAGS]) -> pandas.DataFrame:
+def obter_leiturista(robo: SapBot, argumento: int, _flags: list[ZMED89_FLAGS]) -> pandas.DataFrame:
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.GET_CENTER])
+  # if instalacao_info.tipo_instalacao in {'TCBR'}:
+  #   _flags.extend([ZMED89_FLAGS.TELEMEDIDO])
   return robo.ZMED89(
     instalacao = instalacao_info,
+    flags = _flags,
     quantidade = 30,
   )
 
