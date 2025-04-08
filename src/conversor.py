@@ -14,7 +14,15 @@ def __texto(arg) -> str:
   ''' Function to get string from argument '''
   arg = str(arg).strip()
   return ''.join(__accents.get(char, char) for char in arg)
-def __numero(arg) -> float:
+def __numero(arg) -> int:
+  ''' Function to get decimal from argument '''
+  arg = str(arg).strip()
+  if not arg:
+    return 0
+  arg = arg.replace('.', '')
+  arg = arg.replace(',', '.')
+  return int(arg)
+def __decimal(arg) -> float:
   ''' Function to get decimal from argument '''
   arg = str(arg).strip()
   if not arg:
@@ -48,6 +56,7 @@ def __datahora(arg) -> datetime.datetime:
 conversor = {
   'texto': __texto,
   'numero': __numero,
+  'decimal': __decimal,
   'data': __data,
   'hora': __hora,
   'datahora': __datahora
