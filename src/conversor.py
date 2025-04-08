@@ -14,14 +14,14 @@ def __texto(arg) -> str:
   ''' Function to get string from argument '''
   arg = str(arg).strip()
   return ''.join(__accents.get(char, char) for char in arg)
-def __numero(arg) -> int:
+def __numero(arg) -> float:
   ''' Function to get decimal from argument '''
   arg = str(arg).strip()
   if not arg:
     return 0
   arg = arg.replace('.', '')
   arg = arg.replace(',', '.')
-  return int(arg)
+  return float(arg)
 def __data(arg) -> datetime.date:
   ''' Function to get dateonly from argument '''
   arg = str(arg).strip()
