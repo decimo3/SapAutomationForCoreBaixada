@@ -512,7 +512,11 @@ def checar_inspecao(robo: SapBot, argumento: int) -> str:
     raise InformationNotFound(texto + f'ja tem nota {historico_info['Nota'].to_string(index=False)} executada!')
   return f"A instalacao {instalacao_info.instalacao} esta apta sim para abertura de nota de recuperacao!"
 
+def obter_cliente(robo: SapBot, argumento: int) -> object:
+  return robo.ZHISCON(argumento)
+
 aplicacoes = {
+  'cliente': obter_cliente,
   'instalacao': obter_instalacao,
   'servico': obter_servico,
   'medidor': obter_medidor,

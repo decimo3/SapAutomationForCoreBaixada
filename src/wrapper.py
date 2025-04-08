@@ -73,6 +73,7 @@ __ALL__ = (
   'BP', # get information about costumer
   'ZATC66', # get consume report
   'IQ03', # get information about meter
+  'ZHISCON', # get information with CPF/CNPJ
 )
 #endregion
 
@@ -949,3 +950,24 @@ class SapBot:
     dataframe = dataframe[dataframe['Codigo'] != 0]
     medidor.leituras = dataframe
     return [medidor]
+  def ZHISCON(self, cpf_cnpj: int) -> object:
+    ''' Exibe informações do cliente pelo CPF/CNPJ '''
+    self.session.StartTransaction(Transaction="ZHISCON")
+    self.session.FindById(STRINGPATH['ZHISCON_CPFCNPJ_INPUT']).text = cpf_cnpj
+    self.session.FindById(STRINGPATH['ZHISCON_PERIODO_INICIO']).text = ''
+    self.session.FindById(STRINGPATH['ZHISCON_PERIODO_FINAL']).text = ''
+    self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
+    parceiros_lista = self.GET_ROWS(
+      'ZHISCON_TABLE_RESULT',
+      'ZHISCON_COLUMNS_IDS',
+      'ZHISCON_COLUMNS_NAMES',
+      'ZHISCON_COLUMNS_TYPES',
+      0,
+      0
+    )
+    if parceiros_lista.shape[0] == 0:
+      raise InformationNotFound('Nao foram encontrados clientes!')
+    if parceiros_lista.shape[0] > 1:
+      raise TooMannyRequests('Mais de um cliente encontrado!')
+    return parceiros_lista.iloc[0]
+
