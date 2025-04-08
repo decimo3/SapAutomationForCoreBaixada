@@ -27,7 +27,7 @@ def depara(tipo: str, de: str) -> str:
     sql_instruction = f'SELECT para FROM depara WHERE tipo = \'{tipo}\' AND de = \'{de}\''
     cursor = connection.execute(sql_instruction)
     result = cursor.fetchone()
-    return result[0] if result else 'Codigo desconhecido!'
+    return result[0] if result else ''
   except ValueError:
     return ''
 

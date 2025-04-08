@@ -37,7 +37,7 @@ def __hora(arg) -> datetime.time:
   arg = str(arg).strip()
   if not arg:
     return datetime.time.min
-  return datetime.datetime.strptime(arg, '%H:%M:%s').time()
+  return datetime.datetime.strptime(arg, '%H:%M:%S').time()
 def __datahora(arg) -> datetime.datetime:
   ''' Function to get datetime from argument '''
   arg = str(arg).strip()
