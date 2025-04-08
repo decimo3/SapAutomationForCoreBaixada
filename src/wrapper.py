@@ -348,10 +348,79 @@ class SapBot:
     if IW53_FLAGS.GET_INST in flags:
       self.session.FindById(STRINGPATH['IW53_INSTALLATION_TAB']).Select()
       servico.instalacao = self.session.FindById(STRINGPATH['IW53_INSTALLATION_TEXT']).text
+      return servico
     if IW53_FLAGS.GET_INFO in flags:
-      # TODO - COLETAR O RESTO DAS INFORMAÇÔES DO SERVICO
-      pass
-    return servico
+      # Coletar informações sobre o serviço
+      self.session.FindById(STRINGPATH['IW53_SOLICITACAO_TAB']).Select()
+      servico.tipo = self.session.FindById(STRINGPATH['IW53_TIPO_SERVICO']).text
+      servico.status = self.session.FindById(STRINGPATH['IW53_CODIGO_STATUS']).text
+      servico.dano = self.session.FindById(STRINGPATH['IW53_CODIGO_DANO']).text
+      servico.texto_dano = self.session.FindById(STRINGPATH['IW53_DANO_DESCRICAO']).text
+      servico.descricao = self.session.FindById(STRINGPATH['IW53_DESCRICAO_NOTA']).text
+      servico.observacao = self.session.FindById(STRINGPATH['IW53_OBSERVACAO']).text
+      # Coletar informações sobre o cliente e endereço
+      self.session.FindById(STRINGPATH['IW53_SOLICITANTE_TAB']).Select()
+      self.session.FindById(STRINGPATH['IW53_CLIENTE_SUBTAB']).Select()
+      servico.parceiro = self.session.FindById(STRINGPATH['IW53_CLIENTE_NUM']).text
+      servico.nome_cliente = self.session.FindById(STRINGPATH['IW53_CLIENTE_NOME']).text
+      servico.telefones.append(self.session.FindById(STRINGPATH['IW53_CLIENTE_TEL']).text)
+      self.session.FindById(STRINGPATH['IW53_OBJETO_SUBTAB']).Select()
+      servico.endereco = self.session.FindById(STRINGPATH['IW53_OBJETO_ENDERECO']).text
+      servico.cod_postal = self.session.FindById(STRINGPATH['IW53_OBJETO_CEP']).text
+      self.session.FindById(STRINGPATH['IW53_LOCALIZACAO_TAB']).Select()
+      servico.local = self.session.FindById(STRINGPATH['IW53_LOCALIZACAO_LOCAL']).text
+      servico.texto_local = self.session.FindById(STRINGPATH['IW53_LOCALIZACAO_TEXTO']).text
+      # Coletar informações da instalação
+      self.session.FindById(STRINGPATH['IW53_INSTALLATION_TAB']).Select()
+      servico.instalacao = self.session.FindById(STRINGPATH['IW53_INSTALLATION_TEXT']).text
+      servico.atendimento_obs = self.session.FindById(STRINGPATH['IW53_ATENDIMENTO_OBS']).text
+      if self.session.FindById(STRINGPATH['IW53_ATENDIMENTO_TEL']).text:
+        servico.telefones.append(self.session.FindById(STRINGPATH['IW53_ATENDIMENTO_TEL']).text)
+      if self.session.FindById(STRINGPATH['IW53_ATENDIMENTO_CEL']).text:
+        servico.telefones.append(self.session.FindById(STRINGPATH['IW53_ATENDIMENTO_CEL']).text)
+      if servico.status in {'ENVI', 'LIBE', 'PEND', 'TABL'}:
+        return servico
+      # Coletar informações sobre os tempos
+      self.session.FindById(STRINGPATH['IW53_DATAHORA_TAB']).Select()
+      servico.data_nota = conversor['data'](self.session.FindById(STRINGPATH['IW53_DATA_NOTA']).text)
+      servico.hora_nota = conversor['hora'](self.session.FindById(STRINGPATH['IW53_HORA_NOTA']).text)
+      servico.avaria_inicio_data = conversor['data'](self.session.FindById(STRINGPATH['IW53_INICIO_AVARIA_DATA']).text)
+      servico.avaria_inicio_hora = conversor['hora'](self.session.FindById(STRINGPATH['IW53_INICIO_AVARIA_HORA']).text)
+      servico.desejado_inicio_data = conversor['data'](self.session.FindById(STRINGPATH['IW53_INICIO_DESEJADO_DATA']).text)
+      servico.desejado_inicio_hora = conversor['hora'](self.session.FindById(STRINGPATH['IW53_INICIO_DESEJADO_HORA']).text)
+      servico.avaria_final_data = conversor['data'](self.session.FindById(STRINGPATH['IW53_FINAL_AVARIA_DATA']).text)
+      servico.avaria_final_hora = conversor['hora'](self.session.FindById(STRINGPATH['IW53_FINAL_AVARIA_HORA']).text)
+      servico.desejado_final_data = conversor['data'](self.session.FindById(STRINGPATH['IW53_FINAL_DESEJADO_DATA']).text)
+      servico.desejado_final_hora = conversor['hora'](self.session.FindById(STRINGPATH['IW53_FINAL_DESEJADO_HORA']).text)
+      servico.encerramento_data = conversor['data'](self.session.FindById(STRINGPATH['IW53_ENCERRAMENTO_DATA']).text)
+      servico.encerramento_hora = conversor['hora'](self.session.FindById(STRINGPATH['IW53_ENCERRAMENTO_HORA']).text)
+      # Coletar informações da finalização
+      self.session.FindById(STRINGPATH['IW53_FINALIZACAO_TAB']).Select()
+      servico.finalizacao = self.GET_ROWS(
+        'IW53_FINALIZACAO_TABLE',
+        'IW53_FINALIZACAO_IDS',
+        'IW53_FINALIZACAO_NAMES',
+        'IW53_FINALIZACAO_TYPES'
+      )
+      self.session.FindById(STRINGPATH['IW53_EQUIPAMENTO_TAB']).Select()
+      servico.equipamentos_inst = self.GET_ROWS(
+        'IW53_EQUIPAMENTO_INST_TABLE',
+        'IW53_EQUIPAMENTO_INST_IDS',
+        'IW53_EQUIPAMENTO_INST_NAMES',
+        'IW53_EQUIPAMENTO_INST_TYPES'
+      )
+      servico.equipamentos_inst['Texto breve para o registrador'] = servico.equipamentos_inst['Reg'].apply(lambda x:
+          depara('medidor_registrador', str(x).zfill(2)) or 'Sem codigo do registrador')
+      servico.equipamentos_remo = self.GET_ROWS(
+        'IW53_EQUIPAMENTO_REMO_TABLE',
+        'IW53_EQUIPAMENTO_REMO_IDS',
+        'IW53_EQUIPAMENTO_REMO_NAMES',
+        'IW53_EQUIPAMENTO_REMO_TYPES'
+      )
+      servico.equipamentos_remo['Texto breve para o registrador'] = servico.equipamentos_remo['Reg'].apply(lambda x:
+          depara('medidor_registrador', str(x).zfill(2)) or 'Sem codigo do registrador')
+      return servico
+    raise SomethingGoesWrong('Flag argument value is unknow!')
   def ES32(
     self,
     instalacao: int,
