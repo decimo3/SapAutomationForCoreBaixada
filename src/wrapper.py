@@ -58,6 +58,7 @@ __ALL__ = (
   'SEND_ENTER',
   'CHECK_STATUS',
   'GETBY_XY', # get element by col and row numbers
+  'GET_ROWS', # get data from table element
   'ZATC73', # print by invoice document number
   'ZSVC20', # get services report
   'IW53', # get information about service
@@ -319,24 +320,12 @@ class SapBot:
     self.session.FindById(STRINGPATH['ZSVC20_LAYOUT_TEXT']).text = layout
     self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
     self.CHECK_STATUSBAR()
-    # Verifica se há resultados no relatório
-    tabela = self.session.FindById(STRINGPATH['ZSVC20_RESULT_TABLE'], False)
-    if tabela is None:
-      raise InformationNotFound('O relatorio de notas esta vazio!')
-    if tabela.RowCount == 0:
-      raise InformationNotFound('O relatorio de notas esta vazio!')
-    # Coleta as informações da tabela de acordo com as colunas esperadas
-    dataframe = {key: [] for key in colluns_names}
-    dataframe['#'] = []
-    for i in range(tabela.RowCount):
-      for j, column in enumerate(colluns):
-        dataframe[colluns_names[j]].append(tabela.getCellValue(i, column))
-      tabela.firstVisibleRow = i
-      dataframe['#'].append(DESTAQUES.AUSENTE)
-    dataframe = pandas.DataFrame(dataframe)
-    reordered_columns = ['#'] + [col for col in dataframe.columns if col != '#']
-    dataframe = dataframe[reordered_columns]
-    return dataframe
+    return self.GET_ROWS(
+      'ZSVC20_RESULT_TABLE',
+      'ZSVC20_COLUMNS_IDS',
+      'ZSVC20_COLUMNS_NAMES',
+      'ZSVC20_COLUMNS_TYPES'
+    )
   def IW53(
     self,
     nota: int,
@@ -499,22 +488,23 @@ class SapBot:
       raise InformationNotFound('A instalacao nao foi encontrada no relatorio!')
     # Get informations to collect report
     linhas = self.session.FindById(STRINGPATH['ZMED89_RESULT_TABLE']).RowCount
-    dataframe = {key: [] for key in collumns_names}
-    dataframe['#'] = []
     quantidade = int(quantidade / 2)
     min_row = 0 if celula <= quantidade else celula - quantidade
     max_row = linhas if linhas <= celula + quantidade else celula + quantidade
     # Collect report information
-    for i in range(min_row, max_row + 1):
-      for j, collumn in enumerate(collumns):
-        value = self.session.FindById(STRINGPATH['ZMED89_RESULT_TABLE']).getCellValue(i, collumn)
-        dataframe[collumns_names[j]].append(value)
-      destaque = DESTAQUES.AMARELO if i == celula else DESTAQUES.AUSENTE
-      dataframe['#'].append(destaque)
-    dataframe = pandas.DataFrame(dataframe)
-    reordered_columns = ['#'] + [col for col in dataframe.columns if col != '#']
-    dataframe = dataframe[reordered_columns]
-    return dataframe
+    relatorio = self.GET_ROWS(
+      'ZMED89_RESULT_TABLE',
+      'ZMED89_COLUMNS_IDS',
+      'ZMED89_COLUMNS_NAMES',
+      'ZMED89_COLUMNS_TYPES',
+      min_row,
+      max_row + 1
+    )
+    relatorio['#'] = [DESTAQUES.AMARELO if x == instalacao.instalacao
+                      else DESTAQUES.AUSENTE for x in relatorio['Instalacao']]
+    reordered_columns = ['#'] + [col for col in relatorio.columns if col != '#']
+    relatorio = relatorio[reordered_columns]
+    return relatorio
   def ZARC140(
     self,
     instalacao: InstalacaoInfo,
@@ -733,19 +723,12 @@ class SapBot:
       container = self.session.FindById(STRINGPATH['ZMED95_CRUZAMENTOS_TABLE'])
       if container.RowCount == 0:
         raise InformationNotFound('Nao ha informacao de cruzamentos')
-      colunas = ['#', 'Num. 1', 'Cod. Cruza', 'Cod. rua', 'Logradouro', 'Num. 2', 'Latitude', 'Longitude', 'Cidade']
-      dataframe = {key: [] for key in colunas}
-      for i in range(container.RowCount):
-        dataframe['#'].append(DESTAQUES.AUSENTE)
-        dataframe['Num. 1'].append(container.getCellValue(i, "NUMERO"))
-        dataframe['Cod. Cruza'].append(container.getCellValue(i, "COD_CRUZAMENTO"))
-        dataframe['Cod. rua'].append(container.getCellValue(i, "STRT_CODE"))
-        dataframe['Logradouro'].append(container.getCellValue(i, "STREET"))
-        dataframe['Num. 2'].append(container.getCellValue(i, "NUMERO_OUTR"))
-        dataframe['Latitude'].append(str.replace(container.getCellValue(i, "LATITUDE"), ',', '.'))
-        dataframe['Longitude'].append(str.replace(container.getCellValue(i, "LONGITUDE"), ',', '.'))
-        dataframe['Cidade'].append(container.getCellValue(i, "CITY_NAME"))
-      return pandas.DataFrame(dataframe)
+      return self.GET_ROWS(
+        'ZMED95_CRUZAMENTOS_TABLE',
+        'ZMED95_COLUMNS_IDS',
+        'ZMED95_COLUMNS_NAMES',
+        'ZMED95_COLUMNS_TYPES'
+      )
     raise SomethingGoesWrong('Probably the lack of a flag made you fall here')
   def FPL9(
     self,
@@ -898,67 +881,20 @@ class SapBot:
     self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
     self.CHECK_STATUSBAR()
     self.session.FindById(STRINGPATH['ZATC66_LEITURA_RADIO']).Select()
-    tabela = self.session.FindById(STRINGPATH['ZATC66_TABELA_RESULT'])
-    nome_colunas = [
-      '#',
-      'Mes ref.',
-      'Data leit.',
-      'Medidor',
-      'Leitura',
-      'Consumo',
-      'Registrador',
-      'Tipo de leitura',
-      'Motivo da leitura',
-      'Nota do leiturista'
-    ]
-    dataframe = {key: [] for key in nome_colunas}
-    temporario_code = None
-    temporario_texto = None
-    for i in range(tabela.RowCount):
-      dataframe['#'].append(DESTAQUES.AUSENTE)
-      dataframe["Mes ref."].append(tabela.getCellValue(i, "MES_ANO"))
-      dataframe["Data leit."].append(tabela.getCellValue(i, "ADATSOLL"))
-      dataframe["Medidor"].append(int(tabela.getCellValue(i, "GERNR")))
-      temporario_code = int(str(tabela.getCellValue(i, "LEIT_FATURADA")).replace('.', ''))
-      dataframe["Leitura"].append(temporario_code)
-      dataframe["Consumo"].append(0)
-      # Código do registrador e texto breve descritivo
-      temporario_code = tabela.getCellValue(i, "ZWNUMMER")
-      if temporario_code != "":
-        temporario_code = "0" + str(temporario_code) if len(temporario_code) == 1 else temporario_code
-        temporario_texto = depara("medidor_registrador", temporario_code)
-        dataframe["Registrador"].append(f"{temporario_code} - {temporario_texto}")
-      else:
-        dataframe["Registrador"].append("00 - Sem codigo do registrador")
-      temporario_code = temporario_texto = None #! clear values of variables
-      # Código do leiturista e texto breve descritivo
-      temporario_code = tabela.getCellValue(i, "OCORRENCIA")
-      if temporario_code != '':
-        temporario_texto = depara("leitura_codigo", temporario_code)
-        dataframe["Nota do leiturista"].append(f"{temporario_code} - {temporario_texto}")
-      else:
-        dataframe["Nota do leiturista"].append("")
-      temporario_code = temporario_texto = None #! clear values of variables
-      # Código do tipo de leitura e texto breve descritivo
-      temporario_code = tabela.getCellValue(i, "TIPO_LEITURA")
-      if temporario_code != '':
-        temporario_texto = depara("leitura_tipo", temporario_code)
-        dataframe["Tipo de leitura"].append(f"{temporario_code} - {temporario_texto}")
-      else:
-        dataframe["Tipo de leitura"].append("")
-      temporario_code = temporario_texto = None #! clear values of variables
-      # Código do motivo da leitura e texto breve descritivo
-      temporario_code = tabela.getCellValue(i, "MOTIVO_LEITURA")
-      if temporario_code != '':
-        temporario_texto = depara("leitura_motivo", temporario_code)
-        dataframe["Motivo da leitura"].append(f"{temporario_code} - {temporario_texto}")
-      else:
-        dataframe["Motivo da leitura"].append("00 - Sem motivo para leitura")
-      temporario_code = temporario_texto = None #! clear values of variables
-    dataframe = pandas.DataFrame(dataframe)
-    leitura_anterior = dataframe["Leitura"].shift(-1)
-    dataframe["Consumo"] = dataframe["Leitura"] - leitura_anterior
-    return dataframe
+    relatorio = self.GET_ROWS(
+      'ZATC66_TABELA_RESULT',
+      'ZATC66_COLUMNS_IDS',
+      'ZATC66_COLUMNS_NAMES',
+      'ZATC66_COLUMNS_TYPES'
+    )
+    relatorio['Texto registrador'] = relatorio['Reg'].apply(lambda x: 
+        depara('medidor_registrador', str(x).zfill(2)) or 'Sem codigo do registrador')
+    relatorio['Texto do leiturista'] = relatorio['Cod leit'].apply(lambda x: depara('leitura_codigo', x))
+    relatorio['Texto tipo leitura'] = relatorio['Cod tipo'].apply(lambda x: depara('leitura_tipo', str(x).zfill(2)))
+    relatorio['Texto motivo leitura'] = relatorio['Cod motivo'].apply(lambda x: depara('leitura_tipo', str(x).zfill(2)))
+    leitura_anterior = relatorio["Leitura"].shift(-1)
+    relatorio["Consumo"] = relatorio["Leitura"] - leitura_anterior
+    return relatorio[['Mes ref','Data leit','Medidor','Leitura','Consumo','Reg','Texto registrador','Cod tipo','Texto tipo leitura','Cod motivo','Texto motivo leitura','Cod leit','Texto do leiturista']]
   def IQ03(
     self,
     serial: int,
@@ -970,14 +906,16 @@ class SapBot:
     self.session.FindById(STRINGPATH['IQ03_SERIAL_INPUT']).text = serial
     self.session.FindById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
     self.CHECK_STATUSBAR()
-    varios_table = self.session.FindById(STRINGPATH['IQ03_VARIOUS_TABLE'], False)
-    if not varios_table is None:
-      equipamentos = []
-      for i in range(varios_table.RowCount):
-        equipamentos.append(int(varios_table.getCellValue(i, "MATNR")))
+    dataframe = self.GET_ROWS(
+      'IQ03_VARIOUS_TABLE',
+      'IQ03_VARIOUS_COLUMNS_IDS',
+      'IQ03_VARIOUS_COLUMNS_NAMES',
+      'IQ03_VARIOUS_COLUMNS_TYPES'
+    )
+    if dataframe.shape[0] != 0:
       medidores_info = []
-      for i, equipamento in enumerate(equipamentos):
-        medidores_info.extend(self.IQ03(equipamento, serial))
+      for index, row in dataframe.iterrows():
+        medidores_info.extend(self.IQ03(row['Material'], serial))
       return medidores_info
     medidor = MedidorInfo()
     medidor.serial = serial
@@ -996,24 +934,22 @@ class SapBot:
     medidor.instalacao = int(self.session.findById(STRINGPATH['IQ03_INSTALATION_VALUE']).text)
     if IQ03_FLAGS.ONLY_INST in flags:
       return [medidor]
-    leituras = self.session.FindById(STRINGPATH['IQ03_LEITURAS_TABLE'], False)
-    if leituras is None:
+    dataframe = self.GET_ROWS(
+      'IQ03_LEITURAS_TABLE',
+      'IQ03_LEITURAS_COLUMNS_IDS',
+      'IQ03_LEITURAS_COLUMNS_NAMES',
+      'IQ03_LEITURAS_COLUMNS_TYPES',
+      1,
+      12
+    )
+    if dataframe.shape[0] == 0:
       medidor.observacao = "Equipamento sem historico de leituras!"
       return [medidor]
-    dataframe = {key: [] for key in ['Data', 'Codigo', 'Descricao']}
-    limite = 12 if leituras.RowCount > 12 else leituras.RowCount
-    for i in range(limite):
-      data = leituras.getCellValue(i, "ADATSOLL")
-      status = leituras.getCellValue(i, "ABLHINW")
-      if status == '':
-        continue
-      dataframe['Data'].append(data)
-      dataframe['Codigo'].append(status)
-      texto = depara('leitura_codigo', status)
-      dataframe['Descricao'].append(texto)
-    medidor.leituras = pandas.DataFrame(dataframe)
-    if len(medidor.leituras) > 0:
-      medidor.observacao = f"Codigos de leitura nas ultimas {limite} leituras:"
+    dataframe['Descricao'] = dataframe['Codigo'].apply(lambda x: depara('leitura_codigo', x))
+    if medidor.leituras.shape[0] > 0:
+      medidor.observacao = f"Codigos de leitura nas ultimas {medidor.leituras.shape[0]} leituras:"
     else:
-      medidor.observacao = f"Sem codigos de leitura nas ultimas {limite} leituras!"
+      medidor.observacao = f"Sem codigos de leitura nas ultimas {medidor.leituras.shape[0]} leituras!"
+    dataframe = dataframe[dataframe['Codigo'] != 0]
+    medidor.leituras = dataframe
     return [medidor]
