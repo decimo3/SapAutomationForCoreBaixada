@@ -1043,7 +1043,5 @@ class SapBot:
     )
     if parceiros_lista.shape[0] == 0:
       raise InformationNotFound('Nao foram encontrados clientes!')
-    if parceiros_lista.shape[0] > 1:
-      raise TooMannyRequests('Mais de um cliente encontrado!')
-    return parceiros_lista.iloc[0]
+    return '\n\n'.join([row.__str__() for _, row in parceiros_lista.iterrows()])
 
