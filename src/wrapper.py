@@ -1029,7 +1029,7 @@ class SapBot:
   def ZHISCON(self, cpf_cnpj: int) -> object:
     ''' Exibe informações do cliente pelo CPF/CNPJ '''
     self.session.StartTransaction(Transaction="ZHISCON")
-    self.session.FindById(STRINGPATH['ZHISCON_CPFCNPJ_INPUT']).text = cpf_cnpj
+    self.session.FindById(STRINGPATH['ZHISCON_CPFCNPJ_INPUT']).text = str(cpf_cnpj).zfill(11)
     self.session.FindById(STRINGPATH['ZHISCON_PERIODO_INICIO']).text = ''
     self.session.FindById(STRINGPATH['ZHISCON_PERIODO_FINAL']).text = ''
     self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
