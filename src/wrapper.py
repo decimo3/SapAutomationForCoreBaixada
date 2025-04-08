@@ -187,13 +187,15 @@ class SapBot:
     if not os.path.exists(caminho_logs):
       os.mkdir(caminho_logs)
     logfilename = os.path.join(caminho_logs, f'logfile_{instancia}.log')
+    _handlers: list[logging.Handler] = [
+      RotatingFileHandler(logfilename, maxBytes=10000000, backupCount=5)
+    ]
+    if instancia < 0:
+      _handlers.append(logging.StreamHandler(sys.stdout))
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         level=logging.DEBUG,
-        handlers=[
-          RotatingFileHandler(logfilename, maxBytes=10000000, backupCount=5),
-          logging.StreamHandler(sys.stdout) #! Remove to do not display log messages
-        ]
+        handlers=_handlers
     )
     self.logger = logging.getLogger(__name__)
   def HOME_PAGE(self) -> None:
