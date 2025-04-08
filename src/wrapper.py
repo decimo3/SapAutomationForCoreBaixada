@@ -590,7 +590,7 @@ class SapBot:
     self.session.FindById(STRINGPATH['ZARC140_PARCEIRO_INPUT']).text = instalacao.parceiro
     self.session.FindById(STRINGPATH['ZARC140_CONTRATO_INPUT']).text = instalacao.contrato
     self.session.FindById(STRINGPATH['ZARC140_INSTALACAO_INPUT']).text = instalacao.instalacao
-    self.session.FindById(STRINGPATH['ZARC140_REAVISOS_CHECK']).Selected = True
+    self.session.FindById(STRINGPATH['ZARC140_REAVISOS_CHECK']).Selected = (ZARC140_FLAGS.GET_RENOTICE in flags)
     self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
     self.CHECK_STATUSBAR()
     if ZARC140_FLAGS.GET_PENDING in flags:
