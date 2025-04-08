@@ -217,7 +217,8 @@ class SapBot:
     ''' function to get element replace col and row from array id '''
     id_string = STRINGPATH[id_template].replace('¿', str(col)).replace('?', str(row))
     return self.session.FindById(id_string, False)
-  def GET_ROWS(self, table_id: str, columns_ids: str, columns_names: str, data_types: str) -> pandas.DataFrame:
+  def GET_ROWS(self, table_id: str, columns_ids: str, columns_names: str, data_types: str, offset: int = 1, limit: int = 0) -> pandas.DataFrame:
+    ''' function to get values from shell table '''
     data_types_list = STRINGPATH[data_types].split('/')
     columns_ids_list = STRINGPATH[columns_ids].split('/')
     columns_names_list = STRINGPATH[columns_names].split('/')
@@ -225,17 +226,37 @@ class SapBot:
     tabela = self.session.FindById(STRINGPATH[table_id], False)
     if not tabela:
       return pandas.DataFrame(dataframe)
+    if tabela.type == 'GuiShell':
+      shell_or_table = True
+    elif tabela.type == 'GuiTableControl':
+      shell_or_table = False
+    else:
+      raise SomethingGoesWrong(f'The element {table_id} is not table or shell!')
     if tabela.RowCount == 0:
       return pandas.DataFrame(dataframe)
-    for i in range(1, tabela.RowCount):
+    limit = tabela.RowCount if limit == 0 else limit
+    for i in range(offset, limit):
       for j, column in enumerate(columns_ids_list):
         try:
-          valor = tabela.getCellValue(i, column)
+          if shell_or_table:
+            valor = tabela.getCellValue(i, column)
+          else:
+            identificador = f'{STRINGPATH[table_id]}/{column}[{j},0]'
+            valor = self.session.FindById(identificador).text
           valor = conversor[data_types_list[j]](valor)
           dataframe[columns_names_list[j]].append(valor)
         except:
           dataframe[columns_names_list[j]].append(None)
-      tabela.firstVisibleRow = i
+      if shell_or_table:
+        tabela.firstVisibleRow = i
+      else:
+        identificador = f'{STRINGPATH[table_id]}/{columns_ids_list[0]}[0,1]'
+        if not str(self.session.FindById(identificador).text).strip('_'):
+          break
+        else:
+          # NOTE - Usando 'FindById' para 'table_id' novamente pois
+          # a referência para variavel 'table' muda após o scroll
+          self.session.FindById(STRINGPATH[table_id]).verticalScrollbar.position = i
     dataframe = pandas.DataFrame(dataframe)
     dataframe = dataframe.dropna(axis=1, how='all')
     return pandas.DataFrame(dataframe)
