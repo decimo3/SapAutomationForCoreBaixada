@@ -998,8 +998,9 @@ class SapBot:
     return [medidor]
   def ZHISCON(self, cpf_cnpj: int) -> object:
     ''' Exibe informações do cliente pelo CPF/CNPJ '''
+    numero = str(cpf_cnpj).zfill(11) if len(str(cpf_cnpj)) <= 11 else str(cpf_cnpj).zfill(14)
     self.session.StartTransaction(Transaction="ZHISCON")
-    self.session.FindById(STRINGPATH['ZHISCON_CPFCNPJ_INPUT']).text = str(cpf_cnpj).zfill(11)
+    self.session.FindById(STRINGPATH['ZHISCON_CPFCNPJ_INPUT']).text = numero
     self.session.FindById(STRINGPATH['ZHISCON_PERIODO_INICIO']).text = ''
     self.session.FindById(STRINGPATH['ZHISCON_PERIODO_FINAL']).text = ''
     self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
