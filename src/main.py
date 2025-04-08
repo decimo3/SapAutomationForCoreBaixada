@@ -69,7 +69,7 @@ def obter_medidor_por_instalacao(robo: SapBot, numero_instalacao: int, flags: li
   equipamento = instalacao.get_medidor()
   return obter_medidor_por_medidor(robo, equipamento.serial, equipamento.material, flags)
 
-def obter_historico(robo: SapBot, argumento: int) -> pandas.DataFrame:
+def obter_historico(robo: SapBot, argumento: int, _layout: str = '/WILLIAM') -> pandas.DataFrame:
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
   return robo.ZSVC20(
     instalacao = instalacao_info,
@@ -79,7 +79,7 @@ def obter_historico(robo: SapBot, argumento: int) -> pandas.DataFrame:
     danos_filtro = [''],
     statuses = [''],
     regional = '',
-    layout = '/WILLIAM'
+    layout = _layout
   )
 
 def obter_servico_por_instalacao(robo: SapBot, numero_instalacao: int, flags: list[IW53_FLAGS]) -> ServicoInfo:
@@ -509,8 +509,8 @@ def checar_inspecao(robo: SapBot, argumento: int) -> str:
   # Checking if installation already has order
   meses_verificacao_inspecoes =  6  # if not is_residencial else 12
   prazo_maximo_verificacao = datetime.date.today() - datetime.timedelta(days=meses_verificacao_inspecoes * 30)
-  historico_info = obter_historico(robo, instalacao_info.instalacao)
-  historico_info = historico_info[historico_info["Data"] >= pandas.to_datetime(prazo_maximo_verificacao)]
+  historico_info = obter_historico(robo, instalacao_info.instalacao, '/VENCIMENTOS')
+  historico_info = historico_info[pandas.to_datetime(historico_info["Data"]) >= pandas.to_datetime(prazo_maximo_verificacao)]
   historico_info = historico_info[(historico_info["Tipo"] == "BI") | (historico_info["Tipo"] == "BU")]
   historico_info = historico_info[historico_info["Status"] == "EXEC"]
   if historico_info.shape[0] > 0:
