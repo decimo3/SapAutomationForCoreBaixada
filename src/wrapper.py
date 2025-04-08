@@ -410,6 +410,7 @@ class SapBot:
         'IW53_EQUIPAMENTO_INST_NAMES',
         'IW53_EQUIPAMENTO_INST_TYPES'
       )
+      servico.equipamentos_inst = servico.equipamentos_inst.loc[servico.equipamentos_inst['Equipamento'] != 0]
       servico.equipamentos_inst['Texto breve para o registrador'] = servico.equipamentos_inst['Reg'].apply(lambda x:
           depara('medidor_registrador', str(x).zfill(2)) or 'Sem codigo do registrador')
       servico.equipamentos_remo = self.GET_ROWS(
@@ -418,6 +419,7 @@ class SapBot:
         'IW53_EQUIPAMENTO_REMO_NAMES',
         'IW53_EQUIPAMENTO_REMO_TYPES'
       )
+      servico.equipamentos_remo = servico.equipamentos_remo.loc[servico.equipamentos_remo['Equipamento'] != 0]
       servico.equipamentos_remo['Texto breve para o registrador'] = servico.equipamentos_remo['Reg'].apply(lambda x:
           depara('medidor_registrador', str(x).zfill(2)) or 'Sem codigo do registrador')
       return servico
