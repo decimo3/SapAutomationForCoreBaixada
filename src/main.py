@@ -564,6 +564,8 @@ if __name__ == '__main__':
     # Attempts to execute the method requested in the first argument
     retorno = aplicacoes[aplicacao](robo, argumento)
     if isinstance(retorno, pandas.DataFrame):
+      if '#' in retorno.columns:
+        retorno['#'] = retorno['#'].astype(int)
       print(retorno.to_csv(index=False,sep=SEPARADOR))
     else:
       print(retorno)
