@@ -621,7 +621,7 @@ class SapBot:
       dataframe['Observacao'] = dataframe['Status'].apply(lambda x: __status.get(x, [DESTAQUES.AUSENTE, 'Consultar'])[1])
       reordered_columns = ['#'] + [col for col in dataframe.columns if col != '#']
       dataframe = dataframe[reordered_columns]
-      return dataframe
+      return dataframe.drop('Status', axis=1)
     if ZARC140_FLAGS.GET_RENOTICE in flags:
       if self.session.FindById(STRINGPATH['ZARC140_RENOTICE_TAB'], False) is None:
         raise InformationNotFound('Instalacao consultada nao tem registro de reavisos!')
