@@ -367,7 +367,7 @@ def obter_passivo_corte(robo: SapBot, argumento: int) -> str:
   except Exception as erro:
     raise erro
   if instalacao.status == ' Instalação complet.suspensa':
-    return 'Já suspenso no sistema!'
+    return 'Ja suspenso no sistema!'
   if instalacao.contrato == 0:
     return 'Instalacao sem contrato!'
   if not instalacao.nome_cliente:
