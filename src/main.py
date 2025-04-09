@@ -545,6 +545,7 @@ aplicacoes = {
   'lideanexo': obter_lideanexo,
   'abertura': checar_inspecao,
   'informacao': obter_informacao,
+  'leitura': obter_consumo,
 }
 
 if __name__ == '__main__':
