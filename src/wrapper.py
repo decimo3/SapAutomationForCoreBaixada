@@ -787,7 +787,7 @@ class SapBot:
     self.session.findById(STRINGPATH['FPL9_PARCEIRO_INPUT']).text = instalacao.parceiro
     self.session.findById(STRINGPATH['FPL9_CONTRATO_INPUT']).text = instalacao.contrato
     self.session.findById(STRINGPATH['GLOBAL_ENTER_BUTTON']).Press()
-    self.session.findById(STRINGPATH['FPL9_UNKNOW_BUTTON']).Press() # TODO - Search for button need
+    self.session.findById(STRINGPATH['FPL9_EXPAND_BUTTON']).Press()
     self.CHECK_STATUSBAR()
     # Prepare variables to
     #wnd[0]/usr/lbl[char, line]
