@@ -496,22 +496,23 @@ class SapBot:
     tabela = self.session.FindById(STRINGPATH['ZATC45_RESULT_TABLE'])
     # Verificando se as faturas solicitadas estão na tabela
     indices = []
-    for i in range(tabela.RowCount):
-      documento = self.session.FindById(STRINGPATH['ZATC45_RESULT_TABLE']).text
+    quantidade = conversor['numero'](self.session.FindById(STRINGPATH['ZATC45_QUANTIDADE_TEXT']).text)
+    for i in range(quantidade):
+      documento = conversor['numero'](self.GETBY_XY('ZATC45_DOCUMENT_NUMBER', 8, i).text)
       if documento in documentos:
         indices.append(i)
     if len(indices) != len(documentos):
       raise ArgumentException('A quantidade de faturas nao bate com o esperado!')
     self.session.FindById(STRINGPATH['ZATC45_2THVIA_RADIO2']).Select()
     for i in indices:
-      self.session.FindById(STRINGPATH['ZATC45_PRINT_CHECK'].replace('?', i)).selected = True
+      self.GETBY_XY('ZATC45_PRINT_CHECK', 3, i).selected = True
       self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
       if self.session.FindById(STRINGPATH['ZATC45_POPUP_JUSTIFICATIVA'], False) is not None:
         self.session.FindById(STRINGPATH['ZATC45_POPUP_JUSTIFICATIVA']).Select()
         self.session.FindById(STRINGPATH['POPUP_ENTER_BUTTON']).Press()
       if self.session.FindById(STRINGPATH['POPUP'], False) is not None:
         self.session.FindById(STRINGPATH['POPUP_ENTER_BUTTON']).Press()
-      self.session.FindById(STRINGPATH['ZATC45_PRINT_CHECK'].replace('?', i)).selected = False
+      self.GETBY_XY('ZATC45_PRINT_CHECK', 3, i).selected = False
       self.CHECK_STATUSBAR()
   def ZMED89(
       self,
