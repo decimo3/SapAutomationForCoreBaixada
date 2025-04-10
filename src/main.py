@@ -269,8 +269,8 @@ def obter_coordenadas(robo: SapBot, argumento: int) -> str:
 
 def obter_leiturista(robo: SapBot, argumento: int, _flags: list[ZMED89_FLAGS]) -> pandas.DataFrame:
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.GET_CENTER])
-  # if instalacao_info.tipo_instalacao in {'TCBR'}:
-  #   _flags.extend([ZMED89_FLAGS.TELEMEDIDO])
+  if not instalacao_info.tipo_instalacao in {'', 'B'}:
+    _flags.extend([ZMED89_FLAGS.TELEMEDIDO])
   return robo.ZMED89(
     instalacao = instalacao_info,
     flags = _flags,
