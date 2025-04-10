@@ -18,6 +18,7 @@ from exceptions import (
   ArgumentException,
   InformationNotFound,
   TooMannyRequests,
+  UnavailableTransaction,
   WrapperBaseException
 )
 from enumerators import (
@@ -132,8 +133,6 @@ def obter_servico(robo: SapBot, argumento: int, flags: list[IW53_FLAGS] | None =
 def obter_religacao(robo: SapBot, argumento: int) -> pandas.DataFrame:
   if argumento > 90:
     raise ArgumentException('O numero de dias eh superior ao permitido!')
-  if 'ZSVC20' in NOTUSE:
-    raise UnavailableSap('A aplicacao necessaria esta indisponivel!')
   data_inicio = datetime.date.today() - datetime.timedelta(days=argumento)
   return robo.ZSVC20(
     tipos_notas = ['B1', 'BL', 'BR'],
@@ -148,8 +147,6 @@ def obter_religacao(robo: SapBot, argumento: int) -> pandas.DataFrame:
 def obter_bandeirada(robo: SapBot, argumento: int) -> pandas.DataFrame:
   if argumento > 90:
     raise ArgumentException('O numero de dias eh superior ao permitido!')
-  if 'ZSVC20' in NOTUSE:
-    raise UnavailableSap('A aplicacao necessaria esta indisponivel!')
   data_inicio = datetime.date.today() - datetime.timedelta(days=argumento)
   return robo.ZSVC20(
     tipos_notas = ['BA'],
@@ -164,8 +161,6 @@ def obter_bandeirada(robo: SapBot, argumento: int) -> pandas.DataFrame:
 def obter_lideanexo(robo: SapBot, argumento: int) -> pandas.DataFrame:
   if argumento > 90:
     raise ArgumentException('O numero de dias eh superior ao permitido!')
-  if 'ZSVC20' in NOTUSE:
-    raise UnavailableSap('A aplicacao necessaria esta indisponivel!')
   data_inicio = datetime.date.today() - datetime.timedelta(days=argumento)
   relatorio = robo.ZSVC20(
     tipos_notas = ['B5', 'B8', 'BA', 'BC', 'BN', 'BS', 'BV'],
@@ -200,7 +195,7 @@ def obter_pendente(robo: SapBot, argumento: int, raise_error: bool = True) -> pa
       instalacao = instalacao_info,
       flags = flags
     )
-  raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
+  raise UnavailableTransaction('Sem acesso a transacao no sistema SAP!')
 
 def print_pendentes(robo: SapBot, documentos: list[int], instalacao: InstalacaoInfo) -> int:
   if 'ZATC73' not in NOTUSE:
@@ -213,7 +208,7 @@ def print_pendentes(robo: SapBot, documentos: list[int], instalacao: InstalacaoI
       documentos = documentos
     )
   else:
-    raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
+    raise UnavailableTransaction('Sem acesso a transacao no sistema SAP!')
   return len(documentos)
 
 def obter_ligacao(robo: SapBot, instalacao: InstalacaoInfo, _flags: list[ES61_FLAGS] | None = None) -> LigacaoInfo:
@@ -236,7 +231,7 @@ def obter_ligacao(robo: SapBot, instalacao: InstalacaoInfo, _flags: list[ES61_FL
       flags = _flags
     )
   else:
-    raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
+    raise UnavailableTransaction('Sem acesso a transacao no sistema SAP!')
 
 def obter_faturas(robo: SapBot, argumento: int) -> int:
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
@@ -251,7 +246,7 @@ def obter_faturas(robo: SapBot, argumento: int) -> int:
 
 def obter_parceiro(robo: SapBot, argumento: int, flags: list[BP_FLAGS]) -> ParceiroInfo:
   if 'BP' in NOTUSE:
-    raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
+    raise UnavailableTransaction('Sem acesso a transacao no sistema SAP!')
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
   return robo.BP(instalacao_info, flags)
 
@@ -301,10 +296,14 @@ def obter_agrupamento(robo: SapBot, argumento: int) -> pandas.DataFrame:
   return robo.ZMED95(logradouro_info, flag)
 
 def obter_consumo(robo: SapBot, argumento: int) -> pandas.DataFrame:
+  if 'ZATC66' in NOTUSE:
+    raise UnavailableTransaction('Sem acesso a transacao no sistema SAP!')
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
   return robo.ZATC66(instalacao_info)
 
 def obter_consumos(robo: SapBot, argumento: int) -> pandas.DataFrame:
+  if 'ZATC66' in NOTUSE:
+    raise UnavailableTransaction('Sem acesso a transacao no sistema SAP!')
   consumos = pandas.DataFrame()
   # Get reader data
   leiturista = obter_leiturista(robo, argumento, [ZMED89_FLAGS.TIME_ORDER])
@@ -444,6 +443,8 @@ def obter_cruzamento(robo: SapBot, argumento: int) -> pandas.DataFrame:
   return robo.ZMED95(logradouro_info, flag)
 
 def obter_informacao(robo: SapBot, argumento: int) -> str:
+  if 'BP' in NOTUSE:
+    raise UnavailableTransaction('Sem acesso a transacao no sistema SAP!')
   texto = ''
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.GET_METER, ES32_FLAGS.DONOT_THROW])
   if instalacao_info.parceiro:
@@ -518,6 +519,8 @@ def checar_inspecao(robo: SapBot, argumento: int) -> str:
   return f"A instalacao {instalacao_info.instalacao} esta apta sim para abertura de nota de recuperacao!"
 
 def obter_cliente(robo: SapBot, argumento: int) -> object:
+  if 'ZHISCON' in NOTUSE:
+    raise UnavailableSap('Sem acesso a transacao no sistema SAP!')
   return robo.ZHISCON(argumento)
 
 aplicacoes = {
@@ -579,6 +582,8 @@ if __name__ == '__main__':
   except TooMannyRequests as erro:
     print(f'409: {erro.message}')
   except UnavailableSap as erro:
+    print(f'408: {erro.message}')
+  except UnavailableTransaction as erro:
     print(f'408: {erro.message}')
   except SomethingGoesWrong as erro:
     print(f'500: {erro.message}')
