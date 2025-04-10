@@ -450,7 +450,7 @@ def obter_informacao(robo: SapBot, argumento: int) -> str:
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.GET_METER, ES32_FLAGS.DONOT_THROW])
   if instalacao_info.parceiro:
     try:
-      parceiro_info = robo.BP(instalacao_info, [BP_FLAGS.GET_DOCS])
+      parceiro_info = obter_parceiro(robo, instalacao_info.instalacao, [BP_FLAGS.GET_DOCS])
       texto += parceiro_info.__str__() + '\n'
     except WrapperBaseException as erro:
       texto += erro.message
