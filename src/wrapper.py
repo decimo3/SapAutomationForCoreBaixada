@@ -217,6 +217,8 @@ class SapBot:
     A - Abort
     I - Info
     '''
+    if str(statusbar.text).startswith('Sem autorização'):
+      raise UnavailableTransaction(statusbar.text)
     if statusbar.messageType == 'E':
       raise InformationNotFound(statusbar.text)
     if check_false_sucess_text:
