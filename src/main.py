@@ -242,6 +242,7 @@ def obter_faturas(robo: SapBot, argumento: int) -> int:
   if relatorio.shape[0] > 6:
     raise TooMannyRequests(f'O clinete possui faturas demais ({relatorio.shape[0]})')
   # Printing pending invoices
+  relatorio = relatorio[relatorio['#'] != DESTAQUES.AMARELO]
   return print_pendentes(robo, relatorio['Documento'].to_list(), instalacao_info)
 
 def obter_parceiro(robo: SapBot, argumento: int, flags: list[BP_FLAGS]) -> ParceiroInfo:
