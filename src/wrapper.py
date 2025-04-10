@@ -277,6 +277,7 @@ class SapBot:
           # a referência para variavel 'table' muda após o scroll
           self.session.FindById(STRINGPATH[table_id]).verticalScrollbar.position = i
     dataframe = pandas.DataFrame(dataframe)
+    dataframe = dataframe.dropna(axis=0, how='all')
     dataframe = dataframe.dropna(axis=1, how='all')
     return pandas.DataFrame(dataframe)
   def ZATC73(
