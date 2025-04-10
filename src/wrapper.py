@@ -53,9 +53,7 @@ from enumerators import (
   IQ03_FLAGS,
 )
 __ALL__ = (
-  'check_lock',
-  'create_lock',
-  'delete_lock',
+  'create_session',
   'attach_session',
   'HOME_PAGE',
   'SEND_ENTER',
@@ -70,6 +68,7 @@ __ALL__ = (
   'ZMED89', # get reading report
   'ZARC140', # get invoice report
   'ES61', # get information about ligacao
+  'ES62', # get information about ligacao
   'ES57', # get information about street
   'ZMED95', # get information about logradouro
   'FPL9', # get invoice report then ZARC140 unavaliable
@@ -1022,4 +1021,3 @@ class SapBot:
     if parceiros_lista.shape[0] == 0:
       raise InformationNotFound('Nao foram encontrados clientes!')
     return '\n\n'.join([row.__str__() for _, row in parceiros_lista.iterrows()])
-
