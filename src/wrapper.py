@@ -250,7 +250,7 @@ class SapBot:
       raise SomethingGoesWrong(f'The element {table_id} is not table or shell!')
     if tabela.RowCount == 0:
       return pandas.DataFrame(dataframe)
-    limit = tabela.RowCount if limit == 0 else limit
+    limit = tabela.RowCount if limit == 0 or tabela.RowCount < limit else limit
     for i in range(offset, limit):
       for j, column in enumerate(columns_ids_list):
         try:
