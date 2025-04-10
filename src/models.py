@@ -43,6 +43,7 @@ class InstalacaoInfo():
   classe: int = 0
   texto_classe: str = ''
   unidade: str = ''
+  tipo_instalacao: str = ''
   vigencia_inicio: datetime.datetime = field(default_factory=lambda: datetime.datetime.min)
   vigencia_final: datetime.datetime = field(default_factory=lambda: datetime.datetime.min)
   equipamento: list[MedidorInfo] = field(default_factory=list)
