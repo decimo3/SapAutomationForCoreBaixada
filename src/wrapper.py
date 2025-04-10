@@ -337,6 +337,8 @@ class SapBot:
     self.session.FindById(STRINGPATH['ZSVC20_LAYOUT_TEXT']).text = layout
     self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
     self.CHECK_STATUSBAR()
+    if self.session.FindById(STRINGPATH['ZSVC20_ERROR_POPUP_TEXT'], False):
+      raise InformationNotFound(self.session.FindById(STRINGPATH['ZSVC20_ERROR_POPUP_TEXT']).text)
     return self.GET_ROWS(
       'ZSVC20_RESULT_TABLE',
       'ZSVC20_COLUMNS_IDS',
