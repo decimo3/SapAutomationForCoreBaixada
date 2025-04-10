@@ -264,7 +264,10 @@ class SapBot:
         except:
           dataframe[columns_names_list[j]].append(None)
       if shell_or_table:
-        tabela.firstVisibleRow = i
+        try:
+          tabela.firstVisibleRow = i
+        except:
+          pass
       else:
         identificador = f'{STRINGPATH[table_id]}/{columns_ids_list[0]}[0,1]'
         if not str(self.session.FindById(identificador).text).strip('_'):
