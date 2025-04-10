@@ -22,6 +22,8 @@ from constants import (
 from helpers import depara, STRINGPATH
 from conversor import conversor
 from exceptions import (
+  ElementNotFound,
+  UnavailableTransaction,
   WrapperBaseException,
   TooMannyRequests,
   SomethingGoesWrong,
