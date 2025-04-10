@@ -798,7 +798,7 @@ class SapBot:
     hasLines = True
     firstLine = False
     indices = [0,0,0,0,0,0]
-    colunas = ['#', 'Referencia', 'Impressao', 'Vencimento', 'Valores', 'Observacao']
+    colunas = ['#', 'Referencia', 'Documento', 'Vencimento', 'Valor', 'Observacao']
     dataframe = {key: [] for key in colunas}
     while hasLines:
       # Aponta para a linha atual ou para a última caso o índice da linha ultrapasse o máximo
@@ -807,7 +807,7 @@ class SapBot:
       if row >= MAX_ROW:
         self.session.FindById(STRINGPATH['GLOBAL_USER_AREA']).verticalScrollbar.position = row - MAX_ROW
       # Obtém o valor do label na coluna 1 da linha atual
-      primeiro_caractere = self.GETBY_XY(STRINGPATH['FPL9_LABEL_CANVAS'], 1, linha)
+      primeiro_caractere = self.GETBY_XY('FPL9_LABEL_CANVAS', 1, linha, False)
       # Verifica se a coleta já foi iniciada e se o label está vazio, se sim, encerra a coleta
       if indices[2] > 0 and primeiro_caractere is None:
         if firstLine is False:
@@ -823,7 +823,7 @@ class SapBot:
       # iteração sobre todos os caracteres da linha para coletar os índices dos labels
       while (col < MAX_COL and indices[5] == 0):
         # Obtém o valor do label na coluna atual da linha atual
-        label = self.GETBY_XY(STRINGPATH['FPL9_LABEL_CANVAS'], col, linha)
+        label = self.GETBY_XY('FPL9_LABEL_CANVAS', col, linha, False)
         # Verifica se a coordenada do objeto retorna um objeto, se não pula para a próxima coluna
         if label is None:
           col += 1
@@ -841,7 +841,7 @@ class SapBot:
         col += 1
       if indices[2] > 0 and firstLine == True:
         
-        status_icon_name = self.GETBY_XY(STRINGPATH['FPL9_LABEL_CANVAS'], indices[1], linha).iconName
+        status_icon_name = self.GETBY_XY('FPL9_LABEL_CANVAS', indices[1], linha).iconName
         if status_icon_name == "S_TL_R":
           dataframe["#"].append(DESTAQUES.VERMELHO)
           dataframe["Observacao"].append("Fat. vencida")
@@ -854,26 +854,24 @@ class SapBot:
         if not status_icon_name in {"S_TL_R", "S_TL_Y", "S_TL_G"}:
           dataframe["#"].append(DESTAQUES.AUSENTE)
           dataframe["Observacao"].append("")
-        dataframe["Referencia"].append(self.GETBY_XY(STRINGPATH['FPL9_LABEL_CANVAS'], indices[2], linha).text)
-        dataframe["Impressao"].append(self.GETBY_XY(STRINGPATH['FPL9_LABEL_CANVAS'], indices[3], linha).text)
-        vence = datetime.datetime.strptime(self.GETBY_XY(STRINGPATH['FPL9_LABEL_CANVAS'], indices[4], linha).text ,"%d.%m.%Y")
-        dataframe["Vencimento"].append(vence)
-        valor = float(str.replace(self.GETBY_XY(STRINGPATH['FPL9_LABEL_CANVAS'], indices[5], linha).text, ',', '.'))
-        dataframe["Valores"].append(valor)
+        dataframe["Referencia"].append(self.GETBY_XY('FPL9_LABEL_CANVAS', indices[2], linha).text)
+        dataframe["Documento"].append(conversor['numero'](self.GETBY_XY('FPL9_LABEL_CANVAS', indices[3], linha).text))
+        dataframe["Vencimento"].append(conversor['data'](self.GETBY_XY('FPL9_LABEL_CANVAS', indices[4], linha).text))
+        dataframe["Valor"].append(conversor['decimal'](self.GETBY_XY('FPL9_LABEL_CANVAS', indices[5], linha).text))
       row += 1
       col = 1
     dataframe1 = pandas.DataFrame(dataframe)
     # agrupa os valores por documento de impressão
-    dataframe2 = dataframe1.groupby('Impressao')['Valores'].sum().reset_index()
+    dataframe2 = dataframe1.groupby('Documento')['Valor'].sum().reset_index()
     # remove as duplicatas para ter somente um documento de impressão por linha
-    dataframe1.drop_duplicates(subset="Impressao", inplace=True)
+    dataframe1.drop_duplicates(subset="Documento", inplace=True)
     # mescla o dataframe com a soma dos valores com o dataframe com as informações
-    dataframe3 = dataframe1.merge(dataframe2, on="Impressao")
+    dataframe3 = dataframe1.merge(dataframe2, on="Documento")
     # remove a coluna antiga com o valor errado
-    del dataframe3['Valores_x']
-    dataframe3 = dataframe3.rename(columns={'Valores_y': 'valores'})
-    dataframe3['Impressao'] = dataframe3['Impressao'].replace('', pandas.NA)
-    dataframe3 = dataframe3.dropna(subset=['Impressao'])
+    del dataframe3['Valor_x']
+    dataframe3 = dataframe3.rename(columns={'Valor_y': 'Valor'})
+    dataframe3['Documento'] = dataframe3['Documento'].replace('', pandas.NA)
+    dataframe3 = dataframe3.dropna(subset=['Documento'])
     return dataframe3
   def BP(
     self,
