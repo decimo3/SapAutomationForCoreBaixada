@@ -614,12 +614,11 @@ class SapBot:
           return dataframe
         raise InformationNotFound('Instalacao consultada nao tem registro de faturas!')
       __status = {
-        '@5B@': [DESTAQUES.VERDE, 'Fat. no prazo'],
-        '@5C@': [DESTAQUES.VERMELHO, 'Fat. vencida'],
-        '@06@': [DESTAQUES.AMARELO, 'Fat. Retida']
+        '@5B@': DESTAQUES.VERDE,
+        '@5C@': DESTAQUES.VERMELHO,
+        '@06@': DESTAQUES.AMARELO
       }
-      dataframe['#'] = dataframe['Status'].apply(lambda x: __status.get(x, [DESTAQUES.AUSENTE, 'Consultar'])[0])
-      dataframe['Observacao'] = dataframe['Status'].apply(lambda x: __status.get(x, [DESTAQUES.AUSENTE, 'Consultar'])[1])
+      dataframe['#'] = dataframe['Status'].apply(lambda x: __status.get(x, DESTAQUES.AUSENTE))
       reordered_columns = ['#'] + [col for col in dataframe.columns if col != '#']
       dataframe = dataframe[reordered_columns]
       return dataframe.drop('Status', axis=1)
