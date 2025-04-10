@@ -995,7 +995,7 @@ class SapBot:
       'IQ03_LEITURAS_COLUMNS_IDS',
       'IQ03_LEITURAS_COLUMNS_NAMES',
       'IQ03_LEITURAS_COLUMNS_TYPES',
-      1,
+      0,
       12
     )
     if dataframe.shape[0] == 0:
