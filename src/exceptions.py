@@ -54,3 +54,11 @@ class TooMannyRequests(WrapperBaseException):
     self.message = message
   def __str__(self) -> str:
     return self.message.format(**vars(self))
+  
+class UnavailableTransaction(WrapperBaseException):
+  ''' Exception class when we are unable to connect to SAP GUI Scripting Engine '''
+  def __init__(self, message: str = "") -> None:
+    super().__init__(message)
+    self.message = message
+  def __str__(self) -> str:
+    return self.message.format(**vars(self))
