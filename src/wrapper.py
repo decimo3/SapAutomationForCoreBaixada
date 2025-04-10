@@ -223,10 +223,13 @@ class SapBot:
       if check_false_sucess_text in statusbar.text:
         raise InformationNotFound(statusbar.text)
     return statusbar.text
-  def GETBY_XY(self, id_template: str, col: int, row: int):
+  def GETBY_XY(self, id_template: str, col: int, row: int, throw: bool = True):
     ''' function to get element replace col and row from array id '''
     id_string = STRINGPATH[id_template].replace('¿', str(col)).replace('?', str(row))
-    return self.session.FindById(id_string, False)
+    elemento = self.session.FindById(id_string, False)
+    if not elemento and throw:
+      raise ElementNotFound(f'O elemento {id_template} nao foi encontrado')
+    return elemento
   def GET_ROWS(self, table_id: str, columns_ids: str, columns_names: str, data_types: str, offset: int = 1, limit: int = 0) -> pandas.DataFrame:
     ''' function to get values from shell table '''
     data_types_list = STRINGPATH[data_types].split('/')
