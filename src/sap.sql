@@ -732,6 +732,7 @@ INSERT INTO depara (tipo, de, para) VALUES
 INSERT INTO depara (tipo, de, para) VALUES
 ('relatorio_filtro', 'RELIGA', 'ORTI,ORIS,ORRS'),
 ('relatorio_filtro','LIDE','OSLT'),
+('relatorio_filtro','AFERICAO','OAJC,OAJI,OAJI,OAOC,OARC,OATI,OSAR,OSAT,OSFT,OSJD,OSOU,OSTA');
 
 INSERT INTO depara (tipo, de, para) VALUES
 ('classe_subclasse','0001','Sist.setor industrial standard'),
