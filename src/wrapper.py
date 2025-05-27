@@ -206,7 +206,7 @@ class SapBot:
   def SEND_ENTER(self) -> None:
     ''' Function to send 'Enter' key '''
     self.session.FindById("wnd[0]").SendVKey(2)
-  def CHECK_STATUSBAR(self, check_false_sucess_text: str = '') -> str: # TODO - pass a clear check to this function
+  def CHECK_STATUSBAR(self, check_false_sucess_text: str = '', throw_error: bool = True) -> str:
     ''' Function to check errors message on status bar '''
     statusbar = self.session.findById(STRINGPATH['STATUS_BAR_MESSAGE'])
     '''
@@ -218,6 +218,8 @@ class SapBot:
     A - Abort
     I - Info
     '''
+    if not throw_error:
+      return statusbar.text
     if str(statusbar.text).startswith('Sem autorização'):
       raise UnavailableTransaction(statusbar.text)
     if statusbar.messageType == 'E':
