@@ -1,7 +1,5 @@
-# Update of energy recovery note opening analysis criteria
+# 20 de jun. de 2024 - Atualização dos critérios para de abertura de nota de recuperação de energia
 
-
-*ANTES:*
 ANTES:
 1. Instalação tem que estar ativa;
 2. Tem que ter cliente vinculado;

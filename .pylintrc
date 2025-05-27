@@ -1,2 +1,5 @@
+[FORMAT]
 # String used as indentation unit. This is usually "    " (4 spaces) or "\t".
 indent-string='  '
+[MESSAGES CONTROL]
+disable=bare-except,broad-exception-raised,raise-missing-from,invalid-name
