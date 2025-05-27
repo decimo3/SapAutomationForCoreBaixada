@@ -719,10 +719,6 @@ INSERT INTO depara (tipo, de, para) VALUES
 ('material_codigo','392396','POLO P/MEDICAO MT 15KV BCPS11'),
 ('material_codigo','811566','TRANSFORMADOR CORRENTE 145KV'),
 ('material_codigo','811567','TRANSFORMADOR CORRENTE 145KV');
--- Entering values ​​for sector activities
-INSERT INTO depara (tipo, de, para) VALUES
-('setor_atividades','CORE','RELIGA'),
-('setor_atividades','REN','LIDE,ANEXO');
 -- Entering values ​​for report params
 INSERT INTO depara (tipo, de, para) VALUES
 ('relatorio_tipo','RELIGA','B1,BL,BR'),
