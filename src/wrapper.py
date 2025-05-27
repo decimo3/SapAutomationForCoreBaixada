@@ -206,7 +206,7 @@ class SapBot:
   def SEND_ENTER(self) -> None:
     ''' Function to send 'Enter' key '''
     self.session.FindById("wnd[0]").SendVKey(2)
-  def CHECK_STATUSBAR(self, check_false_sucess_text: str = '') -> str: # TODO - pass a clear check to this function
+  def CHECK_STATUSBAR(self, check_false_sucess_text: str = '', throw_error: bool = True) -> str:
     ''' Function to check errors message on status bar '''
     statusbar = self.session.findById(STRINGPATH['STATUS_BAR_MESSAGE'])
     '''
@@ -218,6 +218,8 @@ class SapBot:
     A - Abort
     I - Info
     '''
+    if not throw_error:
+      return statusbar.text
     if str(statusbar.text).startswith('Sem autorização'):
       raise UnavailableTransaction(statusbar.text)
     if statusbar.messageType == 'E':
@@ -505,11 +507,16 @@ class SapBot:
     self.session.findById(STRINGPATH['ZATC45_PARCEIRO_INPUT']).text = instalacao.parceiro
     self.session.findById(STRINGPATH['ZATC45_INSTALLATION_INPUT']).text = instalacao.instalacao
     self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
-    self.CHECK_STATUSBAR()
-    tabela = self.session.FindById(STRINGPATH['ZATC45_RESULT_TABLE'])
+    status_text = self.CHECK_STATUSBAR(throw_error=False)
+    if status_text == 'Nenhum débito foi encontrado!':
+      raise InformationNotFound('A quantidade de faturas nao bate com o esperado!')
+    if status_text:
+      raise InformationNotFound(status_text)
     # Verificando se as faturas solicitadas estão na tabela
     indices = []
     quantidade = conversor['numero'](self.session.FindById(STRINGPATH['ZATC45_QUANTIDADE_TEXT']).text)
+    if quantidade == 0:
+      raise InformationNotFound('A quantidade de faturas nao bate com o esperado!')
     for i in range(quantidade):
       documento = conversor['numero'](self.GETBY_XY('ZATC45_DOCUMENT_NUMBER', 8, i).text)
       if documento in documentos:
