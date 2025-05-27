@@ -515,6 +515,8 @@ class SapBot:
     # Verificando se as faturas solicitadas estão na tabela
     indices = []
     quantidade = conversor['numero'](self.session.FindById(STRINGPATH['ZATC45_QUANTIDADE_TEXT']).text)
+    if quantidade == 0:
+      raise InformationNotFound('A quantidade de faturas nao bate com o esperado!')
     for i in range(quantidade):
       documento = conversor['numero'](self.GETBY_XY('ZATC45_DOCUMENT_NUMBER', 8, i).text)
       if documento in documentos:
