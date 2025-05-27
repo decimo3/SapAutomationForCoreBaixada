@@ -507,8 +507,11 @@ class SapBot:
     self.session.findById(STRINGPATH['ZATC45_PARCEIRO_INPUT']).text = instalacao.parceiro
     self.session.findById(STRINGPATH['ZATC45_INSTALLATION_INPUT']).text = instalacao.instalacao
     self.session.FindById(STRINGPATH['GLOBAL_ACCEPT_BUTTON']).Press()
-    self.CHECK_STATUSBAR()
-    tabela = self.session.FindById(STRINGPATH['ZATC45_RESULT_TABLE'])
+    status_text = self.CHECK_STATUSBAR(throw_error=False)
+    if status_text == 'Nenhum débito foi encontrado!':
+      raise InformationNotFound('A quantidade de faturas nao bate com o esperado!')
+    if status_text:
+      raise InformationNotFound(status_text)
     # Verificando se as faturas solicitadas estão na tabela
     indices = []
     quantidade = conversor['numero'](self.session.FindById(STRINGPATH['ZATC45_QUANTIDADE_TEXT']).text)
