@@ -130,35 +130,51 @@ def obter_servico(robo: SapBot, argumento: int, flags: list[IW53_FLAGS] | None =
     return obter_servico_por_medidor(robo, argumento, flags)
   return obter_servico_por_instalacao(robo, argumento, flags)
 
-def obter_religacao(robo: SapBot, argumento: int) -> pandas.DataFrame:
+def obter_religacao(robo: SapBot, argumento: int, regional: str) -> pandas.DataFrame:
   if argumento > 90:
     raise ArgumentException('O numero de dias eh superior ao permitido!')
   data_inicio = datetime.date.today() - datetime.timedelta(days=argumento)
-  return robo.ZSVC20(
+  relatorio = robo.ZSVC20(
     tipos_notas = ['B1', 'BL', 'BR'],
     min_data = data_inicio,
     max_data = datetime.date.today(),
     statuses = ['ENVI', 'LIBE', 'TABL'],
     danos_filtro = [],
-    regional = 'RO',
+    regional = regional,
     layout = '//TT'
   )
+  filtrar_danos = depara('relatorio_filtro', 'RELIGA').split(',')
+  relatorio = relatorio[~relatorio['Dano'].isin(filtrar_danos)]
+  return relatorio
 
-def obter_bandeirada(robo: SapBot, argumento: int) -> pandas.DataFrame:
+def obter_religacao_oeste(robo: SapBot, argumento: int) -> pandas.DataFrame:
+  return obter_religacao(robo, argumento, 'RO')
+
+def obter_religacao_baixada(robo: SapBot, argumento: int) -> pandas.DataFrame:
+  return obter_religacao(robo, argumento, 'RB')
+
+def obter_bandeirada(robo: SapBot, argumento: int, regional: str) -> pandas.DataFrame:
   if argumento > 90:
     raise ArgumentException('O numero de dias eh superior ao permitido!')
   data_inicio = datetime.date.today() - datetime.timedelta(days=argumento)
+  danos_considerar = depara('relatorio_filtro', 'AFERICAO').split(',')
   return robo.ZSVC20(
     tipos_notas = ['BA'],
     min_data = data_inicio,
     max_data = datetime.date.today(),
-    danos_filtro = ['OSTA', 'OSJD', 'OSFT', 'OSAT', 'OSAR', 'OATI'],
+    danos_filtro = danos_considerar,
     statuses = ['ANAL', 'POSB', 'PCOM', 'NEXE', 'EXEC'],
-    regional = 'RO',
+    regional = regional,
     layout = '/WILLIAM'
   )
 
-def obter_lideanexo(robo: SapBot, argumento: int) -> pandas.DataFrame:
+def obter_bandeirada_oeste(robo: SapBot, argumento: int) -> pandas.DataFrame:
+  return obter_bandeirada(robo, argumento, 'RO')
+
+def obter_bandeirada_baixada(robo: SapBot, argumento: int) -> pandas.DataFrame:
+  return obter_bandeirada(robo, argumento, 'RB')
+
+def obter_lideanexo(robo: SapBot, argumento: int, regional: str) -> pandas.DataFrame:
   if argumento > 90:
     raise ArgumentException('O numero de dias eh superior ao permitido!')
   data_inicio = datetime.date.today() - datetime.timedelta(days=argumento)
@@ -168,13 +184,20 @@ def obter_lideanexo(robo: SapBot, argumento: int) -> pandas.DataFrame:
     max_data = datetime.date.today(),
     danos_filtro = [],
     statuses = ['ENVI', 'LIBE', 'TABL'],
-    regional = 'RO',
+    regional = regional,
     layout = '//TT'
   )
   filtrar_danos = depara('relatorio_filtro', 'LIDE').split(',')
   filtrar_danos.extend(depara('relatorio_filtro', 'ANEXO').split(','))
   relatorio = relatorio[~relatorio['Dano'].isin(filtrar_danos)]
   return relatorio
+
+def obter_lideanexo_oeste(robo: SapBot, argumento: int) -> pandas.DataFrame:
+  return obter_lideanexo(robo, argumento, 'RO')
+
+def obter_lideanexo_baixada(robo: SapBot, argumento: int) -> pandas.DataFrame:
+  return obter_lideanexo(robo, argumento, 'RB')
+
 
 def obter_pendente(robo: SapBot, argumento: int, raise_error: bool = True) -> pandas.DataFrame:
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
@@ -240,7 +263,7 @@ def obter_faturas(robo: SapBot, argumento: int) -> int:
   if relatorio.shape[0] == 0:
     raise InformationNotFound('Cliente nao possui faturas pendentes!')
   if relatorio.shape[0] > 6:
-    raise TooMannyRequests(f'O clinete possui faturas demais ({relatorio.shape[0]})')
+    raise TooMannyRequests(f'O cliente possui faturas demais ({relatorio.shape[0]})')
   # Printing pending invoices
   relatorio = relatorio[relatorio['#'] != DESTAQUES.AMARELO]
   return print_pendentes(robo, relatorio['Documento'].to_list(), instalacao_info)
@@ -535,8 +558,6 @@ aplicacoes = {
   'debito': obter_faturas,
   'coordenada': obter_coordenadas,
   'localizacao': obter_coordenadas,
-  'religacao': obter_religacao,
-  'bandeirada': obter_bandeirada,
   'historico': obter_historico,
   'leiturista': obter_horariado,
   'roteiro': obter_sequencial,
@@ -546,10 +567,15 @@ aplicacoes = {
   'fuga': obter_fugitivos,
   'pendente': obter_pendente,
   'cruzamento': obter_cruzamento,
-  'lideanexo': obter_lideanexo,
   'abertura': checar_inspecao,
   'informacao': obter_informacao,
   'leitura': obter_consumo,
+  'religacaobx': obter_religacao_baixada,
+  'lideanexobx': obter_lideanexo_baixada,
+  'bandeiradabx': obter_bandeirada_baixada,
+  'religacaoro': obter_religacao_oeste,
+  'lideanexoro': obter_lideanexo_oeste,
+  'bandeiradaro': obter_bandeirada_oeste,
 }
 
 if __name__ == '__main__':
