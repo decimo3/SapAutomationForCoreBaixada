@@ -570,12 +570,12 @@ aplicacoes = {
   'abertura': checar_inspecao,
   'informacao': obter_informacao,
   'leitura': obter_consumo,
-  'religacao-bx': obter_religacao_baixada,
-  'lideanexo-bx': obter_lideanexo_baixada,
-  'bandeirada-bx': obter_bandeirada_baixada,
-  'religacao-ro': obter_religacao_oeste,
-  'lideanexo-ro': obter_lideanexo_oeste,
-  'bandeirada-ro': obter_bandeirada_oeste,
+  'religacaobx': obter_religacao_baixada,
+  'lideanexobx': obter_lideanexo_baixada,
+  'bandeiradabx': obter_bandeirada_baixada,
+  'religacaoro': obter_religacao_oeste,
+  'lideanexoro': obter_lideanexo_oeste,
+  'bandeiradaro': obter_bandeirada_oeste,
 }
 
 if __name__ == '__main__':
