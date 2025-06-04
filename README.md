@@ -16,12 +16,32 @@ pip install -r requirements.txt
 ```txt
 USUARIO=sua_matricula_aqui
 PALAVRA=sua_senha_aqui
+NOTUSE=transacoes_sem_acesso
+```
+5. Para atualizar o banco de dados, execute:
+```bash
+rm src\\sap.db
+sqlite3 src\\sap.db < src\\sap.sql
 ```
 6. Para atualizar o executável, execute:
 ```bash
-pyinstaller --onefile sap.py
+pyinstaller --name sap --icon appicon.ico --onefile src\\main.py
 ```
-5. Para finalizar, execute:
+7. Copie todos os arquivos para a pasta `dist`:
+```bash
+md tmp
+copy dist\\sap.exe tmp
+copy src\\sap.conf tmp
+copy src\\sap.path tmp
+copy src\\sap.db tmp
+copy src\\erroDialog.vbs tmp
+copy src\\fileDialog.vbs tmp
+``` 
+8. Monte o pacote com o comando abaixo:
+```bash
+7z u sap_bot.zip .\\tmp\\*
+```
+9. Para finalizar, execute:
 ```bash
 Deactivate
 ```
