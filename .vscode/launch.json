@@ -12,7 +12,16 @@
       "cwd": "${workspaceFolder}/src",
       "console": "integratedTerminal",
       "justMyCode": true,
-      "args": ["ren360", "421164813"]
+      "args": ["fatura", "421164813", "0"]
+    },
+    {
+      "name": "Python: Teste em massa",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "load_test.py",
+      "cwd": "${workspaceFolder}/src",
+      "console": "integratedTerminal",
+      "justMyCode": true,
     }
   ]
 }
