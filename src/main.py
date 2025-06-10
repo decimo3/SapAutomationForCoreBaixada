@@ -11,6 +11,7 @@ from helpers import depara
 from constants import (
   SEPARADOR,
   NOTUSE,
+  EXCLUDE,
 )
 from exceptions import (
   SomethingGoesWrong,
@@ -143,8 +144,7 @@ def obter_religacao(robo: SapBot, argumento: int, regional: str) -> pandas.DataF
     regional = regional,
     layout = '//TT'
   )
-  filtrar_danos = depara('relatorio_filtro', 'RELIGA').split(',')
-  relatorio = relatorio[~relatorio['Dano'].isin(filtrar_danos)]
+  relatorio = relatorio[~relatorio['Dano'].isin(EXCLUDE)]
   return relatorio
 
 def obter_religacao_oeste(robo: SapBot, argumento: int) -> pandas.DataFrame:
@@ -157,12 +157,11 @@ def obter_bandeirada(robo: SapBot, argumento: int, regional: str) -> pandas.Data
   if argumento > 90:
     raise ArgumentException('O numero de dias eh superior ao permitido!')
   data_inicio = datetime.date.today() - datetime.timedelta(days=argumento)
-  danos_considerar = depara('relatorio_filtro', 'AFERICAO').split(',')
   return robo.ZSVC20(
     tipos_notas = ['BA'],
     min_data = data_inicio,
     max_data = datetime.date.today(),
-    danos_filtro = danos_considerar,
+    danos_filtro = [],
     statuses = ['ANAL', 'POSB', 'PCOM', 'NEXE', 'EXEC'],
     regional = regional,
     layout = '/WILLIAM'
@@ -187,9 +186,7 @@ def obter_lideanexo(robo: SapBot, argumento: int, regional: str) -> pandas.DataF
     regional = regional,
     layout = '//TT'
   )
-  filtrar_danos = depara('relatorio_filtro', 'LIDE').split(',')
-  filtrar_danos.extend(depara('relatorio_filtro', 'ANEXO').split(','))
-  relatorio = relatorio[~relatorio['Dano'].isin(filtrar_danos)]
+  relatorio = relatorio[~relatorio['Dano'].isin(EXCLUDE)]
   return relatorio
 
 def obter_lideanexo_oeste(robo: SapBot, argumento: int) -> pandas.DataFrame:
