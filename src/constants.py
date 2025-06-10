@@ -20,3 +20,5 @@ dotenv.load_dotenv(os.path.join(BASE_FOLDER, 'sap.conf'))
 LOCKFILE = os.path.join(BASE_FOLDER, 'sap.lock')
 
 NOTUSE = str(os.environ.get('NOTUSE')).split(',')
+
+EXCLUDE = str(os.environ.get('EXCLUDE')).split(',')
