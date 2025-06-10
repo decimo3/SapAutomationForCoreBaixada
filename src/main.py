@@ -157,7 +157,7 @@ def obter_bandeirada(robo: SapBot, argumento: int, regional: str) -> pandas.Data
   if argumento > 90:
     raise ArgumentException('O numero de dias eh superior ao permitido!')
   data_inicio = datetime.date.today() - datetime.timedelta(days=argumento)
-  return robo.ZSVC20(
+  relatorio = robo.ZSVC20(
     tipos_notas = ['BA'],
     min_data = data_inicio,
     max_data = datetime.date.today(),
@@ -166,6 +166,10 @@ def obter_bandeirada(robo: SapBot, argumento: int, regional: str) -> pandas.Data
     regional = regional,
     layout = '/WILLIAM'
   )
+  relatorio = relatorio[~relatorio['Dano'].isin(EXCLUDE)]
+  if relatorio.shape[0] == 0:
+    raise InformationNotFound('Nenhuma bandeirada encontrada!')
+  return relatorio
 
 def obter_bandeirada_oeste(robo: SapBot, argumento: int) -> pandas.DataFrame:
   return obter_bandeirada(robo, argumento, 'RO')
