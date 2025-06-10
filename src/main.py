@@ -181,8 +181,9 @@ def obter_lideanexo(robo: SapBot, argumento: int, regional: str) -> pandas.DataF
   if argumento > 90:
     raise ArgumentException('O numero de dias eh superior ao permitido!')
   data_inicio = datetime.date.today() - datetime.timedelta(days=argumento)
+  # Tipos LIDE: 'B3', 'B5', 'B8', 'BN', 'BV'; Tipos ANEXO: 'BA', 'BC', 'BS'
   relatorio = robo.ZSVC20(
-    tipos_notas = ['B5', 'B8', 'BA', 'BC', 'BN', 'BS', 'BV'],
+    tipos_notas = ['B3', 'B5', 'B8', 'BA', 'BC', 'BN', 'BS', 'BV'],
     min_data = data_inicio,
     max_data = datetime.date.today(),
     danos_filtro = [],
