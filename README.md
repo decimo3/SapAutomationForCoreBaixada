@@ -46,6 +46,9 @@ copy src\\fileDialog.vbs tmp
 Deactivate
 ```
 
+flask --app webserver run --debug
+
+
 Obs.0: Esse script contém dependências específicas para o sistema operacional `Windowns`.
 
 Obs.1: É necessário ter o `SAP FrontEnd` instalado e estar autenticado para usar o _runner_.
