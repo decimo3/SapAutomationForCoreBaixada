@@ -102,9 +102,7 @@ jobs:
       # Build executable
       - name: Build with pyinstaller
         run: |
-          cd src
-          pyinstaller -n sap --icon ../appicon.ico --version-file ../version_file.txt --distpath ../dist --onefile main.py
-          cd ..
+          pyinstaller --clean --icon appicon.ico --version-file version_file.txt --onefile src/main.py --paths src
       # Compress executable
       - name: compress executable
         run: |
