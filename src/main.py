@@ -87,7 +87,11 @@ def obter_historico(robo: SapBot, argumento: int, _layout: str = '/WILLIAM') -> 
 def obter_servico_por_instalacao(robo: SapBot, numero_instalacao: int, flags: list[IW53_FLAGS]) -> ServicoInfo:
   ''' Obtém informações do servico a partir do número da instalacao '''
   historico = obter_historico(robo, numero_instalacao)
-  return obter_servico_por_servico(robo, historico.at[0, 'Nota'], flags)
+  nota = historico.at[0, 'Nota']
+  if pandas.isna(nota):
+    raise InformationNotFound('Nota nao encontrada no historico!')
+  numero_servico = int(pandas.to_numeric(nota, errors='raise'))
+  return obter_servico_por_servico(robo, numero_servico, flags)
 
 def obter_servico_por_medidor(robo: SapBot, numero_medidor: int, flags: list[IW53_FLAGS]) -> ServicoInfo:
   ''' Obtém informações do servico a partir do número de medidor. '''
@@ -541,7 +545,8 @@ def checar_inspecao(robo: SapBot, argumento: int) -> str:
   historico_info = historico_info[(historico_info["Tipo"] == "BI") | (historico_info["Tipo"] == "BU")]
   historico_info = historico_info[historico_info["Status"] == "EXEC"]
   if historico_info.shape[0] > 0:
-    raise InformationNotFound(texto + f'ja tem nota {historico_info['Nota'].to_string(index=False)} executada!')
+    lista_notas = historico_info['Nota'].to_string(index=False)
+    raise InformationNotFound(texto + f'ja tem nota {lista_notas} executada!')
   return f"A instalacao {instalacao_info.instalacao} esta apta sim para abertura de nota de recuperacao!"
 
 def obter_cliente(robo: SapBot, argumento: int) -> object:
