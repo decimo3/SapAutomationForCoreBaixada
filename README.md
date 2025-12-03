@@ -9,7 +9,7 @@
 2. Ative o ambiente virtual:
 
     ```bash
-    venv\Scripts\Activate
+    source venv/Scripts/activate
     ```
 
 3. Instale as dependências:
@@ -23,6 +23,8 @@
     ```txt
     USUARIO=sua_matricula_aqui
     PALAVRA=sua_senha_aqui
+    NOTUSE=lista_de_transações_para_não_usar_separadas_por_virgula
+    EXCLUDE=lista_de_danos_para_serem_filtrados_separadas_por_virgula
     ```
 
 5. Para atualizar o executável, execute:
@@ -36,7 +38,7 @@
 6. Para finalizar, execute:
 
     ```bash
-    Deactivate
+    deactivate
     ```
 
 Obs.1: Esse script contém dependências específicas para o sistema operacional `Windowns`.
