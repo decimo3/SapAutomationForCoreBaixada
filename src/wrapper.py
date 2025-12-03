@@ -462,6 +462,8 @@ class SapBot:
     data.endereco = self.session.FindById(STRINGPATH['ES32_NOME_ENDERECO_TEXT']).text
     data.nome_cliente = str(self.session.findById(STRINGPATH['ES32_NOMECLIENTE_TEXT']).text).split('/')[0]
     data.tipo_instalacao = self.session.findById(STRINGPATH['ES32_TIPO_INSTALACAO']).text
+    temporario = self.session.FindById(STRINGPATH['ES32_NUMERO_UC']).text
+    data.num_uc = int(temporario) if temporario else 0
     if ES32_FLAGS.ENTER_CONSUMO in flags:
       self.session.FindById(STRINGPATH['ES32_CONSUMO_TEXT']).setFocus()
       self.SEND_ENTER()
