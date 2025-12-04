@@ -48,8 +48,10 @@ class InstalacaoInfo():
   vigencia_final: datetime.datetime = field(default_factory=lambda: datetime.datetime.min)
   equipamento: list[MedidorInfo] = field(default_factory=list)
   centro: int = 0
+  num_uc: int = 0
   def __str__(self) -> str:
     texto = f'*Instalacao:* {self.instalacao}\n' if self.instalacao else ''
+    texto += f'*Numero UC:* {self.num_uc}\n' if self.num_uc else ''
     texto += f'*Status:* {self.status}\n' if self.status else ''
     texto += f'*Contrato:* {self.contrato}\n' if self.contrato else ''
     texto += f'*Parceiro:* {self.parceiro}\n' if self.parceiro else ''

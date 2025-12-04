@@ -3,6 +3,7 @@
 # coding: utf8
 #region imports
 import sys
+import json
 import datetime
 import pandas
 from dateutil.relativedelta import relativedelta
@@ -262,7 +263,7 @@ def obter_ligacao(robo: SapBot, instalacao: InstalacaoInfo, _flags: list[ES61_FL
   else:
     raise UnavailableTransaction('Sem acesso a transacao no sistema SAP!')
 
-def obter_faturas(robo: SapBot, argumento: int) -> int:
+def obter_faturas(robo: SapBot, argumento: int) -> str:
   instalacao_info = obter_instalacao(robo, argumento, [ES32_FLAGS.ONLY_INST])
   # Getting the pending invoice report
   relatorio = obter_pendente(robo, argumento, False)
@@ -272,7 +273,8 @@ def obter_faturas(robo: SapBot, argumento: int) -> int:
     raise TooMannyRequests(f'O cliente possui faturas demais ({relatorio.shape[0]})')
   # Printing pending invoices
   relatorio = relatorio[relatorio['#'] != DESTAQUES.AMARELO]
-  return print_pendentes(robo, relatorio['Documento'].to_list(), instalacao_info)
+  quantidade = print_pendentes(robo, relatorio['Documento'].to_list(), instalacao_info)
+  return json.dumps({'quantidade': quantidade, 'numero_uc': instalacao_info.num_uc})
 
 def obter_parceiro(robo: SapBot, argumento: int, flags: list[BP_FLAGS]) -> ParceiroInfo:
   if 'BP' in NOTUSE:
